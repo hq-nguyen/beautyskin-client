@@ -24,6 +24,6 @@ This repository contains the frontend for the Skincare Shop Management System, b
 ### Installation  
 1. Clone the repository:  
    ```bash
-   git clone https://github.com/your-username/skin-client.git
-   cd skin-client
+   git clone https://github.com/..../....git
+   cd ....
 2. Install dependencies ... 
