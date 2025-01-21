@@ -1,0 +1,11 @@
+#default-carousel {
+    margin-top: 24px;
+}
+
+
+@media (min-width: 960px) {
+    .md\:h-96 {
+        height: 28rem;
+    }
+}
+
