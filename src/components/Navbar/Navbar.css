@@ -1,4 +1,36 @@
 .navbar {
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(77, 35, 59, 0.1);
-  }
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(77, 35, 59, 0.1);
+}
+
+.navbar-link:hover {
+   color: #ECB1C0;
+   transition: 0.3s;
+}
+
+.dropdown-menu {
+  z-index: 1000;
+}
+
+.dropdown-menu-box {
+  box-shadow: 0 2px 8px rgba(77, 35, 59, 0.1);
+}
+
+.dropdown-menu:focus {
+  display: block;
+}
+
+.px-5 {
+  padding-left: 0.4rem !important;
+  padding-right: 0.4rem !important;
+}
+
+.login-section, .register-section {
+  border-radius:4px;
+  padding: 5px 10px;
+}
+
+.login-section:hover, .register-section:hover {
+  background-color: #ECB1C0;
+  transition: 0.3s;
+}

@@ -9,6 +9,7 @@ import cart_icon from './cart_icon.png'
 import profile_icon from './profile_icon.png'
 import menu_icon from './menu_icon.png'
 import dropdown_icon from './dropdown_icon.png'
+import wishlist_icon from './wishlist_icon.jpg'
 
 
 export const assets = {
@@ -22,5 +23,6 @@ export const assets = {
     cart_icon,
     profile_icon,
     menu_icon,
-    dropdown_icon
+    dropdown_icon,
+    wishlist_icon
 }
