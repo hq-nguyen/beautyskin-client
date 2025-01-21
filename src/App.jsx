@@ -8,6 +8,8 @@ import Blog from './pages/Blog'
 import News from './pages/News'
 import TestSkinType from './pages/TestSkinType'
 import Cart from './pages/Cart'
+import Login from './pages/Login'
+import Register from './pages/Register'
 
 const App = () => {
 
@@ -23,7 +25,9 @@ const App = () => {
           <Route path='/news' element={<News/>}/>
           <Route path='/test' element={<TestSkinType/>}/>
           <Route path='/cart' element={<Cart/>}/>
-
+          <Route path='/login' element={<Login/>} />
+          <Route path='/register' element={<Register/>} />
+          {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
 
         </Routes>
       </div>
