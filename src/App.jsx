@@ -10,6 +10,7 @@ import TestSkinType from './pages/TestSkinType'
 import Cart from './pages/Cart'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Footer from './components/Footer/Footer'
 
 const App = () => {
 
@@ -30,6 +31,7 @@ const App = () => {
           {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
 
         </Routes>
+        <Footer />
       </div>
 
     </div>

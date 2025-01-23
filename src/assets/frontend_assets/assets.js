@@ -10,6 +10,7 @@ import profile_icon from './profile_icon.png'
 import menu_icon from './menu_icon.png'
 import dropdown_icon from './dropdown_icon.png'
 import wishlist_icon from './wishlist_icon.jpg'
+import phone from './phone.png'
 
 
 export const assets = {
@@ -24,5 +25,6 @@ export const assets = {
     profile_icon,
     menu_icon,
     dropdown_icon,
-    wishlist_icon
+    wishlist_icon,
+    phone
 }
