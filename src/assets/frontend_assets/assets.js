@@ -10,7 +10,13 @@ import profile_icon from './profile_icon.png'
 import menu_icon from './menu_icon.png'
 import dropdown_icon from './dropdown_icon.png'
 import wishlist_icon from './wishlist_icon.jpg'
-
+import phone from './phone.png'
+import i_facebook from './icon_facebook.png'
+import i_instagram from './icon_insta.png'
+import i_youtube from './icon_youtube.png'
+import i_tiktok from './icon_tiktok.png'
+import i_clock from './icon_clock.png'
+import i_bussiness_open from './icon_timeopen.png'
 
 export const assets = {
     logo,
@@ -24,5 +30,12 @@ export const assets = {
     profile_icon,
     menu_icon,
     dropdown_icon,
-    wishlist_icon
+    wishlist_icon,
+    phone,
+    i_facebook,
+    i_instagram,
+    i_youtube,
+    i_tiktok,
+    i_clock,
+    i_bussiness_open
 }
