@@ -21,6 +21,11 @@ import da_kho from './kho.jpg'
 import da_dau from './dau.jpg'
 import da_thuong from './thuong.jpg'
 import da_tonghop from './tonghop.jpg'
+import product_new_1 from './new_1.jpg'
+import product_new_2 from './new_2.jpg'
+import product_new_3 from './new_3.jpg'
+import product_new_4 from './new_4.jpg'
+import product_new_5 from './new_5.jpg'
 
 export const assets = {
     logo,
@@ -45,5 +50,10 @@ export const assets = {
     da_kho,
     da_dau,
     da_thuong,
-    da_tonghop
+    da_tonghop,
+    product_new_1,
+    product_new_2,
+    product_new_3,
+    product_new_4,
+    product_new_5
 }

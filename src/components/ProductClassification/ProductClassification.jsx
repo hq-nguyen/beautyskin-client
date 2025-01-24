@@ -97,10 +97,10 @@ const ProductClassification = () => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`rounded-xl py-2 px-4 text-sm font-medium transition-colors duration-300 ${
+                            className={`rounded-xl mr-4 py-2 px-4 ${
                                 activeTab === tab.id
                                     ? "bg-primary text-white"
-                                    : "text-foreground hover:bg-muted"
+                                    : "bg-gray-100 text-foreground hover:bg-muted"
                             }`}
                         >
                             {tab.label}
