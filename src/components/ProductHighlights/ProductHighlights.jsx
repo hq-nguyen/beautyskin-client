@@ -10,7 +10,7 @@ const ProductHighlights = () => {
   const hotDealsProducts = [
     {
       id: 1,
-      name: "Premium Wireless Headphones",
+      name: "Premium Wireless",
       image: assets.product_new_1,
       rating: 4.5,
       newPrice: 199.99,
@@ -19,7 +19,7 @@ const ProductHighlights = () => {
     },
     {
       id: 2,
-      name: "Premium Wireless Headphones",
+      name: "Premium Wireless Wireless Headphones",
       image: assets.product_new_2,
       rating: 4.5,
       newPrice: 199.99,
@@ -54,7 +54,7 @@ const ProductHighlights = () => {
       discount: 33,
     },
     {
-      id: 2,
+      id: 6,
       name: "Premium Wireless Headphones",
       image: assets.product_new_2,
       rating: 4.5,
@@ -63,7 +63,7 @@ const ProductHighlights = () => {
       discount: 33,
     },
     {
-      id: 5,
+      id: 7,
       name: "Premium Wireless Headphones",
       image: assets.product_new_5,
       rating: 4.5,
@@ -72,7 +72,7 @@ const ProductHighlights = () => {
       discount: 33,
     },
     {
-      id: 1,
+      id: 8,
       name: "Premium Wireless Headphones",
       image: assets.product_new_1,
       rating: 4.5,
@@ -102,7 +102,7 @@ const ProductHighlights = () => {
       discount: 33,
     },
     {
-      id: 3,
+      id: 13,
       name: "Premium Wireless Headphones",
       image: assets.da_kho,
       rating: 4.5,
@@ -111,7 +111,7 @@ const ProductHighlights = () => {
       discount: 33,
     },
     {
-      id: 4,
+      id: 14,
       name: "Premium Wireless Headphones",
       image: assets.da_thuong,
       rating: 4.5,
@@ -120,7 +120,7 @@ const ProductHighlights = () => {
       discount: 33,
     },
     {
-      id: 5,
+      id: 15,
       name: "Premium Wireless Headphones",
       image: assets.da_tonghop,
       rating: 4.5,
@@ -129,7 +129,7 @@ const ProductHighlights = () => {
       discount: 33,
     },
     {
-      id: 2,
+      id: 12,
       name: "Premium Wireless Headphones",
       image: assets.product_new_2,
       rating: 4.5,
@@ -138,7 +138,7 @@ const ProductHighlights = () => {
       discount: 33,
     },
     {
-      id: 5,
+      id: 11,
       name: "Premium Wireless Headphones",
       image: assets.product_new_5,
       rating: 4.5,
@@ -163,49 +163,51 @@ const ProductHighlights = () => {
     return [...Array(5)].map((_, index) => (
       <FaStar
         key={index}
-        className={`w-4 h-4 ${index < Math.floor(rating) ? "text-yellow-400" : "text-gray-300"
+        className={`w-3 h-3 ${index < Math.floor(rating) ? "text-primary" : "text-gray-300"
           }`}
       />
     ));
   };
 
   const ProductCard = ({ product }) => (
-    <div className="relative flex flex-col bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-transform duration-300">
+    <div className="relative flex flex-col bg-white p-4 pb-8 hover:shadow-lg transition-transform duration-300">
       {/* image and discount section */}
-      <div className="relative group hover:scale-95 transition-transform duration-300">
-        <div className="absolute top-2 left-2 bg-pink-500 text-white text-sm px-2 py-1 rounded">
+      <a href="" className="relative h-60 group hover:scale-95 transition-transform duration-300">
+        <div className="absolute top-2 left-2 bg-primary font-semibold text-white text-xs px-2 py-1 rounded">
           -{product.discount}%
         </div>
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-48 object-cover rounded-lg"
+          className="w-full object-cover h-48 mt-12"
         />
-      </div>
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold truncate">{product.name}</h3>
+      </a>
+      <div className="mt-8">
+        <a href="">
+          <h3 className="text-sm font-semibold text-gray-600 hover:text-pink-600 truncate">{product.name}</h3>
+        </a>
         <div className="flex my-2">{renderStars(product.rating)}</div>
 
         <div className="flex items-center">
-          <span className="text-xl font-bold text-primary-foreground">
-            ${product.newPrice}
-          </span>
-          <span className="ml-2 text-sm text-gray-500 line-through">
+          <span className="text-xs text-gray-500 line-through">
             ${product.oldPrice}
+          </span>
+          <span className="ml-2 text-base font-semibold text-primary">
+            ${product.newPrice}
           </span>
         </div>
 
-        <div className="flex space-x-2 mt-auto">
+        <div className="flex space-x-2 mt-8">
           <button
-            className="flex-1 bg-primary text-white py-2 rounded-md transition-colors duration-300 hover:bg-opacity-90 flex items-center justify-center space-x-1"
+            className="flex-1 bg-primary text-white py-2 rounded-md transition-colors duration-300 hover:opacity-80 flex items-center justify-center space-x-1"
           >
             <FaEye className="w-4 h-4" />
-            <span>Quick View</span>
+            <span>Xem nhanh</span>
           </button>
           <button
-            className="bg-secondary text-primary-foreground p-2 rounded-md transition-colors duration-300 hover:bg-opacity-90"
+            className="bg-gray-100 p-2 rounded-md transition-colors duration-300 hover:opacity-90"
           >
-            <FaHeart className="w-4 h-4" />
+            <FaHeart className="w-4 h-4 hover:text-red-500" />
           </button>
         </div>
 
@@ -214,34 +216,34 @@ const ProductHighlights = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8 bg-white rounded-lg shadow-lg mt-24">
       {/* Tabs */}
       <div className="flex space-x-4 mb-6">
         <button
-          className={`px-6 py-2 rounded-md transition-colors duration-300 ${activeTab === "hotDeals"
+          className={`px-6 py-2 rounded-xl transition-colors duration-300 ${activeTab === "hotDeals"
             ? "bg-primary text-white"
             : "bg-gray-200 text-gray-700"
             }`}
           onClick={() => setActiveTab("hotDeals")}
         >
-          Hot Deals
+          Bán chạy
         </button>
         <button
-          className={`px-6 py-2 rounded-md transition-colors duration-300 ${activeTab === "newProducts"
+          className={`px-6 py-2 rounded-xl transition-colors duration-300 ${activeTab === "newProducts"
             ? "bg-primary text-white"
             : "bg-gray-200 text-gray-700"
             }`}
           onClick={() => setActiveTab("newProducts")}
         >
-          New Products
+          Sản phẩm mới
         </button>
       </div>
 
       {/* Product Carousel */}
-      <div className="relative">
+      <div className="relative px-12">
         <div className="overflow-hidden">
           <div
-            className="flex mb-4 transition-transform duration-300"
+            className="flex flex-row flex-nowrap mb-4 transition-transform duration-300"
             style={{ transform: `translateX(-${startIndex * 20}%)` }}
           >
             {products.map((product) => (
@@ -269,7 +271,7 @@ const ProductHighlights = () => {
         >
           <FaChevronRight className="w-6 h-6 text-primary-foreground" />
         </button>
-        
+
       </div>
     </div>
   );
