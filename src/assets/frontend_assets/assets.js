@@ -17,6 +17,10 @@ import i_youtube from './icon_youtube.png'
 import i_tiktok from './icon_tiktok.png'
 import i_clock from './icon_clock.png'
 import i_bussiness_open from './icon_timeopen.png'
+import da_kho from './kho.jpg'
+import da_dau from './dau.jpg'
+import da_thuong from './thuong.jpg'
+import da_tonghop from './tonghop.jpg'
 
 export const assets = {
     logo,
@@ -37,5 +41,9 @@ export const assets = {
     i_youtube,
     i_tiktok,
     i_clock,
-    i_bussiness_open
+    i_bussiness_open,
+    da_kho,
+    da_dau,
+    da_thuong,
+    da_tonghop
 }
