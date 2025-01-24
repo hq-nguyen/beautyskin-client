@@ -52,11 +52,11 @@ const ProductClassification = () => {
     const getGridClass = () => {
         switch (activeTab) {
             case "skinType":
-                return "grid-cols-4"; // 4 columns
+                return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"; // 4 columns
             case "skinProblem":
-                return "grid-cols-6"; // 6 columns
+                return "grid-cols-1 sm:grid-cols-3 lg:grid-cols-6"; // 6 columns
             case "texture":
-                return "grid-cols-5"; // 5 columns
+                return "grid-cols-1 sm:grid-cols-3 lg:grid-cols-5"; // 5 columns
             default:
                 return "grid-cols-4"; // Default to 4 columns
         }
@@ -87,7 +87,7 @@ const ProductClassification = () => {
     );
 
     return (
-        <div className="container mx-auto mt-8 px-4 py-8 bg-white rounded-lg shadow-lg mt-24">
+        <div className="container mx-auto mt-12 mb-8 px-4 py-8 bg-white rounded-lg shadow-lg mt-24">
             <h4 className="text-primary font-semibold mb-2">TRẢI NGHIỆM MUA HÀNG</h4>
             <h4 className="text-primary mb-8 text-2xl">Phân loại phổ biến tại BeautySkin</h4>
 
@@ -97,7 +97,7 @@ const ProductClassification = () => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`rounded-xl py-2 px-4 text-sm md:text-base font-medium transition-colors duration-300 ${
+                            className={`rounded-xl py-2 px-4 text-sm font-medium transition-colors duration-300 ${
                                 activeTab === tab.id
                                     ? "bg-primary text-white"
                                     : "text-foreground hover:bg-muted"

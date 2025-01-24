@@ -20,20 +20,19 @@ const App = () => {
       <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path='/about' element={<About/>}/>
-          <Route path='/shop' element={<Shop/>} />
-          <Route path='/blog' element={<Blog/>}/>
-          <Route path='/news' element={<News/>}/>
-          <Route path='/test' element={<TestSkinType/>}/>
-          <Route path='/cart' element={<Cart/>}/>
-          <Route path='/login' element={<Login/>} />
-          <Route path='/register' element={<Register/>} />
+          <Route path='/about' element={<About />} />
+          <Route path='/shop' element={<Shop />} />
+          <Route path='/blog' element={<Blog />} />
+          <Route path='/news' element={<News />} />
+          <Route path='/test' element={<TestSkinType />} />
+          <Route path='/cart' element={<Cart />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
           {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
 
         </Routes>
-        <Footer />
       </div>
-
+      <Footer />
     </div>
   )
 }
