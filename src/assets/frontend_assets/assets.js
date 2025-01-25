@@ -26,6 +26,7 @@ import product_new_2 from './new_2.jpg'
 import product_new_3 from './new_3.jpg'
 import product_new_4 from './new_4.jpg'
 import product_new_5 from './new_5.jpg'
+import banner_deal from './deal_banner.jpg'
 
 export const assets = {
     logo,
@@ -34,6 +35,7 @@ export const assets = {
     banner3,
     banner4, 
     banner5,
+    banner_deal,
     search_icon,
     cart_icon,
     profile_icon,
