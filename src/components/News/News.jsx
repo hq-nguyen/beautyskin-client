@@ -3,7 +3,7 @@ import { FaLeaf, FaOilCan, FaTint, FaBalanceScale, FaAllergies, FaHeartbeat, FaS
 import { assets } from "../../assets/frontend_assets/assets";
 import { Link } from "react-router-dom";
 
-const ProductClassification = () => {
+const News = () => {
     const [activeTab, setActiveTab] = useState("skinType");
 
     const tabs = [
@@ -87,9 +87,9 @@ const ProductClassification = () => {
     );
 
     return (
-        <div className="container mx-auto mt-12 mb-8 px-4 py-8 bg-white rounded-lg shadow-lg mt-24">
-            <h4 className="text-primary text-sm font-semibold mb-2">TRẢI NGHIỆM MUA HÀNG</h4>
-            <h4 className="text-primary mb-8 text-2xl">Phân loại phổ biến tại BeautySkin</h4>
+        <div className="container mx-auto mb-8 px-4 py-8 bg-white rounded-lg shadow-lg mt-24">
+            <h4 className="text-primary text-sm font-semibold mb-2">CẬP NHẬT THÔNG TIN </h4>
+            <h4 className="text-primary mb-8 text-2xl">Tin tức mới nhất</h4>
 
             <div className="mb-8">
                 <div className="rounded-lg bg-secondary overflow-hidden">
@@ -119,5 +119,5 @@ const ProductClassification = () => {
     );
 };
 
-export default ProductClassification;
+export default News;
 
