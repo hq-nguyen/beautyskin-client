@@ -43,6 +43,10 @@ import news_2 from './news_2.jpg'
 import news_3 from './news_3.jpg'
 import news_4 from './news_4.jpg'
 import brand from './brand.png'
+import blog_1 from './blog_1.png'
+import blog_2 from './blog_2.png'
+import blog_3 from './blog_3.png'
+import blog_4 from './blog_4.jpg'
 
 export const assets = {
     logo,
@@ -89,5 +93,9 @@ export const assets = {
     news_2,
     news_3,
     news_4,
-    brand
+    brand,
+    blog_1,
+    blog_2,
+    blog_3,
+    blog_4
 }
