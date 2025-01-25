@@ -4,6 +4,7 @@ import ProductClassification from '../components/ProductClassification/ProductCl
 import ProductHighlights from '../components/ProductHighlights/ProductHighlights'
 import DealBanner from '../components/DealBanner/DealBanner'
 import News from '../components/News/News'
+import FAQSection from '../components/FAQSection/FAQSection'
 
 const Home = () => {
   return (
@@ -13,6 +14,7 @@ const Home = () => {
       <ProductHighlights />
       <DealBanner />
       <News />
+      <FAQSection />
       
     </div>
   )
