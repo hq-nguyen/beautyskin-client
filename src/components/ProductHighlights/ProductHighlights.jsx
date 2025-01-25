@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { FaHeart, FaEye, FaStar, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { assets } from "../../assets/frontend_assets/assets";
+import { Link } from "react-router-dom";
 
 const ProductHighlights = () => {
   const [activeTab, setActiveTab] = useState("hotDeals");
@@ -218,7 +219,7 @@ const ProductHighlights = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 bg-white rounded-lg shadow-lg mt-24">
       {/* Tabs */}
-      <div className="flex space-x-4 mb-6">
+      <div className="relative flex space-x-4 mb-6">
         <button
           className={`px-6 py-2 rounded-xl transition-colors duration-300 ${activeTab === "hotDeals"
             ? "bg-primary text-white"
@@ -237,6 +238,12 @@ const ProductHighlights = () => {
         >
           Sản phẩm mới
         </button>
+
+        <Link to="/product" className="absolute right-0 top-1/2 transform -translate-y-1/2">
+          <button className="text-sm font-semibold px-4 py-2 bg-gray-600 text-white rounded-full shadow hover:bg-pink-600 transition-colors duration-300">
+            Xem tất cả sản phẩm
+          </button>
+        </Link>
       </div>
 
       {/* Product Carousel */}
