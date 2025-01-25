@@ -2,8 +2,16 @@
     color: #EE1F5B;
 }
 
+.text-secondary {
+    color: #26B04D;
+}
+
 .bg-primary {
     background-color: #EE1F5B;
+}
+
+.bg-mark {
+    background-color: #E7F6EB;
 }
 
 .bg-card {

@@ -1,118 +1,113 @@
-import { useState } from "react";
-import { FaLeaf, FaOilCan, FaTint, FaBalanceScale, FaAllergies, FaHeartbeat, FaSun, FaFeather } from "react-icons/fa";
 import { assets } from "../../assets/frontend_assets/assets";
 import { Link } from "react-router-dom";
 
 const News = () => {
-    const [activeTab, setActiveTab] = useState("skinType");
 
-    const tabs = [
-        { id: "skinType", label: "Mua theo loại da" },
-        { id: "skinProblem", label: "Mua theo vấn đề da" },
-        { id: "texture", label: "Mua theo kết cấu" }
+    const lastNews = [
+        {
+            id: 1,
+            tag: "Tin Tức - Deal Hot",
+            title: "HappySkin BST Hộp Mặt Nạ, sale cực sốc ! vào Tết này",
+            image: assets.news_1,
+            date: "16/12/2024",
+            nthNews: 9,
+        },
+        {
+            id: 2,
+            tag: "Tin Tức - Deal Hot",
+            title: "Lương Ý Như Và Emmié by happySkin: Sự Kết Hợp Đầy Hứa Hẹn Trong Hành Trình Chăm Sóc Sắc Đẹp”",
+            image: assets.news_2,
+            date: "20/12/2024",
+            nthNews: 12,
+        },
+        {
+            id: 3,
+            tag: "Tin Tức - Deal Hot",
+            title: "CEO Emmi Hoàng tham gia Workshop “UPSKILL, UPSCALE - Bứt phá doanh thu mùa mega live cùng TikTokShop”",
+            image: assets.news_3,
+            date: "08/11/2024",
+            nthNews: 10,
+        },
+        {
+            id: 4,
+            tag: "Tin Tức - Deal Hot",
+            title: "Chính Thức Ra Mắt - Bộ 4 Máy Làm Đẹp Da Đa Năng Emmié by Happyskin Beauty Machine",
+            image: assets.news_4,
+            date: "16/11/2024",
+            nthNews: 11,
+        },
     ];
 
-    const skinTypeData = [
-        { id: 1, title: "Da dầu", icon: <FaOilCan />, image: assets.da_dau },
-        { id: 2, title: "Da khô", icon: <FaLeaf />, image: assets.da_kho },
-        { id: 3, title: "Da thường", icon: <FaTint />, image: assets.da_thuong },
-        { id: 4, title: "Da tổng hợp", icon: <FaBalanceScale />, image: assets.da_tonghop }
-    ];
-
-    const skinProblemData = [
-        { id: 1, title: "Da khô, mất nước", icon: <FaAllergies />, image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6" },
-        { id: 2, title: "Da không đều màu", icon: <FaHeartbeat />, image: "https://images.unsplash.com/photo-1556228578-c5b2222270b1" },
-        { id: 3, title: "Da lão hóa", icon: <FaSun />, image: "https://images.unsplash.com/photo-1556228720-195a672e8a03" },
-        { id: 4, title: "Da lỗ chân lông to", icon: <FaFeather />, image: "https://images.unsplash.com/photo-1556228841-a3c527510b77" },
-        { id: 5, title: "Da mụn", icon: <FaFeather />, image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571" },
-        { id: 6, title: "Da kém đàn hồi", icon: <FaFeather />, image: "https://images.unsplash.com/photo-1556228852-80b6e5eeff06" }
-    ];
-
-    const textureData = [
-        { id: 1, title: "Dạng kem", icon: <FaTint />, image: "https://images.unsplash.com/photo-1556228720-195a672e8a03" },
-        { id: 2, title: "Kết cấu gel", icon: <FaTint />, image: "https://images.unsplash.com/photo-1556228841-a3c527510b77" },
-        { id: 3, title: "Kết cấu dầu", icon: <FaTint />, image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571" },
-        { id: 4, title: "Dung dịch tẩy rửa", icon: <FaTint />, image: "https://images.unsplash.com/photo-1556228852-80b6e5eeff06" },
-        { id: 5, title: "Serum cho da mặt", icon: <FaTint />, image: "https://images.unsplash.com/photo-1556228841-a3c527510b77" }
-    ];
-
-    const getActiveData = () => {
-        switch (activeTab) {
-            case "skinType":
-                return skinTypeData;
-            case "skinProblem":
-                return skinProblemData;
-            case "texture":
-                return textureData;
-            default:
-                return skinTypeData;
-        }
-    };
-
-    const getGridClass = () => {
-        switch (activeTab) {
-            case "skinType":
-                return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"; // 4 columns
-            case "skinProblem":
-                return "grid-cols-1 sm:grid-cols-3 lg:grid-cols-6"; // 6 columns
-            case "texture":
-                return "grid-cols-1 sm:grid-cols-3 lg:grid-cols-5"; // 5 columns
-            default:
-                return "grid-cols-4"; // Default to 4 columns
-        }
-    };
-
-    const ProductCard = ({ item }) => (
-        <Link to={""} className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-            <div className="relative h-200 overflow-hidden">
-                <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
-                    style={{
-                        aspectRatio: "2 / 2.6"
-                    }}
-                    onError={(e) => {
-                        e.target.src = "https://images.unsplash.com/photo-1556228578-0d85b1a4d571";
-                    }}
-                />
+    const NewsCard = ({ item }) => (
+        <div className="flex p-4 border-2 border-solid outline-gray-50 shadow-md hover:shadow-lg transition-shadow duration-300 rounded-md bg-white overflow-hidden">
+            {/* Image Section */}
+            <div className="sm:w-1/2 w-full h-40 sm:h-36 overflow-hidden rounded-lg">
+                <Link>
+                    <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                            e.target.src =
+                                "https://images.unsplash.com/photo-1556228578-0d85b1a4d571";
+                        }}
+                    />
+                </Link>
             </div>
-            <div className="p-4">
-                <div className="flex justify-center items-center space-x-2 mb-2">
-                    <span className="text-sm text-primary">{item.icon}</span>
-                    <h3 className="text-sm font-heading text-foreground">{item.title}</h3>
+
+            {/* Content Section */}
+            <div className="sm:w-3/5 w-full px-3 py-2 flex flex-wrap content-between">
+                {/* Tag */}
+                <div className="w-full mb-1">
+                    <Link>
+                        <span className="text-secondary hover:text-pink-700 hover:bg-gray-100 text-[10px] font-bold bg-mark px-2 py-1 rounded-md">
+                            {item.tag}
+                        </span>
+                    </Link>
+                </div>
+
+                {/* Title */}
+                <div className="w-full mb-1">
+                    <Link>
+                        <h3
+                            className="text-md font-semibold hover:text-pink-700 leading-snug line-clamp-3"
+                            title={item.title}
+                        >
+                            {item.title}
+                        </h3>
+                    </Link>
+                </div>
+
+                {/* Date and nthNews */}
+                <div className="text-gray-500 text-[12px] w-full flex items-center mt-1">
+                    <span>{item.date}</span>
+                    <span className="mx-1">●</span>
+                    <span>{item.nthNews}</span>
                 </div>
             </div>
-        </Link>
+        </div>
     );
 
     return (
         <div className="container mx-auto mb-8 px-4 py-8 bg-white rounded-lg shadow-lg mt-24">
-            <h4 className="text-primary text-sm font-semibold mb-2">CẬP NHẬT THÔNG TIN </h4>
-            <h4 className="text-primary mb-8 text-2xl">Tin tức mới nhất</h4>
-
-            <div className="mb-8">
-                <div className="rounded-lg bg-secondary overflow-hidden">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`rounded-xl mr-4 py-2 px-4 ${
-                                activeTab === tab.id
-                                    ? "bg-primary text-white"
-                                    : "bg-gray-100 text-foreground hover:bg-muted"
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h4 className="text-primary text-xs font-semibold mb-2">
+                        CẬP NHẬT THÔNG TIN
+                    </h4>
+                    <h4 className="text-primary text-lg sm:text-xl font-semibold">
+                        Tin tức mới nhất
+                    </h4>
                 </div>
+                <Link to="/news">
+                    <button className="text-sm px-4 py-2 bg-gray-600 text-white rounded-full shadow hover:bg-pink-600 transition-colors duration-300">
+                        Khám phá thêm
+                    </button>
+                </Link>
             </div>
-
-            {/* Dynamic grid based on activeTab */}
-            <div className={`grid ${getGridClass()} gap-6 px-24`}>
-                {getActiveData().map((item) => (
-                    <ProductCard key={item.id} item={item} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-12">
+                {lastNews.map((item) => (
+                    <NewsCard key={item.id} item={item} />
                 ))}
             </div>
         </div>
@@ -120,4 +115,3 @@ const News = () => {
 };
 
 export default News;
-
