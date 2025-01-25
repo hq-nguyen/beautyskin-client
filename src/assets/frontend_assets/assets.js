@@ -21,6 +21,17 @@ import da_kho from './kho.jpg'
 import da_dau from './dau.jpg'
 import da_thuong from './thuong.jpg'
 import da_tonghop from './tonghop.jpg'
+import concern_dry from './concern_dry.jpg'
+import concern_oil from './concern_oil.jpg'
+import concern_acne from './concern_acne.jpg'
+import concern_anti_aging from './concern_anti_aging.jpg'
+import concern_sensitive from './concern_sensitive.jpg'
+import concern_pigmentation from './concern_pigmentation.jpg'
+import type_cream from './type_kem.jpg'
+import type_gel from './type_gel.png'
+import type_foam from './type_bot.jpg'
+import type_serum from './type_serum.jpg'
+import type_cleanser from './type_tayrua.jpg'
 import product_new_1 from './new_1.jpg'
 import product_new_2 from './new_2.jpg'
 import product_new_3 from './new_3.jpg'
@@ -58,6 +69,17 @@ export const assets = {
     da_dau,
     da_thuong,
     da_tonghop,
+    concern_dry,
+    concern_oil,
+    concern_acne,
+    concern_anti_aging,
+    concern_sensitive,
+    concern_pigmentation,
+    type_cream,
+    type_gel,
+    type_foam,
+    type_serum,
+    type_cleanser,
     product_new_1,
     product_new_2,
     product_new_3,
