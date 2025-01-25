@@ -77,7 +77,7 @@ Follow these steps to set up the project locally:
    npm run dev
    ```
 
-## Contributing or Questions  
+## Questions  
 For any configuration issues or questions, feel free to contact me via email: **nguyenhaiquan.data@gmail.com**
 
 
