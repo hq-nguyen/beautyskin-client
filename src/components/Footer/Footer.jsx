@@ -5,7 +5,7 @@ import { assets } from '../../assets/frontend_assets/assets';
 const Footer = () => {
     return (
         <>
-            <footer className="relative z-10 bg-pink-50 pb-4 mt-20 dark:bg-dark lg:pt-[40px]">
+            <footer className="relative z-10 border-t-[2px] pb-4 mt-20 dark:bg-dark lg:pt-[40px]">
                 <div className="container flex mx-auto px-4 sm:px-[5vw]">
                     <div className="-mx-4 flex flex-wrap">
                         <div className="w-full px-4 sm:w-2/3 lg:w-3/12">
