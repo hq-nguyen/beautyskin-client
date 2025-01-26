@@ -2,7 +2,6 @@ import { assets } from "../../assets/frontend_assets/assets";
 import { Link } from "react-router-dom";
 
 const News = () => {
-
     const lastNews = [
         {
             id: 1,
@@ -39,9 +38,9 @@ const News = () => {
     ];
 
     const NewsCard = ({ item }) => (
-        <div className="flex p-4 border-2 border-solid outline-gray-50 shadow-md hover:shadow-lg transition-shadow duration-300 rounded-md bg-white overflow-hidden">
+        <div className="flex flex-col sm:flex-row p-4 border-2 border-solid shadow-md hover:shadow-lg transition-shadow duration-300 rounded-md bg-white overflow-hidden">
             {/* Image Section */}
-            <div className="sm:w-1/2 w-full h-40 sm:h-36 overflow-hidden rounded-lg">
+            <div className="w-full sm:w-1/2 overflow-hidden rounded-lg">
                 <Link>
                     <img
                         src={item.image}
@@ -56,9 +55,9 @@ const News = () => {
             </div>
 
             {/* Content Section */}
-            <div className="sm:w-3/5 w-full px-3 py-2 flex flex-wrap content-between">
+            <div className="w-full sm:w-3/5 px-3 py-2 flex flex-col justify-between">
                 {/* Tag */}
-                <div className="w-full mb-1">
+                <div className="mb-1">
                     <Link>
                         <span className="text-secondary hover:text-pink-700 hover:bg-gray-100 text-[10px] font-bold bg-mark px-2 py-1 rounded-md">
                             {item.tag}
@@ -67,7 +66,7 @@ const News = () => {
                 </div>
 
                 {/* Title */}
-                <div className="w-full mb-1">
+                <div className="mb-1">
                     <Link>
                         <h3
                             className="text-md font-semibold hover:text-pink-700 leading-snug line-clamp-3"
@@ -79,7 +78,7 @@ const News = () => {
                 </div>
 
                 {/* Date and nthNews */}
-                <div className="text-gray-500 text-[12px] w-full flex items-center mt-1">
+                <div className="text-gray-500 text-[12px] flex items-center mt-1">
                     <span>{item.date}</span>
                     <span className="mx-1">●</span>
                     <span>{item.nthNews}</span>
@@ -89,8 +88,9 @@ const News = () => {
     );
 
     return (
-        <div className="container mx-auto mb-8 px-4 py-8 bg-white rounded-lg shadow-lg mt-24">
-            <div className="flex justify-between items-center mb-6">
+        <div className="container mx-auto mb-8 px-4 py-8 sm:py-12 bg-white rounded-lg shadow-lg mt-24 relative pb-20 sm:pb-8">
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
                 <div>
                     <h4 className="text-primary text-xs font-semibold mb-2">
                         CẬP NHẬT THÔNG TIN
@@ -99,13 +99,16 @@ const News = () => {
                         Tin tức mới nhất
                     </h4>
                 </div>
+                {/* Button */}
                 <Link to="/news">
-                    <button className="text-sm px-4 py-2 bg-gray-600 text-white rounded-full shadow hover:bg-pink-600 transition-colors duration-300">
+                    <button className="text-sm px-4 py-2 bg-gray-600 text-white rounded-full shadow hover:bg-pink-600 transition-colors duration-300 sm:static absolute bottom-6 left-1/2 transform -translate-x-1/2 sm:translate-x-0 sm:bottom-auto sm:mt-0">
                         Khám phá thêm
                     </button>
                 </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-12">
+
+            {/* News Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 sm:px-12">
                 {lastNews.map((item) => (
                     <NewsCard key={item.id} item={item} />
                 ))}
