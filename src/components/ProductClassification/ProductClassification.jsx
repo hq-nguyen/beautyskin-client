@@ -20,20 +20,20 @@ const ProductClassification = () => {
     ];
 
     const skinProblemData = [
-        { id: 1, title: "Da khô, mất nước", icon: <FaAllergies />, image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6" },
-        { id: 2, title: "Da không đều màu", icon: <FaHeartbeat />, image: "https://images.unsplash.com/photo-1556228578-c5b2222270b1" },
-        { id: 3, title: "Da lão hóa", icon: <FaSun />, image: "https://images.unsplash.com/photo-1556228720-195a672e8a03" },
-        { id: 4, title: "Da lỗ chân lông to", icon: <FaFeather />, image: "https://images.unsplash.com/photo-1556228841-a3c527510b77" },
-        { id: 5, title: "Da mụn", icon: <FaFeather />, image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571" },
-        { id: 6, title: "Da kém đàn hồi", icon: <FaFeather />, image: "https://images.unsplash.com/photo-1556228852-80b6e5eeff06" }
+        { id: 1, title: "Da khô, mất nước", icon: <FaAllergies />, image: assets.concern_dry },
+        { id: 2, title: "Da không đều màu", icon: <FaHeartbeat />, image: assets.concern_pigmentation },
+        { id: 3, title: "Da lão hóa", icon: <FaSun />, image: assets.concern_anti_aging },
+        { id: 4, title: "Da lỗ chân lông to", icon: <FaFeather />, image: assets.concern_sensitive },
+        { id: 5, title: "Da mụn", icon: <FaFeather />, image: assets.concern_acne },
+        { id: 6, title: "Da kém đàn hồi", icon: <FaFeather />, image: assets.concern_oil }
     ];
 
     const textureData = [
-        { id: 1, title: "Dạng kem", icon: <FaTint />, image: "https://images.unsplash.com/photo-1556228720-195a672e8a03" },
-        { id: 2, title: "Kết cấu gel", icon: <FaTint />, image: "https://images.unsplash.com/photo-1556228841-a3c527510b77" },
-        { id: 3, title: "Kết cấu dầu", icon: <FaTint />, image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571" },
-        { id: 4, title: "Dung dịch tẩy rửa", icon: <FaTint />, image: "https://images.unsplash.com/photo-1556228852-80b6e5eeff06" },
-        { id: 5, title: "Serum cho da mặt", icon: <FaTint />, image: "https://images.unsplash.com/photo-1556228841-a3c527510b77" }
+        { id: 1, title: "Dạng kem", icon: <FaTint />, image: assets.type_cream },
+        { id: 2, title: "Kết cấu gel", icon: <FaTint />, image: assets.type_gel },
+        { id: 3, title: "Kết cấu tạo bọt", icon: <FaTint />, image: assets.type_foam },
+        { id: 4, title: "Dung dịch tẩy rửa", icon: <FaTint />, image: assets.type_cleanser },
+        { id: 5, title: "Serum cho da mặt", icon: <FaTint />, image: assets.type_serum }
     ];
 
     const getActiveData = () => {
@@ -52,11 +52,11 @@ const ProductClassification = () => {
     const getGridClass = () => {
         switch (activeTab) {
             case "skinType":
-                return "grid-cols-4"; // 4 columns
+                return "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4"; // 4 columns
             case "skinProblem":
-                return "grid-cols-6"; // 6 columns
+                return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"; // 6 columns
             case "texture":
-                return "grid-cols-5"; // 5 columns
+                return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"; // 5 columns
             default:
                 return "grid-cols-4"; // Default to 4 columns
         }
@@ -87,8 +87,8 @@ const ProductClassification = () => {
     );
 
     return (
-        <div className="container mx-auto mt-8 px-4 py-8 bg-white rounded-lg shadow-lg mt-24">
-            <h4 className="text-primary font-semibold mb-2">TRẢI NGHIỆM MUA HÀNG</h4>
+        <div className="container mx-auto mt-12 mb-8 px-4 sm:px-12 lg:px-24 py-8 bg-white rounded-lg shadow-lg mt-24">
+            <h4 className="text-primary text-sm font-semibold mb-2">TRẢI NGHIỆM MUA HÀNG</h4>
             <h4 className="text-primary mb-8 text-2xl">Phân loại phổ biến tại BeautySkin</h4>
 
             <div className="mb-8">
@@ -97,10 +97,10 @@ const ProductClassification = () => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`rounded-xl py-2 px-4 text-sm md:text-base font-medium transition-colors duration-300 ${
+                            className={`rounded-xl mr-4 mb-4 py-2 px-4 transition-colors duration-300 ${
                                 activeTab === tab.id
                                     ? "bg-primary text-white"
-                                    : "text-foreground hover:bg-muted"
+                                    : "bg-gray-100 text-foreground hover:bg-muted"
                             }`}
                         >
                             {tab.label}
@@ -110,7 +110,7 @@ const ProductClassification = () => {
             </div>
 
             {/* Dynamic grid based on activeTab */}
-            <div className={`grid ${getGridClass()} gap-6 px-24`}>
+            <div className={`grid ${getGridClass()} gap-6 px-4 sm:px-12 lg:px-24`}>
                 {getActiveData().map((item) => (
                     <ProductCard key={item.id} item={item} />
                 ))}
@@ -120,4 +120,3 @@ const ProductClassification = () => {
 };
 
 export default ProductClassification;
-
