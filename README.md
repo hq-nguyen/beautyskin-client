@@ -31,7 +31,7 @@ Follow these steps to set up the project locally:
    Open a terminal and run:  
    ```bash
    git clone https://github.com/hq-nguyen/BeautySkin.git
-   cd <BeautySkin>
+   cd BeautySkin
    ```
 
 2. **Install Dependencies**  
