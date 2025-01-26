@@ -6,7 +6,7 @@ const Footer = () => {
     return (
         <>
             <footer className="relative z-10 border-t-[2px] pb-4 mt-20 dark:bg-dark lg:pt-[40px]">
-                <div className="container flex mx-auto px-4 sm:px-[5vw]">
+                <div className="container flex mx-auto lg:px-2 sm:px-[5vw]">
                     <div className="-mx-4 flex flex-wrap">
                         <div className="w-full px-4 sm:w-2/3 lg:w-3/12">
                             <div className="mb-10 w-full">
@@ -29,7 +29,7 @@ const Footer = () => {
                             </div>
                         </div>
 
-                        <LinkGroup header="CHĂM SÓC KHÁCH HÀNG">
+                        <LinkGroup header="DỊCH VỤ">
                             <LinkMove link="/#" label="Tài khoản" />
                             <LinkMove link="/#" label="Câu hỏi thường gặp" />
                             <LinkMove link="/#" label="Theo dõi đơn hàng" />
