@@ -47,6 +47,11 @@ import blog_1 from './blog_1.png'
 import blog_2 from './blog_2.png'
 import blog_3 from './blog_3.png'
 import blog_4 from './blog_4.jpg'
+import about_us_1 from './about-us-1.jpg'
+import about_us_2 from './about-us-2.jpg'
+import about_us_3 from './about-us-3.jpg'
+import thumbnail from './video_thumbnail.png'
+import about_us_2b from './gioi-thieu-ve-happyskin-2.png'
 
 export const assets = {
     logo,
@@ -97,5 +102,10 @@ export const assets = {
     blog_1,
     blog_2,
     blog_3,
-    blog_4
+    blog_4,
+    about_us_1,
+    about_us_2,
+    about_us_3,
+    about_us_2b,
+    thumbnail
 }
