@@ -52,6 +52,16 @@ import about_us_2 from './about-us-2.jpg'
 import about_us_3 from './about-us-3.jpg'
 import thumbnail from './video_thumbnail.png'
 import about_us_2b from './gioi-thieu-ve-happyskin-2.png'
+import vision from './vision.png'
+import vision_award from './vision_award.png'
+import why_choose_us1 from './why-choose-us-1.jpg'
+import why_choose_us2 from './why-choose-us-2.jpg'
+import why_choose_us3 from './why-choose-us-3.jpg'
+import authentic_icon from './authentic-icon.png'
+import certified_icon from './certified-icon.png'
+import ship_icon from './ship-icon.png'
+import support_icon from './support-icon.png'
+
 
 export const assets = {
     logo,
@@ -107,5 +117,15 @@ export const assets = {
     about_us_2,
     about_us_3,
     about_us_2b,
-    thumbnail
+    vision,
+    vision_award,
+    why_choose_us1,
+    why_choose_us2,
+    why_choose_us3,
+    authentic_icon,
+    certified_icon,
+    ship_icon,
+    support_icon,
+    thumbnail,
+    
 }
