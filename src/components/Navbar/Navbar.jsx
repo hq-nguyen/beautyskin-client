@@ -8,7 +8,7 @@ const Navbar = () => {
   const [visible, setVisible] = useState(false);
 
   return (
-    <div className='navbar flex items-center justify-between py-5 font-medium px-4 lg:px-[9vw]'>
+    <div className='navbar sticky top-0 z-40 flex items-center justify-between py-5 font-medium px-4 lg:px-[9vw]'>
 
       <Link to='/'>
         <img src={assets.logo} className='w-36' alt="" />
