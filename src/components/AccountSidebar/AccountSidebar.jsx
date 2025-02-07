@@ -1,11 +1,13 @@
 import { faUser, faIdCard, faLocationDot, faBox, faStar, faLock, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Link } from 'react-router-dom';
+
 
 function AccountSidebar() {
     return (
         <div className="w-[300px]">
             <p className="mb-[15px] text-[14px] text-gray-600">
-                <a href="#" className="text-gray-600 no-underline hover:text-[#d90429]">Trang chủ</a> - Quản lí tài khoản
+                <Link to={'/'} className="text-gray-600 no-underline hover:text-[#d90429]">Trang chủ</Link> - Quản lí tài khoản
             </p>
             <div className="bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)]">
                 <div className="text-center mb-5 pb-5 border-b border-gray-300">
