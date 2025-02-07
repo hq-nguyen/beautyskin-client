@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { BsCheckCircle, BsXCircle } from "react-icons/bs";
-import { Link, NavLink } from "react-router-dom";
+// import { BsCheckCircle, BsXCircle } from "react-icons/bs";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [formData, setFormData] = useState({

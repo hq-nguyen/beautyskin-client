@@ -1,5 +1,6 @@
-import React from 'react'
-import { Link, NavLink } from 'react-router-dom';
+/* eslint-disable react/prop-types */
+// import React from 'react'
+import { Link } from 'react-router-dom';
 import { assets } from '../../assets/frontend_assets/assets';
 
 const Footer = () => {
