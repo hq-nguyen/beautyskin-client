@@ -1,0 +1,26 @@
+//Input
+.input-container {
+    margin-bottom: 15px;
+    text-align: left;
+  
+    label {
+      display: block;
+      font-size: 14px;
+      color: var(--text-color);
+      margin-bottom: 5px;
+    }
+  
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+    }
+  
+    &:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+  }
+  //End Input

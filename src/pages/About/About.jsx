@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { assets } from '../assets/frontend_assets/assets';
+import { assets } from '../../assets/frontend_assets/assets';
 
 const About = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

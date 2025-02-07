@@ -5,7 +5,7 @@ import { assets } from '../../assets/frontend_assets/assets';
 const Footer = () => {
     return (
         <>
-            <footer className="relative z-10 border-t-[2px] pb-4 mt-20 dark:bg-dark lg:pt-[40px]">
+            <footer className="relative z-10 border-t-[2px] mt-[2px] dark:bg-dark lg:pt-[40px]">
                 <div className="container flex mx-auto px-4 sm:px-[5vw]">
                     <div className="-mx-4 flex flex-wrap">
                         <div className="w-full px-4 sm:w-2/3 lg:w-3/12">
@@ -96,7 +96,7 @@ const Footer = () => {
                     </div>
                 </div>
                 {/* <hr className="my-4 border-blueGray-300" /> */}
-                <div className="flex flex-wrap items-center md:justify-between justify-center bg-pink-500">
+                <div className="flex flex-wrap items-center md:justify-between justify-center bg-primary">
                     <div className="w-full md:w-4/12 mx-auto text-center">
                         <div className="w-full text-sm text-gray-500 font-semibold py-1 text-white">
                             BeautySkin © <span id="get-current-year">2025. </span>Thiết kế bởi BeautySkin Team.
