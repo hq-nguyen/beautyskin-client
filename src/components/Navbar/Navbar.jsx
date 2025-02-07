@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { assets } from '../../assets/frontend_assets/assets'
 import './Navbar.css'
@@ -72,7 +72,6 @@ const Navbar = () => {
           <NavLink onClick={() => setVisible(false)} className='py-2 pl-5 border' to='/contact'>Contact</NavLink>
         </div>
       </div>
-
     </div>
   )
 }

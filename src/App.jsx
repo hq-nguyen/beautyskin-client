@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
+// import AccountContent from './components/AccountContent/AccountContent'
 import Navbar from './components/Navbar/Navbar'
 import Home from './pages/Home'
 import Shop from './pages/Shop/Shop'
@@ -11,6 +12,8 @@ import Cart from './pages/Cart/Cart'
 import Register from './pages/Register/Register'
 import Footer from './components/Footer/Footer'
 import Login from './pages/Login/Login'
+import AccountManagement from './pages/ManageAccount/AccountManagement'
+// import AccountSidebar from './components/AccountSidebar/AccountSidebar'
 
 const App = () => {
 
@@ -28,12 +31,14 @@ const App = () => {
           <Route path='/cart' element={<Cart />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
+          <Route path='/manage' element={<AccountManagement />} />
           {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
 
         </Routes>
       </div>
       <Footer />
     </div>
+    
   )
 }
 
