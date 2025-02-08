@@ -31,7 +31,7 @@ const App = () => {
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
           <Route path='/manage' element={<AccountManagement />} />
-          <Route path='/manageInfo' element={<InfoUser />} />
+          <Route path='/manage-info' element={<InfoUser />} />
           {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
 
         </Routes>
