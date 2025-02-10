@@ -3,7 +3,7 @@ import { faUser, faEnvelope, faLock, faMapMarkerAlt } from "@fortawesome/free-so
 
 const AccountContent = () => {
     return (
-        <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[45px]">
+        <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px]">
             <h2 className="text-[24px] font-bold mb-5">Quản lý tài khoản</h2>
             
             <div className="mb-5 pb-[10px] border-b border-gray-300">

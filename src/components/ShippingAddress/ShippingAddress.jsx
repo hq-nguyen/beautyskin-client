@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 
 
 const ShippingAddress = () => {
@@ -6,7 +7,7 @@ const ShippingAddress = () => {
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-bold">Số địa chỉ nhận hàng</h2>
                 <button className="bg-gray-800 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-gray-700 transition-colors">
-                    Thêm địa chỉ mới →
+                    <Link to={'/add-address'}>Thêm địa chỉ mới →</Link> 
                 </button>
             </div>
 
@@ -14,7 +15,7 @@ const ShippingAddress = () => {
                 <h3 className="font-semibold text-lg mb-2">Địa chỉ của tôi</h3>
                 <div className="flex items-center gap-2">
                     <p className="text-gray-600">Hiện tại bạn chưa có địa chỉ nào!</p>
-                    <a href="#" className="text-[#d90429] hover:underline">Thêm mới tại đây!</a>
+                    <Link to={'/add-address'} className="text-[#d90429] hover:underline">Thêm mới tại đây!</Link>
                 </div>
             </div>
         </div>

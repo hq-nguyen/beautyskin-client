@@ -7,7 +7,7 @@ const UpdateInfoUser = () => {
     const [gender, setGender] = useState('');
 
     return (    
-        <div className="max-w-3xl w-full mx-auto p-6 bg-white rounded-lg mt-[36px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)]">
+        <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px]">
             <h2 className="text-2 xl font-bold mb-6 text-gray-800">Thông tin cá nhân</h2>
             <form className="space-y-4">
                 <div>

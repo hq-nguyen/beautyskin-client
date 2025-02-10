@@ -14,9 +14,8 @@ import Login from './pages/Login/Login'
 import AccountManagement from './pages/ManageAccount/AccountManagement'
 import InfoUser from './pages/InfoUser/InfoUser'
 import Address from './pages/Address/Address'
-// import ShippingAddress from './components/ShippingAddress/ShippingAddress'
-// import InfoUser from './pages/InfoUser/InfoUser'
-// import ShippingAddress from './components/ShippingAddress/ShippingAddress'
+import AddAddress from './pages/AddressForm/AddressForm'
+import AddressDefault from './pages/AddressManagement'
 
 const App = () => {
 
@@ -37,6 +36,8 @@ const App = () => {
           <Route path='/manage' element={<AccountManagement />} />
           <Route path='/manage-info' element={<InfoUser />} />
           <Route path='/address' element={<Address />} />
+          <Route path='/add-address' element={<AddAddress />} />
+          <Route path='/manage-address' element={<AddressDefault />} />
           {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
 
         </Routes>
@@ -47,4 +48,4 @@ const App = () => {
   )
 }
 
-export default App
+export default App;
