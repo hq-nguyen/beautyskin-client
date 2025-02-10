@@ -6,7 +6,7 @@ const UpdateInfoUser = () => {
     const [phone, setPhone] = useState('');
     const [gender, setGender] = useState('');
 
-    return (
+    return (    
         <div className="max-w-3xl w-full mx-auto p-6 bg-white rounded-lg mt-[36px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)]">
             <h2 className="text-2 xl font-bold mb-6 text-gray-800">Thông tin cá nhân</h2>
             <form className="space-y-4">
