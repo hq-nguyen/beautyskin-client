@@ -13,6 +13,10 @@ import Footer from './components/Footer/Footer'
 import Login from './pages/Login/Login'
 import AccountManagement from './pages/ManageAccount/AccountManagement'
 import InfoUser from './pages/InfoUser/InfoUser'
+import Address from './pages/Address/Address'
+// import ShippingAddress from './components/ShippingAddress/ShippingAddress'
+// import InfoUser from './pages/InfoUser/InfoUser'
+// import ShippingAddress from './components/ShippingAddress/ShippingAddress'
 
 const App = () => {
 
@@ -32,6 +36,7 @@ const App = () => {
           <Route path='/register' element={<Register />} />
           <Route path='/manage' element={<AccountManagement />} />
           <Route path='/manage-info' element={<InfoUser />} />
+          <Route path='/address' element={<Address />} />
           {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
 
         </Routes>

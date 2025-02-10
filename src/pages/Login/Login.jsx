@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -105,9 +107,9 @@ const Login = () => {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    alert("Google Sign In clicked");
-  };
+  const handleLoginGoogle = () => {
+    alert("google cliked");
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-8">
@@ -230,7 +232,7 @@ const Login = () => {
 
           <button
             type="button"
-            onClick={handleGoogleSignIn}
+            onClick={handleLoginGoogle}
             className="w-full bg-white text-foreground py-2 px-4 rounded-md border border-input hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
           >
             <FcGoogle className="w-5 h-5" />
