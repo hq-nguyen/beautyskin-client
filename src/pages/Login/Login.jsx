@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 // import { BsCheckCircle, BsXCircle } from "react-icons/bs";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -107,9 +107,30 @@ const Login = () => {
     }
   };
 
+  const navigate = useNavigate();
   const handleLoginGoogle = () => {
-    alert("google cliked");
-  }
+    console.log("first");
+    const provider = new GoogleAuthProvider();
+
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const token = result.user.accessToken;
+        const user = result.user;
+
+        console.log(user);
+        navigate('/');
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.customData.email;
+        // The AuthCredential type that was used.
+        const credential = GoogleAuthProvider.credentialFromError(error);
+        // ...
+      });
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-8">
