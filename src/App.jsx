@@ -16,6 +16,7 @@ import InfoUser from './pages/InfoUser/InfoUser'
 import Address from './pages/Address/Address'
 import AddAddress from './pages/AddressForm/AddressForm'
 import AddressDefault from './pages/AddressManagement'
+import Order from './pages/ManageOrder'
 
 const App = () => {
 
@@ -33,11 +34,13 @@ const App = () => {
           <Route path='/cart' element={<Cart />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
-          <Route path='/manage' element={<AccountManagement />} />
-          <Route path='/manage-info' element={<InfoUser />} />
-          <Route path='/address' element={<Address />} />
-          <Route path='/add-address' element={<AddAddress />} />
-          <Route path='/manage-address' element={<AddressDefault />} />
+          <Route path='/user' element={<AccountManagement />} />
+          <Route path='/user/info' element={<InfoUser />} />
+          <Route path='/user/address' element={<Address />} />
+          <Route path='/user/add-address' element={<AddAddress />} />
+          <Route path='/user/manage-address' element={<AddressDefault />} />
+          <Route path='/user/manage-order' element={<Order />} />
+          {/* <Route path='/user/change-password' element={<ChangePassword />} /> */}
           {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
 
         </Routes>

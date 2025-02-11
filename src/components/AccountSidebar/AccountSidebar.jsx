@@ -6,10 +6,10 @@ function AccountSidebar() {
     const location = useLocation();
 
     const menuItems = [
-        { icon: faIdCard, text: 'Quản lý tài khoản', route: '/manage', breadcrumb: 'Quản lý tài khoản' },
-        { icon: faUser, text: 'Thông tin cá nhân', route: '/manage-info', breadcrumb: 'Thông tin cá nhân' },
-        { icon: faLocationDot, text: 'Địa chỉ nhận hàng', route: '/address', breadcrumb: 'Địa chỉ nhận hàng' },
-        { icon: faBox, text: 'Quản lý đơn hàng', route: '/orders', breadcrumb: 'Quản lý đơn hàng' },
+        { icon: faIdCard, text: 'Quản lý tài khoản', route: '/user', breadcrumb: 'Quản lý tài khoản' },
+        { icon: faUser, text: 'Thông tin cá nhân', route: '/user/info', breadcrumb: 'Thông tin cá nhân' },
+        { icon: faLocationDot, text: 'Địa chỉ nhận hàng', route: '/user/address', breadcrumb: 'Địa chỉ nhận hàng' },
+        { icon: faBox, text: 'Quản lý đơn hàng', route: '/user/order', breadcrumb: 'Quản lý đơn hàng' },
         { icon: faStar, text: 'Tích điểm', route: '/points', breadcrumb: 'Tích điểm' },
         { icon: faLock, text: 'Đổi mật khẩu', route: '/change-password', breadcrumb: 'Đổi mật khẩu' }   
     ];
