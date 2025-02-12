@@ -7,7 +7,7 @@ const ShippingAddress = () => {
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-bold">Số địa chỉ nhận hàng</h2>
                 <button className="bg-gray-800 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-gray-700 transition-colors">
-                    <Link to={'/add-address'}>Thêm địa chỉ mới →</Link> 
+                    <Link to={'/user/add-address'}>Thêm địa chỉ mới →</Link> 
                 </button>
             </div>
 
