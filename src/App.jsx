@@ -17,6 +17,7 @@ import Address from './pages/Address/Address'
 import AddAddress from './pages/AddressForm/AddressForm'
 import AddressDefault from './pages/AddressManagement'
 import Order from './pages/ManageOrder'
+import UserLayout from './components/layout/UserLayout'
 
 const App = () => {
 
@@ -34,13 +35,18 @@ const App = () => {
           <Route path='/cart' element={<Cart />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
-          <Route path='/user' element={<AccountManagement />} />
-          <Route path='/user/info' element={<InfoUser />} />
-          <Route path='/user/address' element={<Address />} />
-          <Route path='/user/add-address' element={<AddAddress />} />
-          <Route path='/user/manage-address' element={<AddressDefault />} />
-          <Route path='/user/manage-order' element={<Order />} />
-          {/* <Route path='/user/change-password' element={<ChangePassword />} /> */}
+
+          {/* user section */}
+          {/* User Section */}
+          <Route path="/user" element={<UserLayout/> } >
+                        <Route index element={<AccountManagement />} /> {/*  index is for /user */}
+                        <Route path="info" element={<InfoUser />} />
+                        <Route path="address" element={<Address />} />
+                        <Route path="add-address" element={<AddAddress />} />
+                        <Route path="manage-address" element={<AddressDefault />} />
+                        <Route path="manage-order" element={<Order />} />
+                        {/* <Route path="change-password" element={<ChangePassword />} /> */}
+                    </Route>
           {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
 
         </Routes>
