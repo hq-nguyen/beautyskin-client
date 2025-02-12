@@ -17,12 +17,13 @@ import Order from '../pages/ManageOrder';
 import ChangePassword from '../pages/ChangePassword';
 import UserLayout from '../layout/UserLayout';
 import MainLayout from '../layout/MainLayout'; // Assuming you have this
+import AdminLayout from "../layout/AdminLayout";
 
 const Routers = () => {
   const routing = useRoutes([
     {
       path: "/",
-      element: <MainLayout />, 
+      element: <MainLayout />,
       children: [
         {
           index: true,
@@ -93,6 +94,20 @@ const Routers = () => {
         {
           path: "change-password",
           element: <ChangePassword />,
+        },
+      ],
+    },
+    {
+      path: "/admin",
+      element: <AdminLayout />,
+      children: [
+        {
+          index: true,
+          element: <AccountManagement />,
+        },
+        {
+          path: "info",
+          element: <InfoUser />,
         },
       ],
     },
