@@ -19,11 +19,13 @@ import AddressDefault from './pages/AddressManagement'
 import Order from './pages/ManageOrder'
 import UserLayout from './components/layout/UserLayout'
 import ChangePassword from './pages/ChangePassword'
+import { ToastContainer } from 'react-toastify'
 
 const App = () => {
 
   return (
     <div>
+      <ToastContainer/>
       <Navbar />
       <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
         <Routes>

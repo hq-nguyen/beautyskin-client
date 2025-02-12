@@ -4,25 +4,30 @@ import { auth } from "../../config/firebase";
 import { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { Link, useNavigate } from "react-router-dom";
+import { data, Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import api from "../../config/axios";
 
 const Register = () => {
   const [formData, setFormData] = useState({
     fullName: "",
+    username: "",
     email: "",
     password: "",
-    confirmPassword: "",
     terms: false
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
   const validateFullName = (name) => {
     return /^[A-Za-z\s]{2,}$/.test(name);
+  };
+
+  const validateUsername = (username) => {
+    return /^[a-zA-Z0-9_]{3,20}$/.test(username);
   };
 
   const validateEmail = (email) => {
@@ -69,6 +74,10 @@ const Register = () => {
       newErrors.fullName = "Full name must contain only letters and spaces (minimum 2 characters)";
     }
 
+    if (!validateUsername(formData.username)) {
+      newErrors.username = "Username must be 3-20 characters and can only contain letters, numbers, and underscores";
+    }
+
     if (!validateEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
@@ -76,10 +85,6 @@ const Register = () => {
     if (!validatePassword(formData.password)) {
       newErrors.password =
         "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character";
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
     }
 
     if (!formData.terms) {
@@ -92,14 +97,16 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (validateForm()) {
       setLoading(true);
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        alert("Registration successful!");
+        const response = await api.post('register', formData);
+        toast.success("Successfully create new account");
+        navigate('/login');
       } catch (error) {
-        alert("Registration failed. Please try again.");
+        toast.error(error.response.data);
+        console.log(error.response.data);
       } finally {
         setLoading(false);
       }
@@ -117,7 +124,7 @@ const Register = () => {
         const user = result.user;
 
         console.log(user);
-        navigate('/');
+        navigate('/login');
       })
       .catch((error) => {
         // Handle Errors here.
@@ -138,7 +145,6 @@ const Register = () => {
         <p className="text-[12px] text-gray-600 text-center font-bold mb-5">Đăng ký để không bỏ lỡ quyền lợi tích luỹ và hoàn tiền cho bất kỳ đơn hàng nào</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-
           <div>
             <label htmlFor="email" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
               Email 
@@ -155,6 +161,25 @@ const Register = () => {
             />
             {errors.email && (
               <p className="mt-1 text-sm text-destructive">{errors.email}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="username" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
+              Tên đăng nhập
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className={`w-full px-4 py-2 rounded-md border ${errors.username ? "border-destructive" : "border-input"} focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring`}
+              placeholder="Nhập tên đăng nhập"
+              aria-invalid={errors.username ? "true" : "false"}
+            />
+            {errors.username && (
+              <p className="mt-1 text-sm text-destructive">{errors.username}</p>
             )}
           </div>
 
@@ -217,38 +242,6 @@ const Register = () => {
                           "w-full bg-green-500"}`}
               />
             </div>
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
-              Nhập lại mật khẩu
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-md border ${errors.confirmPassword ? "border-destructive" : "border-input"}  focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring pr-10`}
-                placeholder="Nhập lại mật khẩu"
-                aria-invalid={errors.confirmPassword ? "true" : "false"}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
-              >
-                {showConfirmPassword ? (
-                  <AiOutlineEyeInvisible className="w-5 h-5 text-gray-500" />
-                ) : (
-                  <AiOutlineEye className="w-5 h-5 text-gray-500" />
-                )}
-              </button>
-            </div>
-            {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-destructive text-red-600">{errors.confirmPassword}</p>
-            )}
           </div>
 
           <div className="flex items-start">
