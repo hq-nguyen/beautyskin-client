@@ -17,6 +17,7 @@ import Address from './pages/Address/Address'
 import AddAddress from './pages/AddressForm/AddressForm'
 import AddressDefault from './pages/AddressManagement'
 import Order from './pages/ManageOrder'
+import ChangePassword from './pages/ChangePassword'
 
 const App = () => {
 
@@ -38,9 +39,9 @@ const App = () => {
           <Route path='/user/info' element={<InfoUser />} />
           <Route path='/user/address' element={<Address />} />
           <Route path='/user/add-address' element={<AddAddress />} />
-          <Route path='/user/manage-address' element={<AddressDefault />} />
-          <Route path='/user/manage-order' element={<Order />} />
-          {/* <Route path='/user/change-password' element={<ChangePassword />} /> */}
+          <Route path='/user/address' element={<AddressDefault />} />
+          <Route path='/user/order' element={<Order />} />
+          <Route path='/user/change-password' element={<ChangePassword />} />
           {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
 
         </Routes>

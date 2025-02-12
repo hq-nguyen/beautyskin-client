@@ -11,7 +11,7 @@ function AccountSidebar() {
         { icon: faLocationDot, text: 'Địa chỉ nhận hàng', route: '/user/address', breadcrumb: 'Địa chỉ nhận hàng' },
         { icon: faBox, text: 'Quản lý đơn hàng', route: '/user/order', breadcrumb: 'Quản lý đơn hàng' },
         { icon: faStar, text: 'Tích điểm', route: '/points', breadcrumb: 'Tích điểm' },
-        { icon: faLock, text: 'Đổi mật khẩu', route: '/change-password', breadcrumb: 'Đổi mật khẩu' }   
+        { icon: faLock, text: 'Đổi mật khẩu', route: '/user/change-password', breadcrumb: 'Đổi mật khẩu' }   
     ];
 
     const currentItem = menuItems.find(item => location.pathname === item.route) ||

@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import axios from "axios";
-import { toast } from "react-toastify";
 
 
 const AddressManagement = () => {
