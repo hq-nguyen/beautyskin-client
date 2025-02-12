@@ -6,6 +6,8 @@ import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 // import { BsCheckCircle, BsXCircle } from "react-icons/bs";
 import { Link, useNavigate } from "react-router-dom";
+import api from '../../config/axios';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -93,17 +95,19 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      setLoading(true);
-      try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        alert("Registration successful!");
-      } catch (error) {
-        alert("Registration failed. Please try again.");
-      } finally {
-        setLoading(false);
-      }
+    
+    console.log(formData)
+   
+   
+    try {
+      const response = await api.post('login', formData);
+      console.log("success");
+      toast.success("Successfully create new account")
+      navigate('/')
+    } catch (error) {
+      console.log("sai");
+      toast.error(error.response.data)
+      console.log(error.response.data)
     }
   };
 
