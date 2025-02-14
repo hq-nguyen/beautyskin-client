@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
 import { MdOutlineDashboard } from "react-icons/md";
 import { BiUser, BiPackage, BiCart, BiMessageRounded, BiBell, BiCog } from "react-icons/bi"; // More comprehensive icon set
@@ -17,30 +17,33 @@ const AdminSidebar = () => {
       label: 'Dashboard',
       icon: <MdOutlineDashboard size={20} />,
       path: '/admin', // Base path for the group
+      mark: 'dashboard',
       subItems: [
-        { label: 'Trang chủ', path: '/dashboard' },
-        { label: 'Thống kê', path: '/dashboard/analytics' },
-        { label: 'Doanh thu', path: '/dashboard/reports' },
+        { label: 'Trang chủ', path: 'dashboard' },
+        { label: 'Thống kê', path: 'dashboard-analytics' },
+        { label: 'Doanh thu', path: 'dashboard-reports' },
       ],
     },
     {
       id: 'account',
       label: 'Tài khoản',
       icon: <BiUser size={20} />,
-      path: '/account',
+      path: '/admin',
+      mark: 'account',
       subItems: [
-        { label: 'Nhân viên', path: '/admin/manage-employees' },
-        { label: 'Khách hàng', path: '/admin/manage-customers' },
+        { label: 'Nhân viên', path: 'manage-employees' },
+        { label: 'Khách hàng', path: 'manage-customers' },
       ],
     },
     {
       id: 'products',
       label: 'Sản phẩm',
       icon: <BiPackage size={20} />,
-      path: '/products',
+      path: '/admin',
+      mark: 'product',
       subItems: [
-        { label: 'Danh sách sản phẩm', path: '/admin/list-products' },
-        { label: 'Thêm sản phẩm', path: '/admin/add-products' },
+        { label: 'Danh sách sản phẩm', path: 'list-products' },
+        { label: 'Thêm sản phẩm', path: 'add-product' },
       ],
     },
     {
@@ -48,12 +51,14 @@ const AdminSidebar = () => {
       label: 'Đơn đặt hàng',
       icon: <BiCart size={20} />,
       path: '/admin/manage-orders',
+      mark:'order',
     },
     {
       id: 'messages',
       label: 'Tin nhắn',
       icon: <BiMessageRounded size={20} />,
       path: '/messages',
+      mark: 'message',
       badge: 4,
     },
     {
@@ -61,13 +66,15 @@ const AdminSidebar = () => {
       label: 'Thông báo',
       icon: <BiBell size={20} />,
       path: '/notifications',
+      mark: 'notification',
       badge: 4,
     },
     {
       id: 'settings',
       label: 'Cài đặt',
       icon: <BiCog size={20} />,
-      path: '/settings',
+      path: '/admin/info',
+      mark: 'setting',
     },
   ];
 
@@ -90,9 +97,9 @@ const AdminSidebar = () => {
         {/* Header with toggle button and logo */}
         <div className="flex items-center shrink-0 justify-between mb-4">
           {isSidebarOpen && (
-            <div className="ml-2 transition-opacity duration-200">
+            <Link to={'/admin'} className="ml-2 transition-opacity duration-200">
               <img className='w-12' src={assets.icon} alt="Logo" />
-            </div>
+            </Link>
           )}
           <button
             onClick={() => {
@@ -123,7 +130,7 @@ const AdminSidebar = () => {
         <ul className="mt-2">
           {menuItems.map((item) => (
             item.subItems ? (
-              <SidebarLinkGroup key={item.id} activecondition={isSectionActive(item)}>
+              <SidebarLinkGroup key={item.id} activecondition={pathname.includes(item.mark)}>
                 {(handleClick, open) => (
                   <React.Fragment>
                     <a
@@ -149,6 +156,7 @@ const AdminSidebar = () => {
                       </div>
                     </a>
 
+                    {/* subitem */}
                     <div className={`${!isSidebarOpen ? "lg:hidden" : "lg:block"}`}>
                       <ul className={`pl-6 mt-1  ${!open && "hidden"}`}>
                         {item.subItems.map((subItem) => (
@@ -177,11 +185,13 @@ const AdminSidebar = () => {
                     `block text-gray-700 hover:text-gray-900 transition duration-150 truncate py-2 px-4 rounded-lg flex items-center ${isActive ? "bg-violet-50 text-violet-500 font-semibold" : "hover:bg-gray-50"}`
                   }
                 >
-                  {item.icon}
-                  <span className={`ml-3 text-sm font-medium transition-opacity duration-200 ${isSidebarOpen ? "opacity-100" : "opacity-0"}`}>{item.label}</span>
-                  {item.badge && (
-                    <span className="ml-2 text-xs font-semibold text-white bg-violet-500 rounded-full px-2 py-0.5">{item.badge}</span>
-                  )}
+                  <div className='flex items-center'>
+                    {item.icon}
+                    <span className={`ml-3 text-sm font-medium transition-opacity duration-200 ${isSidebarOpen ? "opacity-100" : "opacity-0"}`}>{item.label}</span>
+                    {item.badge && (
+                      <span className="ml-2 text-xs font-semibold text-white bg-violet-500 rounded-full px-2 py-0.5">{item.badge}</span>
+                    )}
+                  </div>
                 </NavLink>
               </li>
             )

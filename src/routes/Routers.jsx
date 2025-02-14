@@ -16,8 +16,11 @@ import AddressDefault from '../pages/AddressManagement';
 import Order from '../pages/ManageOrder';
 import ChangePassword from '../pages/ChangePassword';
 import UserLayout from '../layout/UserLayout';
-import MainLayout from '../layout/MainLayout'; // Assuming you have this
+import MainLayout from '../layout/MainLayout';
+// Admin Section
 import AdminLayout from "../layout/AdminLayout";
+import ManageProduct from "../pages/Admin/ManageProduct/ManageProduct";
+import AddProductPage from "../pages/Admin/ManageProduct/AddProduct";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -109,6 +112,14 @@ const Routers = () => {
           path: "info",
           element: <InfoUser />,
         },
+        {
+          path: "list-products",
+          element: <ManageProduct />,
+        },
+        {
+          path: "add-product",
+          element: <AddProductPage />,
+        }
       ],
     },
     {

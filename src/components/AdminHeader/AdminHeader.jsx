@@ -8,7 +8,7 @@ const AdminHeader = ({ onMobileMenuClick }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 bg-gray-50 md:border-b lg:border-none border-gray-200">
+    <header className="sticky top-0 z-40 bg-gray-50 md:border-b lg:border-none border-gray-200">
       {/* Left Section - Mobile Menu Button */}
       <div className='px-4 sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between h-16 lg:border-b border-gray-200'>
