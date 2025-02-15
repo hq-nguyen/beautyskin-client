@@ -16,17 +16,14 @@ import AddressDefault from '../pages/AddressManagement';
 import Order from '../pages/ManageOrder';
 import ChangePassword from '../pages/ChangePassword';
 import UserLayout from '../layout/UserLayout';
-import MainLayout from '../layout/MainLayout';
-// Admin Section
-import AdminLayout from "../layout/AdminLayout";
-import ManageProduct from "../pages/Admin/ManageProduct/ManageProduct";
-import AddProductPage from "../pages/Admin/ManageProduct/AddProduct";
+import MainLayout from '../layout/MainLayout'; // Assuming you have this
+import ForgotPassword from "../pages/ForgetPassword";
 
 const Routers = () => {
   const routing = useRoutes([
     {
       path: "/",
-      element: <MainLayout />,
+      element: <MainLayout />, 
       children: [
         {
           index: true,
@@ -61,9 +58,14 @@ const Routers = () => {
           element: <Login />,
         },
         {
+          path: "/forgot-password",
+          element: <ForgotPassword />,
+        },
+        {
           path: '/register',
           element: <Register />,
         },
+        
       ],
     },
     {
@@ -98,28 +100,7 @@ const Routers = () => {
           path: "change-password",
           element: <ChangePassword />,
         },
-      ],
-    },
-    {
-      path: "/admin",
-      element: <AdminLayout />,
-      children: [
-        {
-          index: true,
-          element: <AccountManagement />,
-        },
-        {
-          path: "info",
-          element: <InfoUser />,
-        },
-        {
-          path: "list-products",
-          element: <ManageProduct />,
-        },
-        {
-          path: "add-product",
-          element: <AddProductPage />,
-        }
+        
       ],
     },
     {
