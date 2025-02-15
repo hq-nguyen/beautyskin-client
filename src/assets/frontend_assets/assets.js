@@ -1,3 +1,4 @@
+import icon from './icon.png'
 import logo from './logo.png'
 import banner from './banner.png'
 import banner2 from './banner2.jpg'
@@ -64,6 +65,7 @@ import support_icon from './support-icon.png'
 
 
 export const assets = {
+    icon,
     logo,
     banner,
     banner2,

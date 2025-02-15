@@ -1,7 +1,7 @@
 import { ToastContainer } from 'react-toastify';
 import './App.css'
 import Routers from './routes/Routers';
-import ScrollTop from './utils/ScrollTop';
+import ScrollTop from './components/ScrollTop/ScrollTop';
 
 
 const App = () => {
