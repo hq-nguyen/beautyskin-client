@@ -17,7 +17,7 @@ import Order from '../pages/ManageOrder';
 import ChangePassword from '../pages/ChangePassword';
 import UserLayout from '../layout/UserLayout';
 import MainLayout from '../layout/MainLayout'; // Assuming you have this
-import ForgotPassword from "../pages/ForgetPassword";
+import ForgotPassword from "../pages/ForgotPassword";
 
 const Routers = () => {
   const routing = useRoutes([
