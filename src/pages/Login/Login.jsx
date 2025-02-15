@@ -1,33 +1,15 @@
+/* eslint-disable no-unused-vars */
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { BsCheckCircle, BsXCircle } from "react-icons/bs";
-import { Link, NavLink } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import api from '../../config/axios';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-<<<<<<< Updated upstream
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    terms: false
-  });
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState(0);
-
-  const validateFullName = (name) => {
-    return /^[A-Za-z\s]{2,}$/.test(name);
-  };
-
-  const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-=======
       username: "",
       password: "",
       rememberMe: false,
@@ -37,40 +19,6 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
->>>>>>> Stashed changes
-
-  const calculatePasswordStrength = (password) => {
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^A-Za-z0-9]/.test(password)) strength++;
-    return strength;
-  };
-
-  const validatePassword = (password) => {
-    return (
-      password.length >= 8 &&
-      /[A-Z]/.test(password) &&
-      /[a-z]/.test(password) &&
-      /[0-9]/.test(password) &&
-      /[^A-Za-z0-9]/.test(password)
-    );
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
-  };
-
-  useEffect(() => {
-    const strength = calculatePasswordStrength(formData.password);
-    setPasswordStrength(strength);
-  }, [formData.password]);
 
   const validateForm = () => {
       const newErrors = {};
@@ -82,51 +30,6 @@ const Login = () => {
           newErrors.username = "Username must not exceed 50 characters";
       }
 
-<<<<<<< Updated upstream
-    if (!validateFullName(formData.fullName)) {
-      newErrors.fullName = "Full name must contain only letters and spaces (minimum 2 characters)";
-    }
-
-    if (!validateEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    if (!validatePassword(formData.password)) {
-      newErrors.password =
-        "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character";
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    if (!formData.terms) {
-      newErrors.terms = "You must accept the terms and conditions";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setLoading(true);
-      try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        alert("Registration successful!");
-      } catch (error) {
-        alert("Registration failed. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handleGoogleSignIn = () => {
-    alert("Google Sign In clicked");
-=======
       if (!formData.password) {
           newErrors.password = "Password is required";
       } else if (formData.password.length < 8) {
@@ -163,7 +66,7 @@ const Login = () => {
 
           
       } catch (error) {
-          toast.error(error?.response?.data);
+          toast.error(error?.response.data);
       } finally {
           setIsLoading(false)
       }
@@ -194,7 +97,6 @@ const handleChange = (e) => {
         const email = error.customData.email;
         const credential = GoogleAuthProvider.credentialFromError(error);
       });
->>>>>>> Stashed changes
   };
 
   return (
@@ -204,7 +106,6 @@ const handleChange = (e) => {
         <p className="text-[12px] text-gray-600 text-center font-bold mb-5">Đăng ký để không bỏ lỡ quyền lợi tích luỹ và hoàn tiền cho bất kỳ đơn hàng nào</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-
           <div>
             <label htmlFor="emailOrUsername" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
               Email hoặc tên đăng nhập
@@ -225,66 +126,56 @@ const handleChange = (e) => {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
-              Nhập mật khẩu
+            <label htmlFor="password" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
+              Mật khẩu
             </label>
             <div className="relative">
               <input
-                type={showConfirmPassword ? "text" : "password"}
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-md border ${errors.confirmPassword ? "border-destructive" : "border-input"}  focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring pr-10`}
+                className={`w-full px-4 py-2 rounded-md border ${errors.password ? "border-destructive" : "border-input"}  focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring pr-10`}
                 placeholder="Nhập mật khẩu"
-                aria-invalid={errors.confirmPassword ? "true" : "false"}
+                aria-invalid={errors.password ? "true" : "false"}
               />
               <button
                 type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2"
               >
-                {showConfirmPassword ? (
+                {showPassword ? (
                   <AiOutlineEyeInvisible className="w-5 h-5 text-gray-500" />
                 ) : (
                   <AiOutlineEye className="w-5 h-5 text-gray-500" />
                 )}
               </button>
             </div>
-            {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-destructive text-red-600">{errors.confirmPassword}</p>
+            {errors.password && (
+              <p className="mt-1 text-sm text-destructive text-red-600">{errors.password}</p>
             )}
           </div>
 
           <div className="flex items-start justify-between">
             <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="terms"
-              name="terms"
-              checked={formData.terms}
-              onChange={handleChange}
-              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
-            />
-            <label htmlFor="terms" className="ml-2 block text-sm text-foreground">
-            Nhớ mật khẩu
-            </label>
+              <input
+                type="checkbox"
+                id="terms"
+                name="terms"
+                checked={formData.terms}
+                onChange={handleChange}
+                className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+              />
+              <label htmlFor="terms" className="ml-2 block text-sm text-foreground">
+                Nhớ mật khẩu
+              </label>
             </div>
-<<<<<<< Updated upstream
-            
-
-            <Link to={'/#'} className="hover:text-pink-500 text-sm">
-            Quên mật khẩu?
-=======
 
             <Link to={'/forgot-password'} className="hover:text-pink-500 text-sm">
               Quên mật khẩu?
->>>>>>> Stashed changes
             </Link>
           </div>
-          {errors.terms && (
-            <p className="mt-1 text-sm text-destructive">{errors.terms}</p>
-          )}
 
           <button
             type="submit"
@@ -324,7 +215,7 @@ const handleChange = (e) => {
 
           <button
             type="button"
-            onClick={handleGoogleSignIn}
+            onClick={handleLoginGoogle}
             className="w-full bg-white text-foreground py-2 px-4 rounded-md border border-input hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
           >
             <FcGoogle className="w-5 h-5" />
