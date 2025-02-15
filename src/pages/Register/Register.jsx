@@ -19,12 +19,15 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
+<<<<<<< Updated upstream
   const validateFullName = (name) => {
     return /^[A-Za-z\s]{2,}$/.test(name);
   };
 
+=======
+>>>>>>> Stashed changes
   const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   };
 
   const calculatePasswordStrength = (password) => {
@@ -63,10 +66,13 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
+<<<<<<< Updated upstream
     if (!validateFullName(formData.fullName)) {
       newErrors.fullName = "Full name must contain only letters and spaces (minimum 2 characters)";
     }
 
+=======
+>>>>>>> Stashed changes
     if (!validateEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }

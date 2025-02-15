@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
+<<<<<<< Updated upstream
 import Navbar from './components/Navbar/Navbar'
 import Home from './pages/Home'
 import Shop from './pages/Shop/Shop'
@@ -11,11 +12,17 @@ import Cart from './pages/Cart/Cart'
 import Register from './pages/Register/Register'
 import Footer from './components/Footer/Footer'
 import Login from './pages/Login/Login'
+=======
+import Routers from './routes/Routers';
+import ScrollTop from './utils/ScrollTop';
+
+>>>>>>> Stashed changes
 
 const App = () => {
 
   return (
     <div>
+<<<<<<< Updated upstream
       <Navbar />
       <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
         <Routes>
@@ -29,6 +36,12 @@ const App = () => {
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
           {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
+=======
+      <ScrollTop />
+      <ToastContainer />
+      <Routers />
+    </div>
+>>>>>>> Stashed changes
 
         </Routes>
       </div>

@@ -6,6 +6,7 @@ import { Link, NavLink } from "react-router-dom";
 
 const Login = () => {
   const [formData, setFormData] = useState({
+<<<<<<< Updated upstream
     fullName: "",
     email: "",
     password: "",
@@ -26,6 +27,17 @@ const Login = () => {
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
+=======
+      username: "",
+      password: "",
+      rememberMe: false,
+  });
+
+  const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+>>>>>>> Stashed changes
 
   const calculatePasswordStrength = (password) => {
     let strength = 0;
@@ -61,8 +73,16 @@ const Login = () => {
   }, [formData.password]);
 
   const validateForm = () => {
-    const newErrors = {};
+      const newErrors = {};
+      if (!formData.username.trim()) {
+          newErrors.username = "Username is required";
+      } else if (formData.username.trim().length < 3) {
+          newErrors.username = "Username must be at least 3 characters";
+      } else if (formData.username.trim().length > 50) {
+          newErrors.username = "Username must not exceed 50 characters";
+      }
 
+<<<<<<< Updated upstream
     if (!validateFullName(formData.fullName)) {
       newErrors.fullName = "Full name must contain only letters and spaces (minimum 2 characters)";
     }
@@ -106,6 +126,75 @@ const Login = () => {
 
   const handleGoogleSignIn = () => {
     alert("Google Sign In clicked");
+=======
+      if (!formData.password) {
+          newErrors.password = "Password is required";
+      } else if (formData.password.length < 8) {
+          newErrors.password = "Password must be at least 8 characters";
+      }
+
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (validateForm()) {
+          setIsLoading(true);
+      }
+
+      const newFormData = {
+          username: formData.emailOrUsername,
+          password: formData.password
+      }
+
+      try {
+          const response = await api.post('login', newFormData);
+          const { token, roleEnum } = response.data;
+          localStorage.setItem('token', token);
+          toast.success("Successfully login")
+
+     
+          if (roleEnum === 'ADMIN') {
+              navigate('/dashboard')
+          } else if (roleEnum === 'USER'){
+              navigate('/')
+          }
+
+          
+      } catch (error) {
+          toast.error(error?.response?.data);
+      } finally {
+          setIsLoading(false)
+      }
+  
+};
+
+const handleChange = (e) => {
+  const { name, value, type, checked } = e.target;
+  setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+  }));
+};
+
+  const handleLoginGoogle = () => {
+    const provider = new GoogleAuthProvider();
+
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const token = result.user.accessToken;
+        const user = result.user;
+        console.log(user);
+        navigate('/');
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        const email = error.customData.email;
+        const credential = GoogleAuthProvider.credentialFromError(error);
+      });
+>>>>>>> Stashed changes
   };
 
   return (
@@ -117,21 +206,21 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
 
           <div>
-            <label htmlFor="email" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
-              Email 
+            <label htmlFor="emailOrUsername" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
+              Email hoặc tên đăng nhập
             </label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
+              type="text"
+              id="emailOrUsername"
+              name="emailOrUsername"
+              value={formData.emailOrUsername}
               onChange={handleChange}
-              className={`w-full px-4 py-2 rounded-md border ${errors.email ? "border-destructive" : "border-input"} focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring`}
-              placeholder="Nhập địa chỉ email của bạn"
-              aria-invalid={errors.email ? "true" : "false"}
+              className={`w-full px-4 py-2 rounded-md border ${errors.emailOrUsername ? "border-destructive" : "border-input"} focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring`}
+              placeholder="Nhập email hoặc tên đăng nhập của bạn"
+              aria-invalid={errors.emailOrUsername ? "true" : "false"}
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-destructive">{errors.email}</p>
+            {errors.emailOrUsername && (
+              <p className="mt-1 text-sm text-destructive">{errors.emailOrUsername}</p>
             )}
           </div>
 
@@ -181,10 +270,16 @@ const Login = () => {
             Nhớ mật khẩu
             </label>
             </div>
+<<<<<<< Updated upstream
             
 
             <Link to={'/#'} className="hover:text-pink-500 text-sm">
             Quên mật khẩu?
+=======
+
+            <Link to={'/forgot-password'} className="hover:text-pink-500 text-sm">
+              Quên mật khẩu?
+>>>>>>> Stashed changes
             </Link>
           </div>
           {errors.terms && (
@@ -193,10 +288,10 @@ const Login = () => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
             className="w-full bg-primary text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {loading ? (
+            {isLoading ? (
               <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                 <circle
                   className="opacity-25"
