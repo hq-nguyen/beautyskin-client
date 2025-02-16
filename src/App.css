@@ -1,11 +1,27 @@
 .text-primary {
-    color: #EE1F5B;
+  color: #ee1f5b;
+}
+
+.text-secondary {
+  color: #26b04d;
 }
 
 .bg-primary {
-    background-color: #EE1F5B;
+  background-color: #ee1f5b;
+}
+
+.bg-mark {
+  background-color: #e7f6eb;
 }
 
 .bg-card {
-    background-color:rgb(255, 255, 255);
+  background-color: rgb(255, 255, 255);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

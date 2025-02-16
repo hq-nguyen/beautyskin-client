@@ -7,23 +7,77 @@ This repository contains the frontend for the Skincare Shop Management System, b
 - **Homepage**: Product display, blog, FAQs, and news.  
 - **Skin Testing**: Quiz-based tool to determine skin type.  
 - **Product Recommendations**: Personalized suggestions based on skin type.  
-<!-- - **Order Tracking**: Customers track their orders.   -->
-- **Feedback Submission**: Customers leave feedback for admin review.  
+- **Feedback Submission**: Customers leave feedback for admin review.
+ <!-- - **Order Tracking**: Customers track their orders.   -->  
 
 ## Tech Stack  
 - **Framework**: ReactJS  
-- **Styling**: TailwindCSS
+- **Styling**: TailwindCSS  
 - **API Integration**: RESTful APIs  
 <!-- - **State Management**: Context API or Redux   -->
 
 ## Setup Instructions  
+
 ### Prerequisites  
-- **Node.js**
-- **npm**  
+Before getting started, ensure you have the following installed on your machine:  
+- **[Node.js](https://nodejs.org/)** (LTS version recommended)  
+- **npm**
+- **Git**
 
 ### Installation  
-1. Clone the repository:  
+Follow these steps to set up the project locally:  
+
+1. **Clone the Repository**  
+   Open a terminal and run:  
    ```bash
-   git clone https://github.com/..../....git
-   cd ....
-2. Install dependencies ... 
+   git clone https://github.com/hq-nguyen/beautyskin-client.git
+   cd beautyskin-client
+   ```
+
+2. **Install Dependencies**  
+   Install the required packages using `npm` (or npm i):  
+   ```bash
+   npm install
+   ```
+
+4. **Add TailwindCSS Configuration Files**  
+   If `tailwind.config.js` and `postcss.config.js` are missing, generate them with the following command:  
+   ```bash
+   npx tailwindcss init -p
+   ```
+
+   This will create:
+   - **`tailwind.config.js`**: Customize your TailwindCSS setup here. For example:
+     ```javascript
+     /** @type {import('tailwindcss').Config} */
+     export default = {
+       content: [
+           "./index.html",
+           "./src/**/*.{js,jsx,ts,tsx}",
+       ],
+       theme: {
+         extend: {},
+       },
+       plugins: [],
+     };
+     ```
+   - **`postcss.config.js`**: PostCSS setup:
+     ```javascript
+     module.exports = {
+       plugins: {
+         tailwindcss: {},
+         autoprefixer: {},
+       },
+     };
+     ```
+
+5. **Start the Development Server**  
+   Run the development server with:  
+   ```bash
+   npm run dev
+   ```
+
+## Questions  
+For any configuration issues or questions, feel free to contact me via email: **nguyenhaiquan.data@gmail.com**
+
+
