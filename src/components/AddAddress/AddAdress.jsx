@@ -74,7 +74,7 @@ const AddressForm = () => {
     e.preventDefault();
     if (validateForm()) {
       setSuccessMessage('Lưu địa chỉ thành công!');
-      setTimeout(() => navigate('/manage-address'), 1500);
+      setTimeout(() => navigate('/user/manage-address'), 1500);
     }
   };
 
