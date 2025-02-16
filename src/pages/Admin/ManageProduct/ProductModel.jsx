@@ -213,7 +213,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
     return (
         <Modal
             title="Chỉnh sửa sản phẩm"
-            visible={visible}
+            open={visible}
             onCancel={onCancel}
             footer={[
                 <Button key="cancel" onClick={onCancel}>

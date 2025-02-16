@@ -18,6 +18,16 @@ import ChangePassword from '../pages/ChangePassword';
 import UserLayout from '../layout/UserLayout';
 import MainLayout from '../layout/MainLayout'; // Assuming you have this
 import ForgotPassword from "../pages/ForgotPassword";
+// admin section
+import AdminLayout from "../layout/AdminLayout";
+import AddProductPage from "../pages/Admin/ManageProduct/AddProduct";
+import ManageProduct from "../pages/Admin/ManageProduct/ManageProduct";
+import ManageStaff from "../pages/Admin/ManageStaff/ManageStaff";
+import AddStaff from "../pages/Admin/ManageStaff/AddStaff";
+import ManageCustomer from "../pages/Admin/ManageCustomer/ManageCustomer";
+import ManageOrder from "../pages/Admin/ManageOrder/ManageOrder";
+import ManageCategory from "../pages/Admin/ManageCategory/ManageCategory";
+import AddCategory from "../pages/Admin/ManageCategory/AddCategory";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -99,6 +109,49 @@ const Routers = () => {
         {
           path: "change-password",
           element: <ChangePassword />,
+        },
+        
+      ],
+    },
+    {
+      path: "/admin",
+      element: <AdminLayout />,
+      children: [
+        {
+          index: true,
+          element: <ManageProduct />,
+        },
+        {
+          path: 'list-products',
+          element: <ManageProduct />,
+        },
+        {
+          path: "add-product",
+          element: <AddProductPage />,
+        },
+        {
+          path: "staffs",
+          element: <ManageStaff />,
+        },
+        {
+          path: "add-staff",
+          element: <AddStaff />,
+        },
+        {
+          path: "customers",
+          element: <ManageCustomer />,
+        },
+        {
+          path: "orders",
+          element: <ManageOrder />,
+        },
+        {
+          path: "category",
+          element: <ManageCategory />,
+        },
+        {
+          path: "add-category",
+          element: <AddCategory />,
         },
         
       ],
