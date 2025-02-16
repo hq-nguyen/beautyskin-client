@@ -12,7 +12,7 @@ const AddressManagement = () => {
     const [editingAddress, setEditingAddress] = useState(null);
     const [errors, setErrors] = useState({});
 
-    const [newAddress, setNewAddress] = useState({
+    const [newAddress,  setNewAddress] = useState({
         name: '',
         phone: '',
         address: '',
