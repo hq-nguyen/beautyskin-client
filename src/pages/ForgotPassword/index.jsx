@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +28,7 @@ const ForgotPassword = () => {
     try {
       const response = await api.post('forgot-password', { email });
       toast.success("Link đặt lại mật khẩu đã được gửi đến email của bạn");
-      navigate('/login');
+      navigate('/login'); 
     } catch (error) {
       toast.error(error.response?.data || "Có lỗi xảy ra. Vui lòng thử lại sau.");
     } finally {
