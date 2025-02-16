@@ -1,37 +1,94 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
-import { FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../../config/firebase";
+import { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { useNavigate } from "react-router-dom";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { data, Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../config/axios";
 
-const LoginPage = () => {
+const Register = () => {
     const [formData, setFormData] = useState({
+        fullName: "",
         username: "",
+        email: "",
         password: "",
-        rememberMe: false,
+        terms: false
     });
 
-    const navigate = useNavigate();
-    const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [passwordStrength, setPasswordStrength] = useState(0);
+
+    const validateFullName = (name) => {
+        return name.trim().length > 0;
+    };
+
+    const validateUsername = (username) => {
+        return /^[a-zA-Z0-9_]{3,20}$/.test(username);
+    };
+
+    const validateEmail = (email) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
+
+    const calculatePasswordStrength = (password) => {
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        return strength;
+    };
+
+    const validatePassword = (password) => {
+        return (
+            password.length >= 8 &&
+            /[A-Z]/.test(password) &&
+            /[a-z]/.test(password) &&
+            /[0-9]/.test(password) &&
+            /[^A-Za-z0-9]/.test(password)
+        );
+    };
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === "checkbox" ? checked : value
+        }));
+    };
+
+    useEffect(() => {
+        const strength = calculatePasswordStrength(formData.password);
+        setPasswordStrength(strength);
+    }, [formData.password]);
 
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.username.trim()) {
-            newErrors.username = "Username is required";
-        } else if (formData.username.trim().length < 3) {
-            newErrors.username = "Username must be at least 3 characters";
-        } else if (formData.username.trim().length > 50) {
-            newErrors.username = "Username must not exceed 50 characters";
+
+        if (!validateFullName(formData.fullName)) {
+            newErrors.fullName = "Tên người dùng không được để trống";
         }
 
-        if (!formData.password) {
-            newErrors.password = "Password is required";
-        } else if (formData.password.length < 8) {
-            newErrors.password = "Password must be at least 8 characters";
+        if (!validateUsername(formData.username)) {
+            newErrors.username = "Tên người dùng gồm từ 3-20 ký tự và chỉ có thể chứa chữ cái, số và dấu gạch dưới";
+        }
+
+        if (!validateEmail(formData.email)) {
+            newErrors.email = "Địa chỉ email nhập không hợp lệ";
+        }
+
+        if (!validatePassword(formData.password)) {
+            newErrors.password =
+                "Mật khẩu phải có ít nhất 8 ký tự và chứa chữ hoa, chữ thường, số và ký tự đặc biệt";
+        }
+
+        if (!formData.terms) {
+            newErrors.terms = "Bạn phải chấp nhận các điều khoản và điều kiện!";
         }
 
         setErrors(newErrors);
@@ -40,168 +97,183 @@ const LoginPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (validateForm()) {
-            setIsLoading(true);
-        }
-
-        try {
-            const response = await api.post('login', formData);
-            const { token, roleEnum } = response.data;
-            localStorage.setItem('token', token);
-            toast.success("Successfully login")
-
-       
-            if (roleEnum === 'ADMIN') {
-                navigate('/dashboard')
-            } else if (roleEnum === 'USER'){
-                navigate('/')
+            setLoading(true);
+            try {
+                const response = await api.post('register', formData);
+                toast.success("Tạo tài khoản mới thành công!");
+                navigate('/login');
+            } catch (error) {
+                toast.error(error.response.data);
+                console.log(error.response.data);
+            } finally {
+                setLoading(false);
             }
-
-            
-        } catch (error) {
-            toast.error(error.response.data);
-        } finally {
-            setIsLoading(false)
         }
-    
-};
+    };
 
-const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-        ...prev,
-        [name]: type === "checkbox" ? checked : value,
-    }));
-};
+    const navigate = useNavigate();
+    const handleLoginGoogle = () => {
+        console.log("first");
+        const provider = new GoogleAuthProvider();
 
-return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-            <div>
-                <img
-                    className="mx-auto h-12 w-auto"
-                    src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1180&q=80"
-                    alt="Logo"
-                />
-                <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Sign in to your account
-                </h2>
-            </div>
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                const token = result.user.accessToken;
+                const user = result.user;
 
-            <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                <div className="rounded-md shadow-sm space-y-4">
+                console.log(user);
+                navigate('/login');
+            })
+            .catch((error) => {
+                // Handle Errors here.
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                // The email of the user's account used.
+                const email = error.customData.email;
+                // The AuthCredential type that was used.
+                const credential = GoogleAuthProvider.credentialFromError(error);
+                // ...
+            });
+    };
+
+    return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-8">
+            <div className="max-w-xl w-full bg-card rounded-lg shadow-lg p-8">
+                <h2 className="text-2xl text-primary font-bold text-foreground text-center mb-4">Tạo tài khoản mới</h2>
+                <p className="text-[12px] text-gray-600 text-center font-bold mb-5">Đăng ký để không bỏ lỡ quyền lợi tích luỹ và hoàn tiền cho bất kỳ đơn hàng nào</p>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label htmlFor="username" className="sr-only">
-                            Username
+                        <label htmlFor="email" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
+                            Email
                         </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <FaUser className="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                id="username"
-                                name="username"
-                                type="text"
-                                autoComplete="username"
-                                required
-                                className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${errors.username ? "border-red-300" : "border-gray-300"
-                                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                                placeholder="Enter your username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                aria-invalid={errors.username ? "true" : "false"}
-                            />
-                        </div>
-                        {errors.username && (
-                            <p className="mt-2 text-sm text-red-600" role="alert">
-                                {errors.username}
-                            </p>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className={`w-full px-4 py-2 rounded-md border ${errors.email ? "border-destructive" : "border-input"} focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring`}
+                            placeholder="Nhập địa chỉ email của bạn"
+                            aria-invalid={errors.email ? "true" : "false"}
+                        />
+                        {errors.email && (
+                            <p className="mt-1 text-sm text-destructive text-red-600">{errors.email}</p>
                         )}
                     </div>
 
                     <div>
-                        <label htmlFor="password" className="sr-only">
-                            Password
+                        <label htmlFor="username" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
+                            Tên đăng nhập
+                        </label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            className={`w-full px-4 py-2 rounded-md border ${errors.username ? "border-destructive" : "border-input"} focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring`}
+                            placeholder="Nhập tên đăng nhập"
+                            aria-invalid={errors.username ? "true" : "false"}
+                        />
+                        {errors.username && (
+                            <p className="mt-1 text-sm text-destructive text-red-600">{errors.username}</p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label htmlFor="fullName" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
+                            Họ và tên
+                        </label>
+                        <input
+                            type="text"
+                            id="fullName"
+                            name="fullName"
+                            value={formData.fullName}
+                            onChange={handleChange}
+                            className={`w-full px-4 py-2 rounded-md border ${errors.fullName ? "border-destructive" : "border-input"} focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring`}
+                            placeholder="Nhập họ và tên"
+                            aria-invalid={errors.fullName ? "true" : "false"}
+                        />
+                        {errors.fullName && (
+                            <p className="mt-1 text-sm text-destructive text-red-600">{errors.fullName}</p>
+                        )}
+                    </div>
+                    <div>
+                        <label htmlFor="password" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
+                            Mật khẩu
                         </label>
                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <FaLock className="h-5 w-5 text-gray-400" />
-                            </div>
                             <input
+                                type={showPassword ? "text" : "password"}
                                 id="password"
                                 name="password"
-                                type={showPassword ? "text" : "password"}
-                                autoComplete="current-password"
-                                required
-                                className={`appearance-none rounded-lg relative block w-full pl-10 pr-10 py-2 border ${errors.password ? "border-red-300" : "border-gray-300"
-                                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                                placeholder="Enter your password"
                                 value={formData.password}
                                 onChange={handleChange}
+                                className={`w-full px-4 py-2 rounded-md border ${errors.password ? "border-destructive" : "border-input"} focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring pr-10`}
+                                placeholder="Tạo mật khẩu"
                                 aria-invalid={errors.password ? "true" : "false"}
                             />
                             <button
                                 type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
                                 onClick={() => setShowPassword(!showPassword)}
-                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2"
                             >
                                 {showPassword ? (
-                                    <FaEyeSlash className="h-5 w-5 text-gray-400" />
+                                    <AiOutlineEyeInvisible className="w-5 h-5 text-gray-500" />
                                 ) : (
-                                    <FaEye className="h-5 w-5 text-gray-400" />
+                                    <AiOutlineEye className="w-5 h-5 text-gray-500" />
                                 )}
                             </button>
                         </div>
                         {errors.password && (
-                            <p className="mt-2 text-sm text-red-600" role="alert">
-                                {errors.password}
-                            </p>
+                            <p className="mt-1 text-sm text-destructive text-red-600">{errors.password}</p>
                         )}
+                        <div className="mt-2 h-2 bg-gray-200 rounded-full">
+                            <div
+                                className={`h-full rounded-full transition-all ${passwordStrength === 0 ? "w-0" :
+                                    passwordStrength === 1 ? "w-1/5 bg-red-500" :
+                                        passwordStrength === 2 ? "w-2/5 bg-orange-500" :
+                                            passwordStrength === 3 ? "w-3/5 bg-yellow-500" :
+                                                passwordStrength === 4 ? "w-4/5 bg-lime-500" :
+                                                    "w-full bg-green-500"}`}
+                            />
+                        </div>
                     </div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <input
-                            id="remember-me"
-                            name="rememberMe"
                             type="checkbox"
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            checked={formData.rememberMe}
+                            id="terms"
+                            name="terms"
+                            checked={formData.terms}
                             onChange={handleChange}
+                            className="mt-1 h-4 w-4 rounded border-input text-primary focus:ring-ring"
                         />
-                        <label
-                            htmlFor="remember-me"
-                            className="ml-2 block text-sm text-gray-900"
-                        >
-                            Remember me
+                        <label htmlFor="terms" className="ml-2 block text-sm text-foreground">
+                            Tôi đồng ý với {" "}
+                            <a href="#" className="text-primary hover:underline">
+                                Điều khoản dịch vụ
+                            </a>{" "}
+                            và{" "}
+                            <a href="#" className="text-primary hover:underline">
+                                Chính sách bảo mật
+                            </a>
                         </label>
                     </div>
+                    {errors.terms && (
+                        <p className="mt-1 text-sm text-destructive text-red-600">{errors.terms}</p>
+                    )}
 
-                    <div className="text-sm">
-                        <a
-                            href="#"
-                            className="font-medium text-blue-600 hover:text-blue-500"
-                        >
-                            Forgot your password?
-                        </a>
-                    </div>
-                </div>
-
-                <div>
                     <button
                         type="submit"
-                        disabled={isLoading}
-                        className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={loading}
+                        className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                     >
-                        {isLoading ? (
-                            <svg
-                                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
+                        {loading ? (
+                            <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                                 <circle
                                     className="opacity-25"
                                     cx="12"
@@ -209,53 +281,47 @@ return (
                                     r="10"
                                     stroke="currentColor"
                                     strokeWidth="4"
-                                ></circle>
+                                    fill="none"
+                                />
                                 <path
                                     className="opacity-75"
                                     fill="currentColor"
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                ></path>
+                                />
                             </svg>
-                        ) : null}
-                        {isLoading ? "Signing in..." : "Sign in"}
+                        ) : (
+                            "Đăng ký"
+                        )}
                     </button>
 
-                    <p className="mt-4 text-center text-sm text-gray-600">
-                        Don't have an account?{" "}
-                        <a
-                            href="/register"
-                            className="font-medium text-blue-600 hover:text-blue-500"
-                        >
-                            Register here
-                        </a>
-                    </p>
-                </div>
-
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-300"></div>
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-input"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-card text-muted-foreground">Hoặc đăng nhập với</span>
+                        </div>
                     </div>
-                    <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-white text-gray-500">
-                            Or continue with
-                        </span>
-                    </div>
-                </div>
 
-                <div>
                     <button
                         type="button"
-                        className="w-full flex items-center justify-center gap-2 bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        onClick={() => console.log("Google sign in clicked")}
+                        onClick={handleLoginGoogle}
+                        className="w-full bg-white text-foreground py-2 px-4 rounded-md border border-input hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                     >
-                        <FcGoogle className="h-5 w-5" />
-                        Sign in with Google
+                        <FcGoogle className="w-5 h-5" />
+                        Đăng nhập với Google
                     </button>
-                </div>
-            </form>
+
+                    <p className="text-left text-sm text-muted-foreground">
+                        Bạn đã có tài khoản?{" "}
+                        <Link to={'/login'} className="text-primary hover:underline">
+                            Đăng nhập tại đây
+                        </Link>
+                    </p>
+                </form>
+            </div>
         </div>
-    </div>
-);
+    );
 };
 
-export default LoginPage;
+export default Register;
