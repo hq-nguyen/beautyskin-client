@@ -18,8 +18,8 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-        const validateForm = () => {
-            const newErrors = {};
+    const validateForm = () => {
+        const newErrors = {};
         if (!formData.username.trim()) {
             newErrors.username = "Username is required";
         } else if (formData.username.trim().length < 3) {
