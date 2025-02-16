@@ -1,44 +1,56 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Edit, Trash2, X } from 'lucide-react';
 import axios from "axios";
-
+import { toast } from "react-toastify";
 
 const AddressManagement = () => {
-    const [addresses, setAddresses] = useState([
-        {
-            id: 1,
-            name: 'Trương Quốc Hưng',
-            phone: '0912726117',
-            address: 'Phường Cát Lái, Thành Phố Thủ Đức, Hồ Chí Minh',
-            isDefault: true
-        },
-        {
-            id: 2,
-            name: 'Trương Quốc Hưng',
-            phone: '0912726117',
-            address: 'Phường 4, Thành phố Sóc Trăng',
-            isDefault: false
-        }
-    ]);
+    const [addresses, setAddresses] = useState([]);
+    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+    const [addressToDelete, setAddressToDelete] = useState(null);
 
     const [newAddress, setNewAddress] = useState({
         name: '',
         phone: '',
         address: '',
         isDefault: false
-    });
+    }); 
+
+    const fetch = async () => {
+        console.log("fetching address");
+        const response = await axios.get('https://67825c10c51d092c3dcf2d8d.mockapi.io/address')
+        console.log(response.data);
+        setAddresses(response.data)
+        console.log("done fetching address");
+    }
+
+    useEffect(() => {
+        fetch();
+    }, [])
 
     const handleAddAddress = async () => {
         alert('handle address')
     };
 
     const handleEditAddress = (id) => {
-        alert('edit address')
+        
     };
 
-    const handleDeleteAddress = async (id) => {
-        alert('delte address')
+    const confirmDelete = (id) => {
+        setAddressToDelete(id);
+        setShowConfirmDelete(true);
+    };
+
+    const handleDeleteAddress = async () => {
+        try {
+            const response = await axios.delete(`https://67825c10c51d092c3dcf2d8d.mockapi.io/address/${addressToDelete}`)
+            toast.success('successful delete address')
+            await fetch();
+            setShowConfirmDelete(false);
+        } catch (error) {
+            toast.error('Fail to delete address')
+            console.log("Error deleting address", error);
+        }
     };
 
     return (
@@ -71,7 +83,7 @@ const AddressManagement = () => {
                                 <Edit size={20} />
                             </button>
                             <button
-                                onClick={() => handleDeleteAddress(addr.id)}
+                                onClick={() => confirmDelete(addr.id)}
                                 className="text-red-500 hover:bg-red-100 p-2 rounded-full"
                             >
                                 <Trash2 size={20} />
@@ -80,6 +92,38 @@ const AddressManagement = () => {
                     </div>
                 ))}
             </div>
+
+            {/* Confirm Delete Modal */}
+            {showConfirmDelete && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg p-6 w-96">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold">Xác nhận xóa</h3>
+                            <button 
+                                onClick={() => setShowConfirmDelete(false)}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <p className="mb-6">Bạn có chắc chắn muốn xóa địa chỉ này không?</p>
+                        <div className="flex justify-end space-x-4">
+                            <button
+                                onClick={() => setShowConfirmDelete(false)}
+                                className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                onClick={handleDeleteAddress}
+                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                            >
+                                Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <button
                 onClick={handleAddAddress}
