@@ -128,12 +128,12 @@ const LinkGroup = ({ children, header }) => {
 const LinkMove = ({ link, label }) => {
     return (
         <li>
-            <a
-                href={link}
+            <Link
+                to={link}
                 className="inline-block font-semibold text-sm hover:text-pink-500"
             >
                 {label}
-            </a>
+            </Link>
         </li>
     );
 };

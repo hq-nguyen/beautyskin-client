@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
-import { MdOutlineDashboard } from "react-icons/md";
-import { BiUser, BiPackage, BiCart, BiMessageRounded, BiBell, BiCog } from "react-icons/bi"; // More comprehensive icon set
+import { MdOutlineDashboard, MdOutlineCategory } from "react-icons/md";
+import { BiUser, BiPackage, BiCart, BiBell, BiCog } from "react-icons/bi"; // More comprehensive icon set
 import { assets } from '../../assets/frontend_assets/assets';
 import SidebarLinkGroup from './SidebarLinkGroup';
 
@@ -31,8 +31,8 @@ const AdminSidebar = () => {
       path: '/admin',
       mark: 'account',
       subItems: [
-        { label: 'Nhân viên', path: 'manage-employees' },
-        { label: 'Khách hàng', path: 'manage-customers' },
+        { label: 'Nhân viên', path: 'staffs' },
+        { label: 'Khách hàng', path: 'customers' },
       ],
     },
     {
@@ -50,16 +50,19 @@ const AdminSidebar = () => {
       id: 'orders',
       label: 'Đơn đặt hàng',
       icon: <BiCart size={20} />,
-      path: '/admin/manage-orders',
-      mark:'order',
+      path: '/admin/orders',
+      mark: 'order',
     },
     {
-      id: 'messages',
-      label: 'Tin nhắn',
-      icon: <BiMessageRounded size={20} />,
-      path: '/messages',
-      mark: 'message',
-      badge: 4,
+      id: 'category',
+      label: 'Danh mục',
+      icon: <MdOutlineCategory size={20} />,
+      path: '/admin',
+      mark: 'category',
+      subItems: [
+        { label: 'Xem danh mục', path: 'category' },
+        { label: 'Thêm danh mục', path: 'add-category' },
+      ],
     },
     {
       id: 'notifications',
@@ -97,7 +100,7 @@ const AdminSidebar = () => {
         {/* Header with toggle button and logo */}
         <div className="flex items-center shrink-0 justify-between mb-4">
           {isSidebarOpen && (
-            <Link to={'/admin'} className="ml-2 transition-opacity duration-200">
+            <Link to={'/'} className="ml-2 transition-opacity duration-200">
               <img className='w-12' src={assets.icon} alt="Logo" />
             </Link>
           )}
