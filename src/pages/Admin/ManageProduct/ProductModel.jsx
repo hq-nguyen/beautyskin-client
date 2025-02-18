@@ -375,6 +375,16 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                     </Select>
                 </Form.Item>
 
+                <Form.Item name="origin" label="Xuất xứ">
+                    <Select>
+                        {['Hàn Quốc', 'Trung Quốc', 'Việt Nam', 'Ấn Độ', 'Singapore', 'England', 'US'].map((origin) => (
+                            <Select.Option key={origin} value={origin}>
+                                {origin}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+
                 <Form.Item
                     name="stock"
                     label="Tồn kho"

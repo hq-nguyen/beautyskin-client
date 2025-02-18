@@ -39,7 +39,7 @@ const AddProductPage = () => {
 
           // Call the addProduct API with the complete product data
           const newProduct = await addProduct(productData);
-
+          
           message.success('Đã thêm thành công sản phẩm!');
           form.resetFields(); // Clear the form after successful add
           setFileList([]); // Clear image list
@@ -124,42 +124,42 @@ const AddProductPage = () => {
     return isJpgOrPng && isLt2M;
   };
 
-  const uploadImage = async (options) => {
-    const { onSuccess, onError, file } = options;
-    const formData = new FormData();
-    formData.append("image", file);
+  // const uploadImage = async (options) => {
+  //   const { onSuccess, onError, file } = options;
+  //   const formData = new FormData();
+  //   formData.append("image", file);
 
-    try {
-      const res = await uploadFile(file);
+  //   try {
+  //     const res = await uploadFile(file);
 
-      if (res.data.success) {
-        form.setFieldsValue({ imageUrl: res.data.imageUrl });
-        setFileList([{
-          uid: '-1',
-          name: file.name,
-          status: 'done',
-          url: res.data.imageUrl,
-        }]);
-        onSuccess("Ok");
-      } else {
-        onError("Upload failed");
-        message.error("Upload failed: " + res.data.message);
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      onError("Upload failed");
-      message.error("Upload failed: " + error.message);
-    }
-  };
+  //     if (res.data.success) {
+  //       form.setFieldsValue({ imageUrl: res.data.imageUrl });
+  //       setFileList([{
+  //         uid: '-1',
+  //         name: file.name,
+  //         status: 'done',
+  //         url: res.data.imageUrl,
+  //       }]);
+  //       onSuccess("Ok");
+  //     } else {
+  //       onError("Upload failed");
+  //       message.error("Upload failed: " + res.data.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error uploading image:", error);
+  //     onError("Upload failed");
+  //     message.error("Upload failed: " + error.message);
+  //   }
+  // };
 
-  const handleImageRemove = () => {
-    form.setFieldsValue({ imageUrl: null });
-    setFileList([]);
-  };
+  // const handleImageRemove = () => {
+  //   form.setFieldsValue({ imageUrl: null });
+  //   setFileList([]);
+  // };
 
-  const customRequest = (options) => {
-    uploadImage(options);
-  };
+  // const customRequest = (options) => {
+  //   uploadImage(options);
+  // };
 
   const handleCancel = () => {
     navigate('/admin/list-products'); // Redirect to manage product page
@@ -302,6 +302,16 @@ const AddProductPage = () => {
                   ))}
                 </Select>
               </Form.Item>
+
+              <Form.Item name="origin" label="Xuất xứ">
+                    <Select>
+                        {['Hàn Quốc', 'Trung Quốc', 'Việt Nam', 'Ấn Độ', 'Singapore', 'England', 'US'].map((origin) => (
+                            <Select.Option key={origin} value={origin}>
+                                {origin}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                </Form.Item>
 
               {/* stock */}
               <Form.Item label="Số lượng sản phẩm" name="stock" rules={[{ required: true, message: 'Vui lòng nhập tồn kho!' }]}>
