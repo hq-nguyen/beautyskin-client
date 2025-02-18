@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faEnvelope, faLock, faMapMarkerAlt, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faEnvelope, faLock, faMapMarkerAlt, faTimes, faL } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -26,24 +26,26 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 };
 
 const AccountContent = () => {
-    const [name, setName] = useState('Hưng Trương');
+    const [name, setName] = useState('');
     const [email, setEmail] = useState("hungtqse182075@fpt.edu.vn");
     const [isNameModalOpen, setIsNameModalOpen] = useState(false);
     const [tempName, setTempName] = useState('');
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('')
 
     const handleNameSubmit = async () => {
         if (!tempName.trim()) {
-            setError("Vui lòng nhập họ tên");
+            setError('Vui lòng nhập họ tên')
             return;
         }
+
         setIsLoading(true)
-        setError("")
+        setError('')
+        setSuccessMessage('')
 
         try {
-            // Giả sử API endpoint là '/api/users/update-name'
-            const response = await fetch('/api/users/update-name', {
+            const response = await fetch('https://67825c10c51d092c3dcf2d8d.mockapi.io/User/1', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,19 +54,25 @@ const AccountContent = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Có lỗi xảy ra khi cập nhật tên');
+                const errorData =  await response.json()
+                throw new Error(errorData.message || 'Có lỗi xảy ra khi cập nhật tên')
             }
 
             const data = await response.json();
-            setName(data.name);
-            setIsNameModalOpen(false);
-        } catch (err) {
-            setError(err.message || 'Có lỗi xảy ra khi cập nhật tên');
+            setName(data.name || tempName);
+            setSuccessMessage('Cập nhật tên thành công');
+
+            setTimeout(() => {
+                setIsNameModalOpen(false);
+                setSuccessMessage('')
+            }, 1500)
+        } catch (error) {
+            console.log('Error updating name: ', error);
+            setError(error.message || 'Có lỗi xảy ra khi cập nhật tên');
         } finally {
             setIsLoading(false);
         }
-    };
-
+    }
 
     return (
         <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px]">
