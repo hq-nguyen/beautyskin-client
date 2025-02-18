@@ -10,7 +10,7 @@ function AccountSidebar() {
         { icon: faUser, text: 'Thông tin cá nhân', route: '/user/info', breadcrumb: 'Thông tin cá nhân' },
         { icon: faLocationDot, text: 'Địa chỉ nhận hàng', route: '/user/address', breadcrumb: 'Địa chỉ nhận hàng' },
         { icon: faBox, text: 'Quản lý đơn hàng', route: '/user/manage-order', breadcrumb: 'Quản lý đơn hàng' },
-        { icon: faStar, text: 'Tích điểm', route: '/points', breadcrumb: 'Tích điểm' },
+        { icon: faStar, text: 'Tích điểm', route: '/user/promotion', breadcrumb: 'Tích điểm' },
         { icon: faLock, text: 'Đổi mật khẩu', route: '/user/change-password', breadcrumb: 'Đổi mật khẩu' }   
     ];
 

@@ -28,6 +28,7 @@ import ManageCustomer from "../pages/Admin/ManageCustomer/ManageCustomer";
 import ManageOrder from "../pages/Admin/ManageOrder/ManageOrder";
 import ManageCategory from "../pages/Admin/ManageCategory/ManageCategory";
 import AddCategory from "../pages/Admin/ManageCategory/AddCategory";
+import Promotion from "../pages/PromotionManagement/promotion";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -105,6 +106,10 @@ const Routers = () => {
         {
           path: "manage-order",
           element: <Order />,
+        },
+        {
+          path: "promotion",
+          element: <Promotion />,
         },
         {
           path: "change-password",
