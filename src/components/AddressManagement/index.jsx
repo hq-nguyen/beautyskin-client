@@ -33,10 +33,14 @@ const AddressManagement = () => {
 
     const validateForm = (address) => {
         const newErrors = {};
+<<<<<<< HEAD
+                const phoneRegex = /^\d{10}$/;
+=======
     
 
         // Validate phone (must be 10 digits)
         const phoneRegex = /^\d{10}$/;
+>>>>>>> 780330d45c710a936c67422a79dc6d9b0952e8ae
         if (!phoneRegex.test(address.phone)) {
             newErrors.phone = "Số điện thoại không hợp lệ";
         }
