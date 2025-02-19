@@ -3,7 +3,7 @@ import { Input, Button, Form, Checkbox, Select, Row, Col, Image, Upload, message
 import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import './ProductModel.css'; // Reuse the same CSS for consistent styling
-import { addProduct } from '../../../apis/product'; 
+import { addProduct } from '../../../apis/product';
 import uploadFile from '../../../utils/upload';
 
 const { TextArea } = Input;
@@ -15,10 +15,10 @@ const AddProductPage = () => {
   const navigate = useNavigate(); // Use useNavigate for navigation
   useEffect(() => {
     // console.log("fileList changed:", fileList);
-     // Debugging
+    // Debugging
   }, [fileList]);
 
-  const handleSave = async ()  => {
+  const handleSave = async () => {
 
     form
       .validateFields()
@@ -39,7 +39,7 @@ const AddProductPage = () => {
 
           // Call the addProduct API with the complete product data
           const newProduct = await addProduct(productData);
-
+          
           message.success('Đã thêm thành công sản phẩm!');
           form.resetFields(); // Clear the form after successful add
           setFileList([]); // Clear image list
@@ -124,42 +124,42 @@ const AddProductPage = () => {
     return isJpgOrPng && isLt2M;
   };
 
-  const uploadImage = async (options) => {
-    const { onSuccess, onError, file } = options;
-    const formData = new FormData();
-    formData.append("image", file);
+  // const uploadImage = async (options) => {
+  //   const { onSuccess, onError, file } = options;
+  //   const formData = new FormData();
+  //   formData.append("image", file);
 
-    try {
-      const res = await uploadFile(file); 
+  //   try {
+  //     const res = await uploadFile(file);
 
-      if (res.data.success) {
-        form.setFieldsValue({ imageUrl: res.data.imageUrl });
-        setFileList([{
-          uid: '-1',
-          name: file.name,
-          status: 'done',
-          url: res.data.imageUrl,
-        }]);
-        onSuccess("Ok");
-      } else {
-        onError("Upload failed");
-        message.error("Upload failed: " + res.data.message);
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      onError("Upload failed");
-      message.error("Upload failed: " + error.message);
-    }
-  };
+  //     if (res.data.success) {
+  //       form.setFieldsValue({ imageUrl: res.data.imageUrl });
+  //       setFileList([{
+  //         uid: '-1',
+  //         name: file.name,
+  //         status: 'done',
+  //         url: res.data.imageUrl,
+  //       }]);
+  //       onSuccess("Ok");
+  //     } else {
+  //       onError("Upload failed");
+  //       message.error("Upload failed: " + res.data.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error uploading image:", error);
+  //     onError("Upload failed");
+  //     message.error("Upload failed: " + error.message);
+  //   }
+  // };
 
-  const handleImageRemove = () => {
-    form.setFieldsValue({ imageUrl: null });
-    setFileList([]);
-  };
+  // const handleImageRemove = () => {
+  //   form.setFieldsValue({ imageUrl: null });
+  //   setFileList([]);
+  // };
 
-  const customRequest = (options) => {
-    uploadImage(options);
-  };
+  // const customRequest = (options) => {
+  //   uploadImage(options);
+  // };
 
   const handleCancel = () => {
     navigate('/admin/list-products'); // Redirect to manage product page
@@ -179,13 +179,17 @@ const AddProductPage = () => {
           <div className="flex flex-wrap" style={{ width: '100%' }}>
             {/* Basic information */}
             <div style={{ width: '60%', padding: '20px' }}>
-              <h3 className="text-lg font-semibold">Basic Info</h3>
+              <h3 className="text-lg font-semibold">Thông tin cơ bản</h3>
 
               <Form.Item label="Tên sản phẩm" name="name" rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm!' }]}>
                 <Input />
               </Form.Item>
 
-              <Form.Item label="Mô tả sản phẩm" name="decs" rules={[{ required: true, message: 'Vui lòng nhập mô tả sản phẩm!' }]}>
+              <Form.Item label="Mô tả sản phẩm" name="description" rules={[{ required: true, message: 'Vui lòng nhập mô tả sản phẩm!' }]}>
+                <TextArea rows={4} />
+              </Form.Item>
+
+              <Form.Item label="Hướng dẫn sử dụng" name="usageInstruction">
                 <TextArea rows={4} />
               </Form.Item>
 
@@ -193,7 +197,7 @@ const AddProductPage = () => {
               <Form.Item label="Danh mục" name="category">
                 <Checkbox.Group>
                   <Row>
-                    {['Skincare', 'Makeup', 'Haircare', 'Fragrance', 'Tools'].map((cat) => (
+                    {['Chăm sóc da', 'Makeup', 'Đặc trị', 'Dưỡng da', 'Thiết bị'].map((cat) => (
                       <Col span={8} key={cat}>
                         <Checkbox value={cat}>{cat}</Checkbox>
                       </Col>
@@ -230,7 +234,7 @@ const AddProductPage = () => {
               <Form.Item label="Tags" name="tag">
                 <Checkbox.Group>
                   <Row>
-                    {['New', 'Sale', 'Popular', 'Limited', 'Best Seller'].map((tag) => (
+                    {['Sản phẩm mới', 'Bán chạy', 'Hàng giới hạn', 'Phổ biến', 'Mềm', 'Mùi thơm'].map((tag) => (
                       <Col span={8} key={tag}>
                         <Checkbox value={tag}>{tag}</Checkbox>
                       </Col>
@@ -245,15 +249,14 @@ const AddProductPage = () => {
               <h3 className="text-lg font-semibold">Chi tiết cụ thể</h3>
 
               {/* Volume */}
-              <Form.Item label="Dung tích" name="volume">
+              <Form.Item label="Dung tích (hoặc khối lượng)" name="capacity">
                 <Checkbox.Group>
                   <Row>
-                    <Col className='mr-4' span={8}>
-                      <Checkbox value="50ml">50ml</Checkbox>
-                    </Col>
-                    <Col span={8}>
-                      <Checkbox value="100ml">100ml</Checkbox>
-                    </Col>
+                    {['100ml', '80ml', '100g', '80g'].map((tag) => (
+                      <Col span={8} key={tag}>
+                        <Checkbox value={tag}>{tag}</Checkbox>
+                      </Col>
+                    ))}
                   </Row>
                 </Checkbox.Group>
               </Form.Item>
@@ -262,8 +265,8 @@ const AddProductPage = () => {
               <Form.Item label="Loại da" name="skin_type">
                 <Checkbox.Group>
                   <Row>
-                    {['Oily', 'Dry', 'Combination', 'Sensitive'].map((type) => (
-                      <Col className='mr-4' span={6} key={type}>
+                    {['Da dầu', 'Da khô', 'Da tổng hợp', 'Da thường'].map((type) => (
+                      <Col className='mr-4' span={8} key={type}>
                         <Checkbox value={type}>{type}</Checkbox>
                       </Col>
                     ))}
@@ -271,8 +274,47 @@ const AddProductPage = () => {
                 </Checkbox.Group>
               </Form.Item>
 
+              <Form.Item name="skinConcern" label="Vấn đề da">
+                <Checkbox.Group>
+                  <Row>
+                    {['Da mụn', 'Da lão hóa', 'Da lỗ chân lông', 'Da có nếp nhăn'].map((type) => (
+                      <Col className="mr-4" span={10} key={type}>
+                        <Checkbox value={type}>{type}</Checkbox>
+                      </Col>
+                    ))}
+                  </Row>
+                </Checkbox.Group>
+              </Form.Item>
+
+              <Form.Item
+                name="ingredients"
+                label="Thành phần"
+              >
+                <Input />
+              </Form.Item>
+
+              <Form.Item name="texture" label="Chất liệu">
+                <Select>
+                  {['Dạng dung dịch', 'Dạng kem', 'Serum', 'Tạo bọt', 'Kết cấu gel'].map((texture) => (
+                    <Select.Option key={texture} value={texture}>
+                      {texture}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item name="origin" label="Xuất xứ">
+                    <Select>
+                        {['Hàn Quốc', 'Trung Quốc', 'Việt Nam', 'Ấn Độ', 'Singapore', 'England', 'US'].map((origin) => (
+                            <Select.Option key={origin} value={origin}>
+                                {origin}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+
               {/* stock */}
-              <Form.Item label="Tồn kho" name="stock" rules={[{ required: true, message: 'Vui lòng nhập tồn kho!' }]}>
+              <Form.Item label="Số lượng sản phẩm" name="stock" rules={[{ required: true, message: 'Vui lòng nhập tồn kho!' }]}>
                 <Input type="number" />
               </Form.Item>
             </div>
@@ -303,7 +345,7 @@ const AddProductPage = () => {
                   src={previewImage}
                 />
               )}
-              
+
             </div>
             <div style={{ width: '100%', padding: '20px', textAlign: 'right' }}>
               <Button type="primary" onClick={handleSave} loading={loading}>Lưu</Button>

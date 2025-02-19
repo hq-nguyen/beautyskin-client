@@ -58,8 +58,9 @@ const ManageStaff = () => {
 
   const handleAddNewStaff = async (newStaff) => {
     try {
-      await addStaff(newStaff); // Call your API to add the new staff
-      setStaffs([...staffs, newStaff]); // Optimistically update the UI
+      const response = await addStaff(newStaff); 
+      const newStaffWithId = { ...newStaff, id: response.id };
+      setStaffs([...staffs, newStaffWithId]); // Update the state with the new staff
       setIsAddModalVisible(false); // Close the modal
     } catch (error) {
       console.error("Error adding staff:", error);

@@ -10,9 +10,9 @@ import { toast } from 'react-toastify';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-      username: "",
-      password: "",
-      rememberMe: false,
+    emailOrUsername: "",
+    password: "",
+    rememberMe: false,
   });
 
   const navigate = useNavigate();
@@ -21,65 +21,66 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
-      const newErrors = {};
-      if (!formData.username.trim()) {
-          newErrors.username = "Username is required";
-      } else if (formData.username.trim().length < 3) {
-          newErrors.username = "Username must be at least 3 characters";
-      } else if (formData.username.trim().length > 50) {
-          newErrors.username = "Username must not exceed 50 characters";
-      }
+    const newErrors = {};
+    if (!formData.emailOrUsername.trim()) {
+      newErrors.emailOrUsername = "Vui lòng nhập tên đăng nhập hoặc email";
+    } else if (formData.emailOrUsername.trim().length < 3) {
+      newErrors.emailOrUsername = "Username must be at least 3 characters";
+    } else if (formData.emailOrUsername.trim().length > 50) {
+      newErrors.emailOrUsername = "Username must not exceed 50 characters";
+    }
 
-      if (!formData.password) {
-          newErrors.password = "Password is required";
-      } else if (formData.password.length < 8) {
-          newErrors.password = "Password must be at least 8 characters";
-      }
+    if (!formData.password) {
+      newErrors.password = "Vui lòng nhập mật khẩu";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Mật khẩu có ít nhất 8 kí tự";
+    }
 
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
-      e.preventDefault();
-      if (validateForm()) {
-          setIsLoading(true);
+    e.preventDefault();
+    if (validateForm()) {
+      setIsLoading(true);
+    }
+
+    const newFormData = {
+      username: formData.emailOrUsername,
+      password: formData.password
+    }
+
+    try {
+      const response = await api.post('login', newFormData);
+      const { token, roleEnum } = response.data;
+      localStorage.setItem('token', token);
+      toast.success("Đăng nhập thành công!");
+
+      console.log(roleEnum);
+
+      if (roleEnum === 'ADMIN') {
+        navigate('/dashboard')
+      } else if (roleEnum === 'USER') {
+        navigate('/')
       }
 
-      const newFormData = {
-          username: formData.emailOrUsername,
-          password: formData.password
-      }
 
-      try {
-          const response = await api.post('login', newFormData);
-          const { token, roleEnum } = response.data;
-          localStorage.setItem('token', token);
-          toast.success("Successfully login")
+    } catch (error) {
+      toast.error(error?.response.data);
+    } finally {
+      setIsLoading(false)
+    }
 
-     
-          if (roleEnum === 'ADMIN') {
-              navigate('/dashboard')
-          } else if (roleEnum === 'USER'){
-              navigate('/')
-          }
+  };
 
-          
-      } catch (error) {
-          toast.error(error?.response.data);
-      } finally {
-          setIsLoading(false)
-      }
-  
-};
-
-const handleChange = (e) => {
-  const { name, value, type, checked } = e.target;
-  setFormData((prev) => ({
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
-  }));
-};
+    }));
+  };
 
   const handleLoginGoogle = () => {
     const provider = new GoogleAuthProvider();
@@ -121,7 +122,7 @@ const handleChange = (e) => {
               aria-invalid={errors.emailOrUsername ? "true" : "false"}
             />
             {errors.emailOrUsername && (
-              <p className="mt-1 text-sm text-destructive">{errors.emailOrUsername}</p>
+              <p className="mt-1 text-sm text-destructive text-red-600">{errors.emailOrUsername}</p>
             )}
           </div>
 
