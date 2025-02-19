@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Input, Button, Form, Checkbox, Select, Row, Col, Upload, message, Modal, Image } from 'antd';
+import { Input, Button, Form, Checkbox, Select, Row, Col, Upload, message, Modal, Image, DatePicker } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import './ProductModel.css';
 import { updateProduct } from '../../../apis/product';
@@ -287,6 +287,10 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                     </Select>
                 </Form.Item>
 
+                <Form.Item name="publish" label="Ngày xuất khẩu" rules={[{ required: true }]}>
+                    <DatePicker />
+                </Form.Item>
+
                 <Form.Item
                     name="price"
                     label="Giá tiền"
@@ -323,7 +327,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 <h3 className="text-xl font-semibold mb-4">Chi tiết cụ thể</h3>
 
                 <Form.Item name="capacity" label="Dung tích / khối lượng">
-                <Checkbox.Group>
+                    <Checkbox.Group>
                         <Row>
                             {['100ml', '80ml', '100g', '80g'].map((tag) => (
                                 <Col span={8} key={tag}>
