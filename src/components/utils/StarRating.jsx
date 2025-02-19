@@ -40,7 +40,7 @@ const StarRating = ({ rating }) => {
                     );
                 }
             })}
-            <span className="ml-2 text-gray-600 dark:text-white">{rating}</span>
+            <span className="mx-2 text-gray-600 text-xs">{rating}</span>
         </div>
     );
 };
