@@ -58,7 +58,6 @@ const Navbar = () => {
 
           <img onClick={() => setVisible(true)} src={assets.menu_icon} className='w-5 cursor-pointer sm:hidden' alt="" />
         </div>
-
       </div>
 
       {/* Sidebar menu for small screens */}
