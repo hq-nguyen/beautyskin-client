@@ -5,7 +5,6 @@ import About from '../pages/About/About';
 import Blog from '../pages/Blog/Blog';
 import News from '../pages/News/News';
 import TestSkinType from '../pages/TestSkinType/TestSkinType';
-import Cart from '../pages/Cart/Cart';
 import Register from '../pages/Register/Register';
 import Login from '../pages/Login/Login';
 import AccountManagement from '../pages/ManageAccount/AccountManagement';
@@ -29,6 +28,7 @@ import ManageOrder from "../pages/Admin/ManageOrder/ManageOrder";
 import ManageCategory from "../pages/Admin/ManageCategory/ManageCategory";
 import AddCategory from "../pages/Admin/ManageCategory/AddCategory";
 import Promotion from "../pages/PromotionManagement/promotion";
+import ShoppingCart from "../pages/ShoppingCart/Cart";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -61,8 +61,8 @@ const Routers = () => {
           element: <TestSkinType />,
         },
         {
-          path: '/cart',
-          element: <Cart />,
+          path: '/shopping-cart',
+          element: <ShoppingCart />,
         },
         {
           path: '/login',
@@ -114,8 +114,7 @@ const Routers = () => {
         {
           path: "change-password",
           element: <ChangePassword />,
-        },
-        
+        }
       ],
     },
     {
