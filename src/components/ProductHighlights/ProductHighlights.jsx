@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaStar } from "react-icons/fa";
 import { assets } from "../../assets/frontend_assets/assets";
 import { Link } from "react-router-dom";
-import ProductItem from "../ProductItem/ProductItem";
+import ProductItem from "../Card/ProductItem";
 
 const ProductHighlights = () => {
   const [activeTab, setActiveTab] = useState("hotDeals");

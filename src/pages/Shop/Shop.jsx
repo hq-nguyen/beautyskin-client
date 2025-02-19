@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { assets } from "../../assets/frontend_assets/assets";
 import { fetchProducts } from '../../apis/product';
 import PropTypes from 'prop-types';
-import ProductItem from "../../components/ProductItem/ProductItem";
+import ProductItem from "../../components/Card/ProductItem";
 
 const Shop = () => {
     const [products, setProducts] = useState([]);

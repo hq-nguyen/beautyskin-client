@@ -29,12 +29,13 @@ import ManageCategory from "../pages/Admin/ManageCategory/ManageCategory";
 import AddCategory from "../pages/Admin/ManageCategory/AddCategory";
 import Promotion from "../pages/PromotionManagement/promotion";
 import ShoppingCart from "../pages/ShoppingCart/Cart";
+import BlogDetail from "../pages/Blog/BlogDetail";
 
 const Routers = () => {
   const routing = useRoutes([
     {
       path: "/",
-      element: <MainLayout />, 
+      element: <MainLayout />,
       children: [
         {
           index: true,
@@ -51,6 +52,10 @@ const Routers = () => {
         {
           path: '/blog',
           element: <Blog />,
+        },
+        {
+          path: '/blog/:slug',
+          element: <BlogDetail />,
         },
         {
           path: '/news',
@@ -76,7 +81,7 @@ const Routers = () => {
           path: '/register',
           element: <Register />,
         },
-        
+
       ],
     },
     {
@@ -97,7 +102,7 @@ const Routers = () => {
         },
         {
           path: "add-address",
-          element: <AddAddress />, 
+          element: <AddAddress />,
         },
         {
           path: "manage-address",
@@ -157,7 +162,7 @@ const Routers = () => {
           path: "add-category",
           element: <AddCategory />,
         },
-        
+
       ],
     },
     {
