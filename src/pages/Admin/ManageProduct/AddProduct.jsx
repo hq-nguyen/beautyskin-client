@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Input, Button, Form, Checkbox, Select, Row, Col, Image, Upload, message } from 'antd';
+import { Input, Button, Form, Checkbox, Select, Row, Col, Image, Upload, message, DatePicker } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import './ProductModel.css'; // Reuse the same CSS for consistent styling
@@ -39,7 +39,7 @@ const AddProductPage = () => {
 
           // Call the addProduct API with the complete product data
           const newProduct = await addProduct(productData);
-          
+
           message.success('Đã thêm thành công sản phẩm!');
           form.resetFields(); // Clear the form after successful add
           setFileList([]); // Clear image list
@@ -217,6 +217,11 @@ const AddProductPage = () => {
                 </Select>
               </Form.Item>
 
+              {/* Publish */}
+              <Form.Item name="publish" label="Ngày xuất khẩu" rules={[{ required: true }]}>
+                <DatePicker />
+              </Form.Item>
+
               {/* Price */}
               <Form.Item label="Giá tiền" name="price" rules={[{ required: true, message: 'Vui lòng nhập giá tiền!' }]}>
                 <Input type="number" />
@@ -304,14 +309,14 @@ const AddProductPage = () => {
               </Form.Item>
 
               <Form.Item name="origin" label="Xuất xứ">
-                    <Select>
-                        {['Hàn Quốc', 'Trung Quốc', 'Việt Nam', 'Ấn Độ', 'Singapore', 'England', 'US'].map((origin) => (
-                            <Select.Option key={origin} value={origin}>
-                                {origin}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                </Form.Item>
+                <Select>
+                  {['Hàn Quốc', 'Trung Quốc', 'Việt Nam', 'Ấn Độ', 'Singapore', 'England', 'US'].map((origin) => (
+                    <Select.Option key={origin} value={origin}>
+                      {origin}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
 
               {/* stock */}
               <Form.Item label="Số lượng sản phẩm" name="stock" rules={[{ required: true, message: 'Vui lòng nhập tồn kho!' }]}>
