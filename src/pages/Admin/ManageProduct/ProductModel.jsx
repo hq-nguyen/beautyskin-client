@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Input, Button, Form, Checkbox, Select, Row, Col, Upload, message, Modal, Image } from 'antd';
+import { Input, Button, Form, Checkbox, Select, Row, Col, Upload, message, Modal, Image, DatePicker } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import './ProductModel.css';
 import { updateProduct } from '../../../apis/product';
@@ -34,14 +34,19 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
         // Load other form values
         form.setFieldsValue({
             name: product?.name || '',
-            decs: product?.decs || '',
+            description: product?.description || '',
             category: product?.category || [],
             brand: product?.brand || '',
             price: product?.price || 0,
             status: product?.status || 'còn hàng',
             tag: product?.tag || [],
-            volume: product?.volume || [],
-            skin_type: product?.skin_type || [],
+            capacity: product?.capacity || [],
+            skinType: product?.skinType || [],
+            // new fields
+            usageInstruction: product?.usageInstruction || '',
+            skinConcern: product?.skinConcern || [],
+            texture: product?.texture || '',
+            ingredients: product?.ingredients || '',
             stock: product?.stock || 0,
         });
         setIsDirty(false);
@@ -242,7 +247,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 </Form.Item>
 
                 <Form.Item
-                    name="decs"
+                    name="description"
                     label="Mô tả sản phẩm"
                     rules={[
                         {
@@ -253,11 +258,17 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 >
                     <TextArea rows={4} />
                 </Form.Item>
+                <Form.Item
+                    name="usageInstruction"
+                    label="Hướng dẫn sử dụng"
+                >
+                    <TextArea rows={4} />
+                </Form.Item>
 
                 <Form.Item name="category" label="Danh mục">
                     <Checkbox.Group>
                         <Row>
-                            {['Skincare', 'Makeup', 'Haircare', 'Fragrance', 'Tools'].map((cat) => (
+                            {['Chăm sóc da', 'Makeup', 'Đặc trị', 'Dưỡng da', 'Thiết bị'].map((cat) => (
                                 <Col span={8} key={cat}>
                                     <Checkbox value={cat}>{cat}</Checkbox>
                                 </Col>
@@ -274,6 +285,10 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                             </Select.Option>
                         ))}
                     </Select>
+                </Form.Item>
+
+                <Form.Item name="publish" label="Ngày xuất khẩu" rules={[{ required: true }]}>
+                    <DatePicker />
                 </Form.Item>
 
                 <Form.Item
@@ -293,13 +308,14 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                     <Select>
                         <Select.Option value="còn hàng">Còn hàng</Select.Option>
                         <Select.Option value="hết hàng">Hết hàng</Select.Option>
+                        <Select.Option value="hết hàng">Ngừng kinh doanh</Select.Option>
                     </Select>
                 </Form.Item>
 
                 <Form.Item name="tag" label="Tags">
                     <Checkbox.Group>
                         <Row>
-                            {['New', 'Sale', 'Popular', 'Limited', 'Best Seller'].map((tag) => (
+                            {['Sản phẩm mới', 'Bán chạy', 'Hàng giới hạn', 'Phổ biến', 'Mềm', 'Mùi thơm'].map((tag) => (
                                 <Col span={8} key={tag}>
                                     <Checkbox value={tag}>{tag}</Checkbox>
                                 </Col>
@@ -308,31 +324,69 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                     </Checkbox.Group>
                 </Form.Item>
 
-                <h3 className="text-lg font-semibold">Chi tiết cụ thể</h3>
+                <h3 className="text-xl font-semibold mb-4">Chi tiết cụ thể</h3>
 
-                <Form.Item name="volume" label="Dung tích">
+                <Form.Item name="capacity" label="Dung tích / khối lượng">
                     <Checkbox.Group>
                         <Row>
-                            <Col className="mr-4" span={8}>
-                                <Checkbox value="50ml">50ml</Checkbox>
-                            </Col>
-                            <Col span={8}>
-                                <Checkbox value="100ml">100ml</Checkbox>
-                            </Col>
+                            {['100ml', '80ml', '100g', '80g'].map((tag) => (
+                                <Col span={8} key={tag}>
+                                    <Checkbox value={tag}>{tag}</Checkbox>
+                                </Col>
+                            ))}
                         </Row>
                     </Checkbox.Group>
                 </Form.Item>
 
-                <Form.Item name="skin_type" label="Loại da">
+                <Form.Item name="skinType" label="Loại da">
                     <Checkbox.Group>
                         <Row>
-                            {['Oily', 'Dry', 'Combination', 'Sensitive'].map((type) => (
-                                <Col className="mr-4" span={6} key={type}>
+                            {['Da dầu', 'Da khô', 'Da tổng hợp', 'Da thường'].map((type) => (
+                                <Col className="mr-4" span={8} key={type}>
                                     <Checkbox value={type}>{type}</Checkbox>
                                 </Col>
                             ))}
                         </Row>
                     </Checkbox.Group>
+                </Form.Item>
+
+                <Form.Item name="skinConcern" label="Vấn đề da">
+                    <Checkbox.Group>
+                        <Row>
+                            {['Da mụn', 'Da lão hóa', 'Da lỗ chân lông', 'Da có nếp nhăn'].map((type) => (
+                                <Col className="mr-4" span={8} key={type}>
+                                    <Checkbox value={type}>{type}</Checkbox>
+                                </Col>
+                            ))}
+                        </Row>
+                    </Checkbox.Group>
+                </Form.Item>
+
+                <Form.Item
+                    name="ingredients"
+                    label="Thành phần"
+                >
+                    <Input />
+                </Form.Item>
+
+                <Form.Item name="texture" label="Chất liệu">
+                    <Select>
+                        {['Dạng dung dịch', 'Dạng kem', 'Serum', 'Tạo bọt', 'Kết cấu gel'].map((texture) => (
+                            <Select.Option key={texture} value={texture}>
+                                {texture}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+
+                <Form.Item name="origin" label="Xuất xứ">
+                    <Select>
+                        {['Hàn Quốc', 'Trung Quốc', 'Việt Nam', 'Ấn Độ', 'Singapore', 'England', 'US'].map((origin) => (
+                            <Select.Option key={origin} value={origin}>
+                                {origin}
+                            </Select.Option>
+                        ))}
+                    </Select>
                 </Form.Item>
 
                 <Form.Item

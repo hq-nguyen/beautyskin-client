@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
 import { MdOutlineDashboard, MdOutlineCategory } from "react-icons/md";
 import { BiUser, BiPackage, BiCart, BiBell, BiCog } from "react-icons/bi"; // More comprehensive icon set
-import { assets } from '../../assets/frontend_assets/assets';
+import { assets } from '../../../assets/frontend_assets/assets';
 import SidebarLinkGroup from './SidebarLinkGroup';
 
 const AdminSidebar = () => {

@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
-import AccountSidebar from '../components/AccountSidebar/AccountSidebar';
 import Navbar from '../components/Navbar/Navbar';
 import Footer from '../components/Footer/Footer';
+import AccountSidebar from '../components/Sidebar/AccountSidebar';
 
 const AccountLayout = () => {
     return (

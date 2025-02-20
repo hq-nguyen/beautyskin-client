@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -56,7 +56,7 @@ const UserProfile = () => {
         [name]: ''
       }));
     }
-  };
+  };  
 
   return (
     <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px] h-100%">

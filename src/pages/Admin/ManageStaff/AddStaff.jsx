@@ -1,5 +1,4 @@
 import { Modal, Form, Input, Select, DatePicker, Button } from 'antd';
-import PropTypes from 'prop-types';
 
 const { Option } = Select;
 
@@ -27,7 +26,7 @@ const AddStaff = ({ visible, onCancel, onSave }) => {
             footer={null} // Remove default OK/Cancel buttons
         >
             <Form form={form} layout="vertical">
-                <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true }]}>
+                <Form.Item name="name" label="Họ và tên" rules={[{ required: true }]}>
                     <Input />
                 </Form.Item>
                 <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
@@ -65,11 +64,6 @@ const AddStaff = ({ visible, onCancel, onSave }) => {
             </Form>
         </Modal>
     );
-};
-AddStaff.propTypes = {
-    visible: PropTypes.bool.isRequired,
-    onCancel: PropTypes.func.isRequired,
-    onSave: PropTypes.func.isRequired,
 };
 
 export default AddStaff;
