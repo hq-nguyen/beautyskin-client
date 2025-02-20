@@ -173,7 +173,7 @@ const ChangePasswordForm = () => {
 
         <button
           type="submit"
-          className="w-full bg-[#d90429] text-white py-2 px-4 rounded-md hover:bg-opacity-80 transition-colors duration-200"
+          className="w-full bg-[#8E0000] text-white py-2 px-4 rounded-md hover:bg-[#6E0000] transition-colors duration-200"
         >
           Đổi mật khẩu
         </button>
