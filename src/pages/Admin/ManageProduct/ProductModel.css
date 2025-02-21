@@ -1,0 +1,24 @@
+.ant-modal {
+    width: 80% !important;
+    max-width: none !important; /* Override any max-width */
+    height: 60vh !important; 
+    max-height: 80vh !important; 
+    top: 1rem !important; 
+  }
+  
+  .ant-modal-content {
+    width: 100%;
+    height: 100%;
+    overflow: auto; 
+    bottom: 4rem !important; 
+  }
+  
+
+  .ant-modal-wrap {
+    display: flex;
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+  }
+  
+  
+  

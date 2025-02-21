@@ -1,15 +1,6 @@
 .navbar {
   background-color: #fff;
-  box-shadow: 0 2px 8px rgba(77, 35, 59, 0.1);
-}
-
-.navbar-link:hover {
-   color: #ECB1C0;
-   transition: 0.3s;
-}
-
-.dropdown-menu {
-  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(39, 22, 31, 0.1);
 }
 
 .dropdown-menu-box {
@@ -33,4 +24,34 @@
 .login-section:hover, .register-section:hover {
   background-color: #ECB1C0;
   transition: 0.3s;
+}
+
+/* small screen */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3); 
+  z-index: 50; 
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100; 
+  width: 60%; 
+  background-color: white;
+  transition: transform 0.3s; 
+}
+
+.sidebar.hidden {
+  transform: translateX(100%); 
+}
+
+.sidebar.visible {
+  transform: translateX(0); 
 }
