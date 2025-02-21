@@ -1,9 +1,10 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { faUser, faIdCard, faLocationDot, faBox, faStar, faLock, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function AccountSidebar() {
     const location = useLocation();
+    const navigate = useNavigate();
 
     const menuItems = [
         { icon: faIdCard, text: 'Quản lý tài khoản', route: '/user', breadcrumb: 'Quản lý tài khoản' },
@@ -16,6 +17,12 @@ function AccountSidebar() {
 
     const currentItem = menuItems.find(item => location.pathname === item.route) ||
         { breadcrumb: 'Quản lý tài khoản' };
+
+    const handleLogout = () => {
+        localStorage.removeItem('authToken');
+        sessionStorage.removeItem('authToken')
+        navigate('/')
+    }
 
     return (
         <div className="w-[300px] mt-5">
@@ -52,9 +59,12 @@ function AccountSidebar() {
                             </li>
                         </Link>
                     ))}
-                    <li className="px-[15px] py-[12px] cursor-pointer flex items-center gap-[10px] text-[#333] rounded-[5px] hover:bg-gray-100 hover:text-[#d90429] border-t border-gray-300 mt-[10px] pt-[15px]">
+                    <li
+                    onClick={handleLogout}
+                    className="px-[15px] py-[12px] cursor-pointer flex items-center gap-[10px] text-[#333] rounded-[5px] hover:bg-gray-100 hover:text-[#d90429] border-t border-gray-300 mt-[10px] pt-[15px]"
+                    >
                         <FontAwesomeIcon icon={faSignOutAlt} className="w-5 text-gray-600 group-hover:text-[#d90429]" />
-                        <Link to={'/'}>Đăng xuất</Link>
+                        <span>Đăng xuất</span>
                     </li>
                 </ul>
             </div>
