@@ -9,9 +9,6 @@ import Register from '../pages/Register/Register';
 import Login from '../pages/Login/Login';
 import AccountManagement from '../pages/ManageAccount/AccountManagement';
 import InfoUser from '../pages/InfoUser/InfoUser';
-import Address from '../pages/Address/Address';
-import AddAddress from '../pages/AddressForm/AddressForm';
-import AddressDefault from '../pages/AddressManagement';
 import Order from '../pages/ManageOrder';
 import ChangePassword from '../pages/ChangePassword';
 import UserLayout from '../layout/UserLayout';
@@ -31,6 +28,9 @@ import Promotion from "../pages/PromotionManagement/promotion";
 import ShoppingCart from "../pages/ShoppingCart/Cart";
 import BlogDetail from "../pages/Blog/BlogDetail";
 import CheckoutPage from "../pages/Checkout/checkout";
+import Address from "../pages/Address/ShippingAddress/Address";
+import AddAddress from "../pages/Address/AddressForm/AddressForm";
+import AddressDefault from "../pages/Address/AddressManagement";
 
 const Routers = () => {
   const routing = useRoutes([

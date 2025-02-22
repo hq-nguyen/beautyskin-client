@@ -1,4 +1,4 @@
-import AddressManagement from "../../components/AddressManagement";
+import AddressManagement from '../../../components/AddressManagement';
 
 
 function AddressDefault() {

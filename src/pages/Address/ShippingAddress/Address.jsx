@@ -1,4 +1,4 @@
-import ShippingAddress from "../../components/ShippingAddress/ShippingAddress";
+import ShippingAddress from "../../../components/ShippingAddress/ShippingAddress";
 
 function Address() {
     return (
