@@ -1,4 +1,4 @@
-import AddressForm from "../../components/AddAddress/AddAdress";
+import AddressForm from "../../../components/AddAddress/AddAdress";
 
 
 function AddAddress() {
