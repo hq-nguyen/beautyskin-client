@@ -102,8 +102,8 @@ const ShoppingCart = () => {
                     </div>
                   </td>
                   <td className="py-4 text-right">
-                    <div className="font-medium">{product.price.toLocaleString()} đ</div>
-                    <div className="text-sm text-gray-500 line-through">{product.originalPrice.toLocaleString()}đ</div>
+                    <div className="font-medium whitespace-nowrap">{product.price.toLocaleString()}&nbsp;đ</div>
+                    <div className="text-sm text-gray-500 line-through whitespace-nowrap">{product.originalPrice.toLocaleString()}&nbsp;đ</div>
                   </td>
                   <td className="py-4">
                     <div className="flex justify-center items-center border border-gray-300 rounded w-24 mx-auto">
@@ -122,8 +122,8 @@ const ShoppingCart = () => {
                       </button>
                     </div>
                   </td>
-                  <td className="py-4 text-right font-medium">
-                    {(product.price * product.quantity).toLocaleString()} đ
+                  <td className="py-4 text-right font-medium whitespace-nowrap">
+                    {(product.price * product.quantity).toLocaleString()}&nbsp;đ
                   </td>
                 </tr>
               ))}
@@ -134,18 +134,17 @@ const ShoppingCart = () => {
           <div className="lg:hidden mt-6 border-t border-gray-200 pt-4">
             <div className="flex justify-between mb-2">
               <span>Tạm tính:</span>
-              <span className="font-medium">{calculateTotal().toLocaleString()} đ</span>
+              <span className="font-medium whitespace-nowrap">{calculateTotal().toLocaleString()}&nbsp;đ</span>
             </div>
             <div className="flex justify-between mb-2">
               <span>Giảm giá:</span>
-              <span>-0 đ</span>
+              <span className="whitespace-nowrap">-0&nbsp;đ</span>
             </div>
             <div className="flex justify-between mb-4 font-medium">
               <span>Tổng cộng:</span>
-              <span className="text-orange-500">{calculateTotal().toLocaleString()} đ</span>
+              <span className="text-orange-500 whitespace-nowrap">{calculateTotal().toLocaleString()}&nbsp;đ</span>
             </div>
             <div className="text-sm text-gray-500 mb-4 text-right">(Đã bao gồm VAT)</div>
-
           </div>
 
           {/* Continue Shopping button */}
@@ -166,15 +165,15 @@ const ShoppingCart = () => {
             <div className="space-y-3 mb-6">
               <div className="flex justify-between">
                 <span>Tạm tính:</span>
-                <span className="font-medium">{calculateTotal().toLocaleString()} đ</span>
+                <span className="font-medium whitespace-nowrap">{calculateTotal().toLocaleString()}&nbsp;đ</span>
               </div>
               <div className="flex justify-between">
                 <span>Giảm giá:</span>
-                <span>-0 đ</span>
+                <span className="whitespace-nowrap">-0&nbsp;đ</span>
               </div>
               <div className="border-t border-gray-200 pt-3 flex justify-between font-medium">
                 <span>Tổng cộng:</span>
-                <span className="text-orange-500 text-xl">{calculateTotal().toLocaleString()} đ</span>
+                <span className="text-orange-500 text-xl whitespace-nowrap">{calculateTotal().toLocaleString()}&nbsp;đ</span>
               </div>
               <div className="text-sm text-gray-500 text-right">(Đã bao gồm VAT)</div>
             </div>
