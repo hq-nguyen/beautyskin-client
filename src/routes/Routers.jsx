@@ -30,6 +30,7 @@ import AddCategory from "../pages/Admin/ManageCategory/AddCategory";
 import Promotion from "../pages/PromotionManagement/promotion";
 import ShoppingCart from "../pages/ShoppingCart/Cart";
 import BlogDetail from "../pages/Blog/BlogDetail";
+import CheckoutPage from "../pages/Checkout/checkout";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -81,6 +82,10 @@ const Routers = () => {
           path: '/register',
           element: <Register />,
         },
+        {
+          path: "checkout",
+          element: <CheckoutPage />,
+        }
 
       ],
     },
@@ -119,7 +124,8 @@ const Routers = () => {
         {
           path: "change-password",
           element: <ChangePassword />,
-        }
+        },
+        
       ],
     },
     {
