@@ -20,6 +20,12 @@ const ChangePasswordForm = () => {
     confirmPassword: ''
   });
 
+  const [status, setStatus] = useState({
+    loading: false, 
+    error: '',
+    success:''
+  })
+
   const validatePasswords = () => {
     let isValid = true;
     const newErrors = {
@@ -27,7 +33,6 @@ const ChangePasswordForm = () => {
       confirmPassword: ''
     };
 
-    // Kiểm tra mật khẩu mới và mật khẩu xác nhận
     if (formData.newPassword !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp với mật khẩu mới';
       isValid = false;
@@ -50,7 +55,6 @@ const ChangePasswordForm = () => {
       [name]: value
     }));
     
-    // Clear errors when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -59,12 +63,53 @@ const ChangePasswordForm = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (validatePasswords()) {
-      // Xử lý logic đổi mật khẩu ở đây
-      console.log('Form submitted:', formData);
+      setStatus({
+        loading: true,
+        error: '',
+        success: ''
+      })
+
+      try {
+        const response = await fetch('https://67825c10c51d092c3dcf2d8d.mockapi.io/chage-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type' : 'application/json',
+          },
+          body: JSON.stringify({
+            oldPassword: formData.oldPassword,
+            newPassword: formData.newPassword,
+            confirmNewPassword: formData.confirmPassword
+
+          })
+        })
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || 'Có lỗi xảy ra khi đổi mật khẩu')
+        }
+
+        setStatus({
+          loading: false,
+          error: '',
+          success: 'Thay đổi mật khẩu thành công'
+        })
+
+        setFormData({
+          oldPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        })
+      } catch (error) {
+        setStatus({
+          loading: false,
+          error: error.message,
+          success: ''
+        });
+      }
     }
   };
 
@@ -173,9 +218,14 @@ const ChangePasswordForm = () => {
 
         <button
           type="submit"
-          className="w-full bg-[#8E0000] text-white py-2 px-4 rounded-md hover:bg-[#6E0000] transition-colors duration-200"
+          disabled={status.loading}
+          className={`w-full bg-[#d90429] text-white py-2 px-4 rounded-md transition-colors duration-200 ${
+            status.loading 
+              ? 'opacity-50 cursor-not-allowed' 
+              : 'hover:bg-opacity-80'
+          }`}
         >
-          Đổi mật khẩu
+          {status.loading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
         </button>
       </form>
     </div>
