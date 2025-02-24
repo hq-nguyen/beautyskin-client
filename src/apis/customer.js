@@ -14,8 +14,6 @@ const axiosInstance = axios.create({
     }
 });
 
-
-
 // Fetch all staffs
 export const fetchCustomer = async () => {
     try {

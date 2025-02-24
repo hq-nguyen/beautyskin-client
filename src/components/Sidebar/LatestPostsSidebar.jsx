@@ -10,7 +10,7 @@ const LatestPostsSidebar = () => {
     useEffect(() => {
         const fetchLatestPosts = async () => {
             try {
-                const posts = await fetchBlogs(); 
+                const posts = await fetchBlogs();
 
                 const sortedPosts = posts.sort((a, b) => new Date(b.publish) - new Date(a.publish));
 
@@ -42,6 +42,7 @@ const LatestPostsSidebar = () => {
                         <Link to={`/blog/${post.slug}`} className="text-black hover:underline">
                             {post.title}
                         </Link>
+                        <hr className='mt-2'/>
                     </li>
                 ))}
             </ul>
