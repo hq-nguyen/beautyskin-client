@@ -1,22 +1,28 @@
 import { useState } from 'react';
-import { Menu, Bell, Search, ChevronDown, Settings, LogOut } from 'lucide-react';
+import PropTypes from 'prop-types';
+import { Menu, Bell, ChevronDown, Settings, LogOut } from 'lucide-react';
+// import { Search} from 'lucide-react';
 import { admin } from '../../assets/admin_assets/admin'
 import { Link } from 'react-router-dom';
 
 
-const AdminHeader = ({ onMobileMenuClick }) => {
+function AdminHeader({
+  sidebarOpen,
+  setSidebarOpen,
+}) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 bg-gray-50 md:border-b lg:border-none border-gray-200">
+    <header className="sticky top-0 z-20 bg-gray-50 md:border-b lg:border-none border-gray-200">
       {/* Left Section - Mobile Menu Button */}
       <div className='px-4 sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between h-16 lg:border-b border-gray-200'>
           <div className="lg:hidden">
             <button
-              onClick={onMobileMenuClick}
+              onClick={(e) => {e.stopPropagation(); setSidebarOpen(!sidebarOpen);} }
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label="Toggle mobile menu"
+              aria-controls='sidebar'
+              aria-expanded={sidebarOpen}
             >
               <Menu size={24} />
             </button>
@@ -25,12 +31,12 @@ const AdminHeader = ({ onMobileMenuClick }) => {
           {/* Right Section - Search, Notifications, Profile */}
           <div className="flex items-center space-x-4 ml-auto">
             {/* Search Button */}
-            <button
+            {/* <button
               className="p-2 rounded-lg hover:bg-gray-200 transition-colors text-gray-500"
               aria-label="Search"
             >
               <Search size={20} />
-            </button>
+            </button> */}
 
             {/* Notifications - Click to show */}
             <div className="relative">
@@ -107,6 +113,11 @@ const AdminHeader = ({ onMobileMenuClick }) => {
       </div>
     </header>
   );
+};
+
+AdminHeader.propTypes = {
+  sidebarOpen: PropTypes.bool.isRequired,
+  setSidebarOpen: PropTypes.func.isRequired,
 };
 
 export default AdminHeader;
