@@ -2,6 +2,8 @@
 // import React from 'react'
 import { Link } from 'react-router-dom';
 import { assets } from '../../assets/frontend_assets/assets';
+import { FaMapLocation } from "react-icons/fa6";
+
 
 const Footer = () => {
     return (
@@ -71,7 +73,22 @@ const Footer = () => {
                                 </a>
                             </div>
                             <p className='text-primary italic cursor-pointer'>beautyskin@gmail.com</p>
-                            <p className='text-gray-600'>Quận 9, Đại học FPT</p>
+
+                            <div className='flex items-center mb-4'>
+                                <FaMapLocation className='w-4 h-4 mr-4' />
+                                <p className='text-gray-600 text-sm'>Quận 9, Đại học FPT</p>
+                            </div>
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.6099415304775!2d106.80730807428841!3d10.841132857998375!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752731176b07b1%3A0xb752b24b379bae5e!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBGUFQgVFAuIEhDTQ!5e0!3m2!1svi!2sus!4v1740560712448!5m2!1svi!2sus"
+                                width="100%"
+                                height="150"
+                                style={{ border: 0 }}
+                                allowFullScreen=""
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                className="rounded-md"
+                            ></iframe>  
+
                         </LinkGroup>
 
                         <div className="w-full px-4 sm:w-2/3 lg:w-3/12">
