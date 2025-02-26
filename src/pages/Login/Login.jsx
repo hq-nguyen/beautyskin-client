@@ -59,8 +59,8 @@ const Login = () => {
 
       console.log(roleEnum);
 
-      if (roleEnum === 'ADMIN') {
-        navigate('/dashboard')
+      if (roleEnum === 'MANAGER') {
+        navigate('/admin')
       } else if (roleEnum === 'USER') {
         navigate('/')
       }

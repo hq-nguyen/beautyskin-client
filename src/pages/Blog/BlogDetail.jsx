@@ -14,10 +14,10 @@ const BlogDetail = () => {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const response = await api.get(`/Blog/?slug=${slug}`);
-                // const response = await api.get(`/blog/get?slug=${slug}`);
+                // const response = await api.get(`/Blog/?slug=${slug}`);
+                const response = await api.get(`/blog/getByDeleteIsFalse?slug=${slug}`);
                 if (response.data && response.data.length > 0) {
-                    setPost(response.data[0]);
+                    setPost(response.data[1]);
                 } else {
                     setError('Post not found');
                 }
@@ -64,7 +64,7 @@ const BlogDetail = () => {
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">{title}</h1>
                 <p className="text-gray-600 mb-4">Ngày đăng: {formatDate(publish)}</p>
                 <p className="text-gray-600 mb-4">Tags: {tag}</p>
-                {/* <p className='mb-4'>Tác giả: {author}</p> */}
+                <p className='mb-4'>Tác giả: {author}</p>
 
                 <img src={image} alt={title} className="w-full rounded-lg mb-6" />
 
