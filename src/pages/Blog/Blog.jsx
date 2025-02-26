@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 // import { Link } from 'react-router-dom';
-import { fetchBlogs } from '../../apis/blog';
+import { fetchBlogsIsFalse } from '../../apis/blog';
 import BlogCard from '../../components/Card/BlogCard';
 import LatestPostsSidebar from '../../components/Sidebar/LatestPostsSidebar';
 
@@ -11,7 +11,7 @@ const Blog = () => {
   useEffect(() => {
     const getBlogs = async () => {
       try {
-        const data = await fetchBlogs();
+        const data = await fetchBlogsIsFalse();
         setPosts(data);
       } catch (error) {
         console.error("Error fetching blog:", error);
