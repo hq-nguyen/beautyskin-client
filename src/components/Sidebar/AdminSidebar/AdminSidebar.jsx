@@ -1,15 +1,58 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
 import { MdOutlineDashboard, MdOutlineCategory } from "react-icons/md";
 import { BiUser, BiPackage, BiCart, BiBell, BiCog } from "react-icons/bi"; // More comprehensive icon set
 import { assets } from '../../../assets/frontend_assets/assets';
 import SidebarLinkGroup from './SidebarLinkGroup';
+import PropTypes from 'prop-types';
 
-const AdminSidebar = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+function AdminSidebar({
+  sidebarOpen,
+  setSidebarOpen,
+}) {
+
   const location = useLocation();
   const { pathname } = location;
+
+  const trigger = useRef(null);
+  const sidebar = useRef(null);
+
+  const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
+  const [sidebarExpanded, setSidebarExpanded] = useState(
+    JSON.parse(localStorage.getItem('sidebar-expanded')) || false
+  );
+
+  // const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  // close sidebar when click outside
+  useEffect(() => {
+    const clickHandler = ({ target }) => {
+      if (!sidebar.current || !trigger.current) return;
+      if (!sidebarOpen || sidebar.current.contains(target) || trigger.current.contains(target)) return;
+      setSidebarOpen(false);
+    };
+    document.addEventListener("click", clickHandler);
+    return () => document.removeEventListener("click", clickHandler);
+  });
+
+  // close if the esc key is pressed
+  useEffect(() => {
+    const keyHandler = ({ keyCode }) => {
+      if (!sidebarOpen || keyCode !== 27) return;
+      setSidebarOpen(false);
+    };
+    document.addEventListener("keydown", keyHandler);
+    return () => document.removeEventListener("keydown", keyHandler);
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sidebar-expanded', sidebarExpanded);
+    if (sidebarExpanded) {
+      document.querySelector('body').classList.add('sidebar-expanded');
+    } else {
+      document.querySelector('body').classList.remove('sidebar-expanded');
+    }
+  }, [sidebarExpanded]);
 
   const menuItems = [
     {
@@ -90,42 +133,40 @@ const AdminSidebar = () => {
 
   return (
     <div className='min-w-fit'>
+
+      {/* Sidebar backdrop (mobile only) */}
+      <div
+        className={`fixed inset-0 bg-gray-900/30 z-40 lg:hidden lg:z-auto transition-opacity duration-200 ${sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        aria-hidden="true"
+      ></div>
+
       <div
         id='sidebar'
+        ref={sidebar}
         className={`flex lg:flex! flex-col absolute z-40 top-0 left-0 lg:static lg:left-auto lg:top-auto
                     lg:translate-x-0 h-[100dvh] overflow-y-auto scrollbar-hide
                     w-64 lg:w-20 2xl:w-64 shrink-0 bg-white transition-all duration-200 ease-in-out p-4
-                    ${isSidebarOpen ? "translate-x-0 lg:!w-64" : "-translate-x-64"} `}
+                    ${sidebarOpen ? "translate-x-0 lg:!w-64" : "-translate-x-64"} `}
       >
         {/* Header with toggle button and logo */}
         <div className="flex items-center shrink-0 justify-between mb-4">
-          {isSidebarOpen && (
+          {sidebarOpen && (
             <Link to={'/'} className="ml-2 transition-opacity duration-200">
               <img className='w-12' src={assets.icon} alt="Logo" />
             </Link>
           )}
           <button
-            onClick={() => {
-              setIsSidebarOpen(!isSidebarOpen);
-              // Collapse all sections when the sidebar is collapsed
-              if (isSidebarOpen) {
-                menuItems.forEach(item => {
-                  if (item.subItems) {
-                    item.collapsed = true; // Add or modify a "collapsed" property
-                  }
-                });
-              } else {
-                menuItems.forEach(item => {
-                  if (item.subItems) {
-                    item.collapsed = false;
-                  }
-                });
-              }
-            }}
+            ref={trigger}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            // aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-controls="sidebar"
+            aria-expanded={sidebarOpen}
+            onClick={() => { setSidebarOpen(!sidebarOpen); }
+          }
+
           >
-            {isSidebarOpen ? <LuArrowLeftToLine className='text-gray-500' size={20} /> : <LuArrowRightToLine className='ml-2 text-gray-500' size={20} />}
+            {sidebarOpen ? <LuArrowLeftToLine className='text-gray-500' size={20} /> : <LuArrowRightToLine className='ml-2 text-gray-500' size={20} />}
           </button>
         </div>
 
@@ -142,12 +183,12 @@ const AdminSidebar = () => {
                       onClick={(e) => {
                         e.preventDefault();
                         handleClick();
-                        setIsSidebarOpen(true);
+                        setSidebarExpanded(true);
                       }}
                     >
                       <div className="flex items-center">
                         {item.icon}
-                        <span className={`ml-3 text-sm font-medium transition-opacity duration-200 ${isSidebarOpen ? "opacity-100" : "opacity-0"}`}>
+                        <span className={`ml-3 text-sm font-medium transition-opacity duration-200 ${sidebarOpen ? "opacity-100" : "opacity-0"}`}>
                           {item.label}
                         </span>
                       </div>
@@ -160,7 +201,7 @@ const AdminSidebar = () => {
                     </a>
 
                     {/* subitem */}
-                    <div className={`${!isSidebarOpen ? "lg:hidden" : "lg:block"}`}>
+                    <div className={`${!sidebarOpen ? "lg:hidden" : "lg:block"}`}>
                       <ul className={`pl-6 mt-1  ${!open && "hidden"}`}>
                         {item.subItems.map((subItem) => (
                           <li className="mb-1 last:mb-0" key={subItem.path}>
@@ -170,7 +211,7 @@ const AdminSidebar = () => {
                                 `block transition duration-150 truncate py-1 hover:text-violet-500 ${isActive ? "text-violet-500 font-semibold" : "text-gray-500 hover:text-gray-700"}`
                               }
                             >
-                              <span className={`text-sm font-medium transition-opacity duration-200 ${isSidebarOpen ? "opacity-100" : "opacity-0"}`}>{subItem.label}</span>
+                              <span className={`text-sm font-medium transition-opacity duration-200 ${sidebarOpen ? "opacity-100" : "opacity-0"}`}>{subItem.label}</span>
                             </NavLink>
                           </li>
                         ))}
@@ -190,7 +231,7 @@ const AdminSidebar = () => {
                 >
                   <div className='flex items-center'>
                     {item.icon}
-                    <span className={`ml-3 text-sm font-medium transition-opacity duration-200 ${isSidebarOpen ? "opacity-100" : "opacity-0"}`}>{item.label}</span>
+                    <span className={`ml-3 text-sm font-medium transition-opacity duration-200 ${sidebarOpen ? "opacity-100" : "opacity-0"}`}>{item.label}</span>
                     {item.badge && (
                       <span className="ml-2 text-xs font-semibold text-white bg-violet-500 rounded-full px-2 py-0.5">{item.badge}</span>
                     )}
@@ -203,6 +244,11 @@ const AdminSidebar = () => {
       </div>
     </div>
   );
+};
+
+AdminSidebar.propTypes = {
+  sidebarOpen: PropTypes.bool.isRequired,
+  setSidebarOpen: PropTypes.func.isRequired,
 };
 
 export default AdminSidebar;

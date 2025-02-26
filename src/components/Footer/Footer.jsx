@@ -116,7 +116,7 @@ const Footer = () => {
                 {/* <hr className="my-4 border-blueGray-300" /> */}
                 <div className="flex flex-wrap items-center md:justify-between justify-center bg-primary">
                     <div className="w-full md:w-4/12 mx-auto text-center">
-                        <div className="w-full text-sm text-gray-500 font-semibold py-1 text-white">
+                        <div className="w-full text-sm font-semibold py-1 text-white">
                             BeautySkin © <span id="get-current-year">2025. </span>Thiết kế bởi BeautySkin Team.
                         </div>
                     </div>
