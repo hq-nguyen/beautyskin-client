@@ -31,7 +31,6 @@ import CheckoutPage from "../pages/Checkout/checkout";
 import Address from "../pages/Address/ShippingAddress/Address";
 import AddAddress from "../pages/Address/AddressForm/AddressForm";
 import AddressDefault from "../pages/Address/AddressManagement";
-
 const Routers = () => {
   const routing = useRoutes([
     {
@@ -63,7 +62,7 @@ const Routers = () => {
           element: <News />,
         },
         {
-          path: '/test',
+          path: '/test-skin',
           element: <TestSkinType />,
         },
         {
@@ -86,7 +85,6 @@ const Routers = () => {
           path: "checkout",
           element: <CheckoutPage />,
         }
-
       ],
     },
     {
