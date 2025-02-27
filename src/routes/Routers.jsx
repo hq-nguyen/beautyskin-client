@@ -31,6 +31,8 @@ import CheckoutPage from "../pages/Checkout/checkout";
 import Address from "../pages/Address/ShippingAddress/Address";
 import AddAddress from "../pages/Address/AddressForm/AddressForm";
 import AddressDefault from "../pages/Address/AddressManagement";
+import NotFoundPage from "../pages/NotFound/NotFoundPage";
+
 const Routers = () => {
   const routing = useRoutes([
     {
@@ -84,6 +86,10 @@ const Routers = () => {
         {
           path: "checkout",
           element: <CheckoutPage />,
+        },
+        {
+          path: '*',
+          element: <NotFoundPage />,
         }
       ],
     },
@@ -123,7 +129,7 @@ const Routers = () => {
           path: "change-password",
           element: <ChangePassword />,
         },
-        
+
       ],
     },
     {
@@ -168,10 +174,6 @@ const Routers = () => {
         },
 
       ],
-    },
-    {
-      path: '*',
-      element: <h1>404 Not Found</h1>
     }
   ]);
 

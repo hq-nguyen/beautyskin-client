@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { fetchBlogs } from '../../apis/blog';
+// import { Link } from 'react-router-dom';
+import { fetchBlogsIsFalse } from '../../apis/blog';
 import BlogCard from '../../components/Card/BlogCard';
 import LatestPostsSidebar from '../../components/Sidebar/LatestPostsSidebar';
 
@@ -11,7 +11,7 @@ const Blog = () => {
   useEffect(() => {
     const getBlogs = async () => {
       try {
-        const data = await fetchBlogs();
+        const data = await fetchBlogsIsFalse();
         setPosts(data);
       } catch (error) {
         console.error("Error fetching blog:", error);
@@ -23,7 +23,7 @@ const Blog = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center py-8">Loading posts...</div>;
+    return <div className="text-center py-8">Đang tải blog...</div>;
   }
 
   return (
@@ -36,7 +36,7 @@ const Blog = () => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No posts yet.</p>
+          <p className="text-gray-500">Chưa có bài viết nào .</p>
         )}
       </main>
 
