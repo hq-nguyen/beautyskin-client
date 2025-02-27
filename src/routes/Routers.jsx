@@ -64,7 +64,7 @@ const Routers = () => {
           element: <News />,
         },
         {
-          path: '/test',
+          path: '/test-skin',
           element: <TestSkinType />,
         },
         {
@@ -91,7 +91,6 @@ const Routers = () => {
           path: '*',
           element: <NotFoundPage />,
         }
-
       ],
     },
     {
