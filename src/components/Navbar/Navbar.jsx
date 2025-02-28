@@ -15,23 +15,23 @@ const Navbar = () => {
 
         </Link>
         <ul className="hidden sm:flex gap-5 text-sm text-gray-700">
-          <NavLink to='/about' className='hover:text-rose-600 duration-300 flex flex-col items-center gap-1'>
+          <NavLink to='/about' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
             <p>Giới thiệu</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
           </NavLink>
-          <NavLink to='/shop' className='hover:text-rose-600 duration-300 flex flex-col items-center gap-1'>
+          <NavLink to='/shop' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
             <p>Mua hàng</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
           </NavLink>
-          <NavLink to='/blog' className='hover:text-rose-600 duration-300 flex flex-col items-center gap-1'>
+          <NavLink to='/blog' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
             <p>Blog</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
           </NavLink>
-          <NavLink to='/news' className='hover:text-rose-600 duration-300 flex flex-col items-center gap-1'>
+          <NavLink to='/news' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
             <p>Tin tức</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
           </NavLink>
-          <NavLink to='/test' className='hover:text-rose-600 duration-300 flex flex-col items-center gap-1'>
+          <NavLink to='/test' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
             <p>Trắc nghiệm loại da</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
           </NavLink>
@@ -46,8 +46,8 @@ const Navbar = () => {
             <img className='w-5 cursor-pointer' src={assets.profile_icon} alt="" />
             <div className='absolute z-100 hidden right-0 pt-4 group-hover:block'>
               <div className='dropdown-menu-box flex flex-col gap-2 w-36 py-3 px-5 bg-white text-gray-500 rounded'>
-                <Link to='/login' className='login-section cursor-pointer hover:text-white'>Đăng nhập</Link>
-                <Link to='/register' className='register-section cursor-pointer hover:text-white'>Đăng ký</Link>
+                <Link to='/login' className='login-section cursor-pointer hover:text-white hover:bg-rose-500 duration-150'>Đăng nhập</Link>
+                <Link to='/register' className='register-section cursor-pointer hover:text-white hover:bg-rose-500 duration-150'>Đăng ký</Link>
               </div>
             </div>
           </div>

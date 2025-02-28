@@ -86,7 +86,7 @@ const FAQSection = () => {
                                 className="border-b border-gray-200 overflow-hidden"
                             >
                                 <button
-                                    className={`w-full text-left p-2 flex justify-between items-center transition-all duration-200 border-b-2 ${activeIndexes.includes(index) ? "border-pink-500" : "border-transparent"
+                                    className={`w-full text-left p-2 flex justify-between items-center transition-all duration-200 border-b-2 ${activeIndexes.includes(index) ? "border-rose-400" : "border-transparent"
                                         }`}
                                     onClick={() => toggleQuestion(index)}
                                     aria-expanded={activeIndexes.includes(index)}

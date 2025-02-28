@@ -4,11 +4,10 @@ import { Link } from 'react-router-dom';
 import { assets } from '../../assets/frontend_assets/assets';
 import { FaMapLocation } from "react-icons/fa6";
 
-
 const Footer = () => {
     return (
         <>
-            <footer className="relative z-10 border-t-[2px] mt-[2px] dark:bg-dark lg:pt-[40px]">
+            <footer className="relative z-10 border-t-[2px] lg:pt-[40px]">
                 <div className="container flex mx-auto px-4 sm:px-[5vw]">
                     <div className="-mx-4 flex flex-wrap">
                         <div className="w-full px-4 sm:w-2/3 lg:w-3/12">
@@ -27,7 +26,7 @@ const Footer = () => {
                                     <span className="mr-3 text-primary">
                                         <img className='w-4' src={assets.phone} alt="" />
                                     </span>
-                                    <span className='text-black'>+012 (345) 678 99</span>
+                                    <span className='text-black'>(+84) 345 678 999</span>
                                 </p>
                             </div>
                         </div>
@@ -46,7 +45,7 @@ const Footer = () => {
                             <LinkMove link="#" label="Liên hệ" />
                         </LinkGroup>
                         <LinkGroup header="THEO DÕI & LIÊN HỆ">
-                            <div className="mb-6 flex items-center">
+                            <div className="flex items-center">
                                 <a
                                     href={'https://www.facebook.com/'}
                                     className="mr-3 flex h-8 w-8 items-center justify-center rounded-full opacity-50 hover:opacity-100 transition-opacity sm:mr-4 lg:mr-3 xl:mr-4"
@@ -132,7 +131,7 @@ const LinkGroup = ({ children, header }) => {
         <>
             <div className="w-full px-4 sm:w-1/2 lg:w-2/12">
                 <div className="mb-10 w-full">
-                    <h4 className="mb-9 text-sm font-bold text-primary">
+                    <h4 className="mb-4 text-sm font-bold text-primary">
                         {header}
                     </h4>
                     <ul className="space-y-3">{children}</ul>
@@ -147,7 +146,7 @@ const LinkMove = ({ link, label }) => {
         <li>
             <Link
                 to={link}
-                className="inline-block font-semibold text-sm hover:text-pink-500"
+                className="inline-block font-semibold text-sm hover:text-rose-600"
             >
                 {label}
             </Link>

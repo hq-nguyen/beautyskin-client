@@ -56,7 +56,7 @@ const ProductHighlights = () => {
         </div>
         {/* Button for large screens */}
         <Link to="/shop" className="hidden lg:block">
-          <button className="text-sm font-semibold px-4 py-2 bg-gray-600 text-white rounded-full shadow hover:bg-pink-600 transition-colors duration-300">
+          <button className="text-sm px-4 py-2 bg-gray-50 hover:text-white rounded-full border border-rose-600 hover:bg-rose-600 transition-colors duration-150">
             Xem tất cả sản phẩm
           </button>
         </Link>
