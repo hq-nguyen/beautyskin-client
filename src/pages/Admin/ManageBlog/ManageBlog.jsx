@@ -1,0 +1,164 @@
+import { useState, useEffect } from 'react';
+import { Button, Popconfirm, Space, Table, Tag } from 'antd';
+import { deleteBlog, fetchBlogs } from '../../../apis/blog';
+import dayjs from 'dayjs';
+import { MdOutlineDeleteOutline } from 'react-icons/md';
+import { CiEdit } from 'react-icons/ci';
+import BlogModel from './BlogModel';
+import { toast } from 'react-toastify';
+
+const ManageBlog = () => {
+    const [blog, setBlog] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
+    const [initialValues, setInitialValues] = useState({});
+
+    const handleOpenModel = () => {
+        setIsOpen(true);
+    };
+
+    const handleCloseModel = () => {
+        setIsOpen(false);
+        setInitialValues(null);
+    };
+
+    const handleSubmit = (values) => {
+        console.log(values);
+        setIsOpen(false);
+        setInitialValues(null);
+        fetchBlogs();
+    };
+
+    const handleEdit = (record) => {
+        setInitialValues(record);
+        handleOpenModel();
+    }
+
+    const handleDelete = async (id) => {
+        const response = await deleteBlog(id);
+        if (response) {
+            toast.success('Xóa bài viết thành công');
+            fetchBlogs();
+        }
+    }
+
+    useEffect(() => {
+        const getBlog = async () => {
+            try {
+                const data = await fetchBlogs();
+                setBlog(data);
+            } catch (error) {
+                console.error("Error fetching blogs:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        getBlog();
+    }, []);
+
+    const columns = [
+        {
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
+        },
+
+        {
+            title: 'Tiêu đề',
+            dataIndex: 'title',
+            key: 'title',
+            render: (title) => (
+                <span title={title}>{title.length > 16 ? title.substring(0, 16) + '...' : title}</span>
+            ),
+        },
+        {
+            title: 'Ảnh nền',
+            dataIndex: 'image',
+            key: 'image',
+            render: (image) => (
+                <img src={image} alt="blog" className="w-20 h-20 object-cover" />
+            ),
+        },
+        {
+            title: 'Ngày đăng',
+            dataIndex: 'publish',
+            key: 'publish',
+            sorter: (a, b) => dayjs(a.publish).valueOf() - dayjs(b.publish).valueOf(),
+            sortDirections: ['ascend', 'descend'],
+            render: (publish) => dayjs(publish).format('DD-MM-YYYY'),
+        },
+        {
+            title: 'Tags',
+            dataIndex: 'tag',
+            key: 'tag',
+            render: (tag) => (
+                <Tag color="blue">{tag}</Tag>
+            )
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'deleted',
+            key: 'deleted',
+            render: (deleted) => (
+                <Tag color={deleted ? 'red' : 'green'}>
+                    {deleted ? 'Không hiển thị' : 'Đang hiển thị'}
+                </Tag>
+            )
+        },
+        {
+            title: 'Hành động',
+            key: 'action',
+            render: (_, record) => (
+                <Space size="middle">
+                    <Button onClick={() => handleEdit(record)} icon={<CiEdit className="text-blue-500 w-5 h-5" />} />
+                    <Popconfirm
+                        title="Bạn có chắc chắn muốn xóa bài viết này không?"
+                        onConfirm={() => handleDelete(record.id)}
+                        okText="Có"
+                        cancelText="Không"
+                    >
+                    <Button onClick={() => handleDelete(record)} icon={<MdOutlineDeleteOutline className="text-red-500 w-5 h-5" />} />
+                    </Popconfirm>
+                </Space>
+            ),
+        },
+    ];
+
+    const onChange = (pagination, filters, sorter, extra) => {
+        console.log('params', pagination, filters, sorter, extra);
+    };
+
+    return (
+        <div className='p-4'>
+            {/* Header */}
+            <div className='flex justify-between items-center mb-4'>
+                <h1 className="text-2xl font-bold mb-4 text-black">Danh sách bài viết</h1>
+                {/* Button to Add New Blog */}
+                <Button type="primary" onClick={handleOpenModel}>Thêm bài viết</Button>
+            </div>
+
+            {loading ? (
+                <div>Loading...</div>
+            ) : (
+                <Table
+                    columns={columns}
+                    dataSource={blog}
+                    onChange={onChange}
+                    rowKey="id"
+                    pagination={{ position: ['bottomRight'] }}
+                    rowClassName={(_, index) => (index % 2 === 0 ? "bg-gray-100" : "bg-white")}
+                    className="w-full border rounded-lg shadow-md"
+                />
+            )}
+
+            <BlogModel
+                isOpen={isOpen}
+                onClose={handleCloseModel} // Pass handleCloseModel as onClose
+                onSubmit={handleSubmit}
+                initialValues={initialValues}
+            />
+        </div>
+    );
+};
+
+export default ManageBlog;

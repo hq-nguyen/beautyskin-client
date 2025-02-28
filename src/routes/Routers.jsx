@@ -32,6 +32,7 @@ import Address from "../pages/Address/ShippingAddress/Address";
 import AddAddress from "../pages/Address/AddressForm/AddressForm";
 import AddressDefault from "../pages/Address/AddressManagement";
 import NotFoundPage from "../pages/NotFound/NotFoundPage";
+import ManageBlog from "../pages/Admin/ManageBlog/ManageBlog";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -172,6 +173,10 @@ const Routers = () => {
           path: "add-category",
           element: <AddCategory />,
         },
+        {
+          path: "blog",
+          element: <ManageBlog />,
+        }
 
       ],
     }

@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-// import api from '../../config/axios';
 import api from '../../apis/blog';
 import LatestPostsSidebar from '../../components/Sidebar/LatestPostsSidebar';
+import { formatDate } from '../../utils/format';
 
 const BlogDetail = () => {
     const { slug } = useParams();
-    // console.log(slug);
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,12 +13,17 @@ const BlogDetail = () => {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                // const response = await api.get(`/Blog/?slug=${slug}`);
                 const response = await api.get(`/blog/getByDeleteIsFalse?slug=${slug}`);
                 if (response.data && response.data.length > 0) {
-                    setPost(response.data[1]);
+                    // Ensure you're getting the correct post based on the slug
+                    const post = response.data.find((item) => item.slug === slug);
+                    if (post) {
+                        setPost(post);
+                    } else {
+                        setError('Không tìm thấy bài viết.');
+                    }
                 } else {
-                    setError('Post not found');
+                    setError('Không tìm thấy bài viết.');
                 }
             } catch (err) {
                 console.error("Error fetching post:", err);
@@ -27,14 +31,13 @@ const BlogDetail = () => {
             } finally {
                 setLoading(false);
             }
-
         };
 
         fetchPost();
-    }, [slug]);
+    }, [slug]); // Update the dependency array to include slug
 
     if (loading) {
-        return <div className="text-center py-8">Loading post...</div>;
+        return <div className="text-center py-8">Đang tải bài viết...</div>;
     }
 
     if (error) {
@@ -42,24 +45,14 @@ const BlogDetail = () => {
     }
 
     if (!post) {
-        return <div className="text-center py-8">Post not found.</div>;
+        return <div className="text-center py-8">Không tìm thấy bài viết.</div>;
     }
 
     const { title, publish, author, image, content, tag } = post;
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        const options = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        };
-        return date.toLocaleDateString('vi-VN', options);
-    };
-
     return (
         <div className="container mx-auto px-4 py-8 flex flex-col lg:flex-row min-h-screen">
-            {/* Main Content (80% width on large screens, full width on small screens) */}
+            {/* Main Content */}
             <main className="lg:w-4/5 pr-4 mb-6 lg:mb-0">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">{title}</h1>
                 <p className="text-gray-600 mb-4">Ngày đăng: {formatDate(publish)}</p>

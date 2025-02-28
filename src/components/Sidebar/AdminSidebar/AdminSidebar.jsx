@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
 import { MdOutlineDashboard, MdOutlineCategory } from "react-icons/md";
-import { BiUser, BiPackage, BiCart, BiBell, BiCog } from "react-icons/bi"; // More comprehensive icon set
+import { BiUser, BiPackage, BiCart, BiCog } from "react-icons/bi"; // More comprehensive icon set
 import { assets } from '../../../assets/frontend_assets/assets';
+import { TbBrandBlogger } from "react-icons/tb";
 import SidebarLinkGroup from './SidebarLinkGroup';
 import PropTypes from 'prop-types';
 
@@ -17,23 +18,26 @@ function AdminSidebar({
 
   const trigger = useRef(null);
   const sidebar = useRef(null);
+  const iconRef = useRef(null); // Ref to the icon inside the trigger button
 
   const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
+
   const [sidebarExpanded, setSidebarExpanded] = useState(
     JSON.parse(localStorage.getItem('sidebar-expanded')) || false
   );
 
-  // const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  // close sidebar when click outside
+  // close sidebar when click outside, only on small screens
   useEffect(() => {
     const clickHandler = ({ target }) => {
+      if (window.innerWidth >= 1024) return; // Do not close on large screens
+
       if (!sidebar.current || !trigger.current) return;
-      if (!sidebarOpen || sidebar.current.contains(target) || trigger.current.contains(target)) return;
+      if (!sidebarOpen || sidebar.current.contains(target) || trigger.current.contains(target) || (iconRef.current && iconRef.current.contains(target))) return;
       setSidebarOpen(false);
     };
     document.addEventListener("click", clickHandler);
     return () => document.removeEventListener("click", clickHandler);
-  });
+  }, [sidebarOpen, setSidebarOpen]);
 
   // close if the esc key is pressed
   useEffect(() => {
@@ -43,10 +47,10 @@ function AdminSidebar({
     };
     document.addEventListener("keydown", keyHandler);
     return () => document.removeEventListener("keydown", keyHandler);
-  });
+  }, [sidebarOpen, setSidebarOpen]);
 
   useEffect(() => {
-    localStorage.setItem('sidebar-expanded', sidebarExpanded);
+    localStorage.setItem('sidebar-expanded', JSON.stringify(sidebarExpanded));
     if (sidebarExpanded) {
       document.querySelector('body').classList.add('sidebar-expanded');
     } else {
@@ -108,12 +112,11 @@ function AdminSidebar({
       ],
     },
     {
-      id: 'notifications',
-      label: 'Thông báo',
-      icon: <BiBell size={20} />,
-      path: '/notifications',
-      mark: 'notification',
-      badge: 4,
+      id: 'blog',
+      label: 'Danh sách blog',
+      icon: <TbBrandBlogger size={20} />,
+      path: '/admin/blog',
+      mark: 'blog',
     },
     {
       id: 'settings',
@@ -129,9 +132,7 @@ function AdminSidebar({
       return pathname.startsWith(item.path); // Check if the current path starts with the item's path
     }
     return false;
-  };
-
-  return (
+  }; return (
     <div className='min-w-fit'>
 
       {/* Sidebar backdrop (mobile only) */}
@@ -152,7 +153,7 @@ function AdminSidebar({
         {/* Header with toggle button and logo */}
         <div className="flex items-center shrink-0 justify-between mb-4">
           {sidebarOpen && (
-            <Link to={'/'} className="ml-2 transition-opacity duration-200">
+            <Link to={'/admin'} className="ml-2 transition-opacity duration-200">
               <img className='w-12' src={assets.icon} alt="Logo" />
             </Link>
           )}
@@ -162,11 +163,14 @@ function AdminSidebar({
             // aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
             aria-controls="sidebar"
             aria-expanded={sidebarOpen}
-            onClick={() => { setSidebarOpen(!sidebarOpen); }
-          }
+            onClick={() => {
+              setSidebarOpen(!sidebarOpen);
+              setSidebarExpanded(!sidebarExpanded)
+            }
+            }
 
           >
-            {sidebarOpen ? <LuArrowLeftToLine className='text-gray-500' size={20} /> : <LuArrowRightToLine className='ml-2 text-gray-500' size={20} />}
+            {sidebarOpen ? <LuArrowLeftToLine ref={iconRef} className='text-gray-500' size={20} /> : <LuArrowRightToLine ref={iconRef} className='ml-2 text-gray-500' size={20} />}
           </button>
         </div>
 
@@ -183,7 +187,7 @@ function AdminSidebar({
                       onClick={(e) => {
                         e.preventDefault();
                         handleClick();
-                        setSidebarExpanded(true);
+                        setSidebarOpen(true);
                       }}
                     >
                       <div className="flex items-center">
@@ -216,9 +220,7 @@ function AdminSidebar({
                           </li>
                         ))}
                       </ul>
-                    </div>
-
-                  </React.Fragment>
+                    </div> </React.Fragment>
                 )}
               </SidebarLinkGroup>
             ) : (
