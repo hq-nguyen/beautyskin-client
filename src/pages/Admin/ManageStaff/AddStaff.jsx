@@ -10,8 +10,8 @@ const AddStaff = ({ visible, onCancel, onSave }) => {
             // Convert date to string format
             const newStaff = {
                 ...values,
-                dob: values.dob.format('YYYY-MM-DD'),
-                dateOfJoining: values.dateOfJoining.format('YYYY-MM-DD'),
+                dob: values.dob.format('DD-MM-YYYY'),
+                dateOfJoining: values.dateOfJoining.format('DD-MM-YYYY'),
             };
             onSave(newStaff);
             form.resetFields(); // Reset form fields after saving
