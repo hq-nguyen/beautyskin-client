@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { faUser, faIdCard, faLocationDot, faBox, faStar, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faIdCard, faLocationDot, faBox, faStar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { toast } from 'react-toastify';
 
 function AccountSidebar() {
     const location = useLocation();
@@ -19,8 +20,9 @@ function AccountSidebar() {
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
-        sessionStorage.removeItem('authToken')
+        localStorage.removeItem('id');
         navigate('/')
+        toast.success('Đăng xuất thành công')
     }
 
     return (
