@@ -2,7 +2,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope, faLock, faMapMarkerAlt, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import api from "../../config/axios";
@@ -143,11 +142,9 @@ const AccountContent = () => {
     };
 
     const handlePasswordSubmit = async () => {
-        // Reset error and success message
         setError('');
         setSuccessMessage('');
         
-        // Validate password fields
         if (!passwordData.oldPassword) {
             setError('Vui lòng nhập mật khẩu hiện tại');
             return;
@@ -171,16 +168,19 @@ const AccountContent = () => {
         setIsLoading(true);
         
         try {
-            // Get user ID from localStorage
             const userId = localStorage.getItem('id');
             if (!userId) {
                 throw new Error('User ID not found');
             }
-            
-            // Call API to verify old password and update with new password
-            const response = await api.put(`update-password/${userId}`, {
+            const token = localStorage.getItem('token');
+            const response = await api.put(`user/changePassword/${userId}`, {
                 oldPassword: passwordData.oldPassword,
-                newPassword: passwordData.newPassword
+                newPassword: passwordData.newPassword,
+                confirmPassword: passwordData.confirmPassword
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}` // Or whatever format your API expects
+                }
             });
             
             if (response.status !== 200) {
@@ -189,14 +189,12 @@ const AccountContent = () => {
             
             setSuccessMessage('Cập nhật mật khẩu thành công');
             
-            // Reset password fields
             setPasswordData({
                 oldPassword: '',
                 newPassword: '',
                 confirmPassword: ''
             });
             
-            // Close modal after 1.5 seconds
             setTimeout(() => {
                 setIsPasswordModalOpen(false);
                 setSuccessMessage('');
