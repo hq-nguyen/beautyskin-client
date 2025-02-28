@@ -10,7 +10,6 @@ import Login from '../pages/Login/Login';
 import AccountManagement from '../pages/ManageAccount/AccountManagement';
 import InfoUser from '../pages/InfoUser/InfoUser';
 import Order from '../pages/ManageOrder';
-import ChangePassword from '../pages/ChangePassword';
 import UserLayout from '../layout/UserLayout';
 import MainLayout from '../layout/MainLayout'; // Assuming you have this
 import ForgotPassword from "../pages/ForgotPassword";
@@ -125,11 +124,7 @@ const Routers = () => {
         {
           path: "promotion",
           element: <Promotion />,
-        },
-        {
-          path: "change-password",
-          element: <ChangePassword />,
-        },
+        }
 
       ],
     },
