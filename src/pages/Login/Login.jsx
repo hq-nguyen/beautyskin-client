@@ -53,8 +53,9 @@ const Login = () => {
 
     try {
       const response = await api.post('login', newFormData);
-      const { token, roleEnum } = response.data;
+      const { token, roleEnum, id } = response.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('id', id);
       toast.success("Đăng nhập thành công!");
 
       console.log(roleEnum);
