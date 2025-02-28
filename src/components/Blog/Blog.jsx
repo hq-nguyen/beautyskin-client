@@ -48,7 +48,7 @@ const BlogCard = React.memo(({ post }) => {
         <p className='text-[12px] text-gray-700 mb-4'>20/10/2025</p>
         <button
           aria-label="Read more"
-          className="inline-flex items-center border border-black px-2 py-1 rounded-md hover:border-rose-500 hover:bg-rose-500 hover:text-white duration-300"
+          className="inline-flex items-center border border-black px-2 py-1 rounded-md hover:border-rose-600 hover:bg-rose-600 hover:text-white duration-300"
         >
           Đọc Blog
           <FiArrowRight className="ml-2" />
@@ -72,7 +72,7 @@ const Blog = () => {
             </p>
             <Link to={'/blog'}>
               <button
-                className="inline-flex items-center bg-gray-500 text-white px-6 py-3 rounded-full hover:bg-rose-600 transition-colors duration-300"
+                className="inline-flex items-center border border-black bg-gray-50 text-black px-6 py-3 rounded-full hover:bg-rose-600 hover:border-rose-600 hover:text-white transition-colors duration-150"
                 aria-label="Go to blog"
               >
                 Đến trang Blog

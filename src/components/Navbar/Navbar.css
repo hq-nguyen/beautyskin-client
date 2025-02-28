@@ -21,11 +21,6 @@
   padding: 5px 10px;
 }
 
-.login-section:hover, .register-section:hover {
-  background-color: #ECB1C0;
-  transition: 0.3s;
-}
-
 /* small screen */
 .overlay {
   position: fixed;

@@ -80,7 +80,7 @@ const ProductClassification = () => {
             <div className="p-4">
                 <div className="flex justify-center items-center space-x-2 mb-2">
                     <span className="text-sm text-primary">{item.icon}</span>
-                    <h3 className="text-sm font-heading text-foreground">{item.title}</h3>
+                    <p className="text-sm font-heading text-foreground">{item.title}</p>
                 </div>
             </div>
         </Link>

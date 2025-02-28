@@ -88,31 +88,11 @@ const UserProfile = () => {
     if (validateForm()) {
       try {
         var id = localStorage.getItem("id");
-        const token = localStorage.getItem("token");
-  
-        const formattedBirthday = formData.birthday ? `${formData.birthday}T00:00:00` : null;
-  
-        const response = await api.put(`/user/update/${id}`, {
-          fullName: formData.fullName,
-          phone: formData.phone,
-          gender: formData.gender,
-          birthday: formattedBirthday
-        }, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-  
-        setUser({
-          ...formData,
-          birthday: formattedBirthday
-        });
-  
-        setFormData({
-          ...formData,
-          birthday: formattedBirthday
-        });
-  
+        const response = await api.put(`/user/update/${id}`, formData);
+        const updatedUser = response.data;
+
+        setUser(updatedUser);
+        setFormData(updatedUser);
         setIsEditing(false);
         toast.success('Cập nhật thông tin thành công');
       } catch (error) {
@@ -122,7 +102,6 @@ const UserProfile = () => {
       }
     }
   };
-  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -218,7 +197,7 @@ const UserProfile = () => {
                 name="birthday"
                 value={formData.birthday}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${error.birthDay ? "border-red-500" : "border-gray-300"}`}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
               {error.birthday && <p className="text-red-500 text-sm mt-1">{error.birthday}</p>}
             </div>

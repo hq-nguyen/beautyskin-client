@@ -59,7 +59,7 @@ const News = () => {
                 {/* Tag */}
                 <div className="mb-1">
                     <Link>
-                        <span className="text-secondary hover:text-pink-700 hover:bg-gray-100 text-[10px] font-bold bg-mark px-2 py-1 rounded-md">
+                        <span className="text-secondary hover:text-rose-600 hover:bg-gray-100 text-[10px] font-bold bg-mark px-2 py-1 rounded-md">
                             {item.tag}
                         </span>
                     </Link>
@@ -69,7 +69,7 @@ const News = () => {
                 <div className="mb-1">
                     <Link>
                         <h3
-                            className="text-md font-semibold hover:text-pink-700 leading-snug line-clamp-3"
+                            className="text-md font-semibold hover:text-rose-600 leading-snug line-clamp-3"
                             title={item.title}
                         >
                             {item.title}
@@ -101,7 +101,7 @@ const News = () => {
                 </div>
                 {/* Button */}
                 <Link to="/news">
-                    <button className="text-sm px-4 py-2 bg-gray-600 text-white rounded-full shadow hover:bg-pink-600 transition-colors duration-300 sm:static absolute bottom-6 left-1/2 transform -translate-x-1/2 sm:translate-x-0 sm:bottom-auto sm:mt-0">
+                    <button className="text-sm px-4 py-2 bg-gray-50 rounded-full border border-rose-600 hover:text-white hover:bg-rose-600 transition-colors duration-150 sm:static absolute bottom-6 left-1/2 transform -translate-x-1/2 sm:translate-x-0 sm:bottom-auto sm:mt-0">
                         Khám phá thêm
                     </button>
                 </Link>
