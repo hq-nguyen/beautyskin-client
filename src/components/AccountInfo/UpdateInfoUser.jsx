@@ -90,7 +90,8 @@ const UserProfile = () => {
         var id = localStorage.getItem("id");
         const token = localStorage.getItem("token");
   
-        const formattedBirthday = formData.birthday ? `${formData.birthday}T00:00:00` : null;
+        // Kiểm tra xem birthday đã có "T" chưa để tránh thêm 2 lần
+        const formattedBirthday = formData.birthday.includes("T") ? formData.birthday : `${formData.birthday}T00:00:00`;
   
         const response = await api.put(`/user/update/${id}`, {
           fullName: formData.fullName,
@@ -122,6 +123,7 @@ const UserProfile = () => {
       }
     }
   };
+  
   
 
   const handleInputChange = (e) => {
