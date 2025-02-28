@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-// Use environment variable for API URL (if available)
-// const API_BASE_URL = "https://67af2a599e85da2f020fbe91.mockapi.io";
 const API_BASE_URL = 'http://14.225.210.92:8080/api/';
 
 // Create an axios instance
@@ -34,5 +32,35 @@ export const fetchBlogsIsFalse = async () => {
     } catch (error) {
         console.error("Error fetching blogs:", error);
         throw new Error("Failed to fetch blogs. Please try again later.");
+    }
+};
+
+export const addBlog = async (blog) => {
+    try {
+        const response = await api.post('/blog/create', blog);
+        return response.data;
+    } catch (error) {
+        console.error("Error adding blog:", error);
+        throw new Error("Failed to add blog. Please try again later.");
+    }
+};
+
+export const editBlog = async (blog) => {
+    try {
+        const response = await api.put(`/blog/edit/${blog.id}`, blog);
+        return response.data;
+    } catch (error) {
+        console.error("Error editing blog:", error);
+        throw new Error("Failed to edit blog. Please try again later.");
+    }
+};
+
+export const deleteBlog = async (id) => {
+    try {
+        const response = await api.delete(`/blog/delete/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting blog:", error);
+        throw new Error("Failed to delete blog. Please try again later.");
     }
 };

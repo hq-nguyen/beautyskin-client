@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { fetchBlogsIsFalse } from '../../apis/blog';
+import { Link } from 'react-router-dom';
 
 const LatestPostsSidebar = () => {
     const [latestPosts, setLatestPosts] = useState([]);
@@ -24,7 +24,7 @@ const LatestPostsSidebar = () => {
         };
 
         fetchLatestPosts();
-    }, []);
+    }, []); // Ensure this only runs once by keeping the dependency array empty
 
     if (loading) {
         return <div>Loading latest posts...</div>;
