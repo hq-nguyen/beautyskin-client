@@ -8,8 +8,8 @@ const UserProfile = () => {
   const [user, setUser] = useState({
     fullName: "",
     phone: "",
-    gender: "male",
-    birthDay: ""
+    gender: "",
+    birthday: ""
   });
 
   const [formData, setFormData] = useState(user);
@@ -21,28 +21,31 @@ const UserProfile = () => {
         const user = response.data.find(item => item.id == localStorage.getItem('id'));
 
         if (user) {
-          var { fullName, mail, phone, birthday,gender} = user;
-          
-          
-          if(!phone){
+          var { fullName, phone, birthday, gender } = user;
+
+          if (!phone) {
             phone = 'Vui lòng cập nhật';
           }
-          if (!birthday){
-            birthday = ''
-          }
-          if(!gender){
-            gender = 'male'
+          if (!birthday) {
+            birthday = '';
           }
           setUser({
-            fullName: fullName,
+            fullName: fullName || "",
             phone: phone,
-            gender: gender,
-            birthDay: birthday
-          })
+            gender: gender || "",
+            birthday: birthday || ""
+          });
+          
+          // Also update formData to match user data
+          setFormData({
+            fullName: fullName || "",
+            phone: phone,
+            gender: gender || "",
+            birthday: birthday || ""
+          });
         } else {
-          console.log("User not found !.");
+          console.log("User not found!.");
         }
-
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu người dùng:", error);
       }
@@ -68,8 +71,12 @@ const UserProfile = () => {
       newErrors.phone = "Số điện thoại không hợp lệ";
     }
 
-    if (!formData.birthDay) {
-      newErrors.birthDay = "Ngày sinh không được để trống";
+    if (!formData.birthday) {
+      newErrors.birthday = "Ngày sinh không được để trống";
+    }
+
+    if (!formData.gender) {
+      newErrors.gender = "Vui lòng chọn giới tính";
     }
 
     setError(newErrors);
@@ -81,19 +88,41 @@ const UserProfile = () => {
     if (validateForm()) {
       try {
         var id = localStorage.getItem("id");
-        const response = await api.put(`/user/update/${id}`, formData);
-        const updatedUser = response.data;
-
-        setUser(updatedUser);
-        setFormData(updatedUser);
+        const token = localStorage.getItem("token");
+  
+        const formattedBirthday = formData.birthday ? `${formData.birthday}T00:00:00` : null;
+  
+        const response = await api.put(`/user/update/${id}`, {
+          fullName: formData.fullName,
+          phone: formData.phone,
+          gender: formData.gender,
+          birthday: formattedBirthday
+        }, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+  
+        setUser({
+          ...formData,
+          birthday: formattedBirthday
+        });
+  
+        setFormData({
+          ...formData,
+          birthday: formattedBirthday
+        });
+  
         setIsEditing(false);
-        toast.success('Cập nhật thông tin thành công')
+        toast.success('Cập nhật thông tin thành công');
       } catch (error) {
         console.error('Lỗi khi cập nhật thông tin người dùng', error);
+        console.error('Chi tiết lỗi:', error.response?.data);
         toast.error('Có lỗi xảy ra khi cập nhật thông tin');
       }
     }
   };
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -108,6 +137,11 @@ const UserProfile = () => {
         [name]: ""
       }));
     }
+  };
+
+  const displayGender = () => {
+    if (!user.gender) return "Chưa cập nhật";
+    return user.gender === "MALE" ? "Nam" : "Nữ";
   };
 
   return (
@@ -140,8 +174,7 @@ const UserProfile = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${error.phone ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${error.phone ? "border-red-500" : "border-gray-300"}`}
               />
               {error.phone && <p className="text-red-500 text-sm mt-1">{error.phone}</p>}
             </div>
@@ -153,8 +186,8 @@ const UserProfile = () => {
                   <input
                     type="radio"
                     name="gender"
-                    value="male"
-                    checked={formData.gender === "male"}
+                    value="MALE"
+                    checked={formData.gender === "MALE"}
                     onChange={handleInputChange}
                     className="w-4 h-4 text-blue-600"
                   />
@@ -164,29 +197,30 @@ const UserProfile = () => {
                   <input
                     type="radio"
                     name="gender"
-                    value="female"
-                    checked={formData.gender === "female"}
+                    value="FEMALE"
+                    checked={formData.gender === "FEMALE"}
                     onChange={handleInputChange}
                     className="w-4 h-4 text-blue-600"
                   />
                   <span className="ml-2">Nữ</span>
                 </label>
               </div>
+              {error.gender && <p className="text-red-500 text-sm mt-1">{error.gender}</p>}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="birthDay" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="birthday" className="block text-sm font-medium text-gray-700">
                 Ngày sinh
               </label>
               <input
                 type="date"
-                id="birthDay"
-                name="birthDay"
-                value={formData.birthDay}
+                id="birthday"
+                name="birthday"
+                value={formData.birthday}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${error.birthday ? "border-red-500" : "border-gray-300"}`}
               />
-              {error.birthDay && <p className="text-red-500 text-sm mt-1">{error.birthDay}</p>}
+              {error.birthday && <p className="text-red-500 text-sm mt-1">{error.birthday}</p>}
             </div>
 
             <div className="flex space-x-4 pt-4">
@@ -203,10 +237,10 @@ const UserProfile = () => {
         <>
           <h2 className="text-2xl font-bold mb-6">Thông tin người dùng</h2>
           <div className="space-y-4">
-            <div>Họ và tên: {user.fullName}</div>
+            <div>Họ và tên: {user.fullName || "Chưa cập nhật"}</div>
             <div>Số điện thoại: {user.phone}</div>
-            <div>Giới tính: {user.gender === "male" ? "Nam" : "Nữ"}</div>
-            <div>Ngày sinh: {user.birthDay ? new Date(user.birthDay).toLocaleDateString("vi-VN") : ""}</div>
+            <div>Giới tính: {displayGender()}</div>
+            <div>Ngày sinh: {user.birthday ? new Date(user.birthday).toLocaleDateString("vi-VN") : "Chưa cập nhật"}</div>
             <button onClick={handleUpdateClick} className="px-4 py-2 bg-[#EE1F5B] text-white rounded-md">
               Cập nhật thông tin
             </button>
