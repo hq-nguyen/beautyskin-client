@@ -1,16 +1,54 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react";
+import api from "../../config/axios";
+import { toast } from "react-toastify";
 
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState({});
   const [user, setUser] = useState({
-    fullName: "Trương Quốc Hưng",
-    phone: "0912726117",
+    fullName: "",
+    phone: "",
     gender: "male",
-    birthDate: "2004-07-22"
+    birthDay: ""
   });
 
   const [formData, setFormData] = useState(user);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await api.get("get");
+        const user = response.data.find(item => item.id == localStorage.getItem('id'));
+
+        if (user) {
+          var { fullName, mail, phone, birthday,gender} = user;
+          
+          
+          if(!phone){
+            phone = 'Vui lòng cập nhật';
+          }
+          if (!birthday){
+            birthday = ''
+          }
+          if(!gender){
+            gender = 'male'
+          }
+          setUser({
+            fullName: fullName,
+            phone: phone,
+            gender: gender,
+            birthDay: birthday
+          })
+        } else {
+          console.log("User not found !.");
+        }
+
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu người dùng:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   const handleUpdateClick = () => {
     setFormData(user);
@@ -25,50 +63,61 @@ const UserProfile = () => {
   const validateForm = () => {
     const newErrors = {};
     const phoneRegex = /^\d{10}$/;
-    
+
     if (!phoneRegex.test(formData.phone)) {
       newErrors.phone = "Số điện thoại không hợp lệ";
     }
-    
+
+    if (!formData.birthDay) {
+      newErrors.birthDay = "Ngày sinh không được để trống";
+    }
+
     setError(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      setUser(formData);
-      setIsEditing(false);
-      setError({});
+      try {
+        var id = localStorage.getItem("id");
+        const response = await api.put(`/user/update/${id}`, formData);
+        const updatedUser = response.data;
+
+        setUser(updatedUser);
+        setFormData(updatedUser);
+        setIsEditing(false);
+        toast.success('Cập nhật thông tin thành công')
+      } catch (error) {
+        console.error('Lỗi khi cập nhật thông tin người dùng', error);
+        toast.error('Có lỗi xảy ra khi cập nhật thông tin');
+      }
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
-    // Xóa lỗi khi người dùng bắt đầu nhập lại
+
     if (error[name]) {
-      setError(prev => ({
+      setError((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: ""
       }));
     }
-  };  
+  };
 
   return (
-    <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px] h-100%">
+    <div className="flex-1 bg-white p-5 rounded-[10px] shadow-md mt-5 h-full">
       {isEditing ? (
         <>
           <h2 className="text-2xl font-bold mb-6">Cập nhật thông tin</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label
-                htmlFor="fullName"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
                 Họ và tên
               </label>
               <input
@@ -77,15 +126,12 @@ const UserProfile = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div className="space-y-2">
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                 Số điện thoại
               </label>
               <input
@@ -94,26 +140,21 @@ const UserProfile = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  error.phone ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${error.phone ? "border-red-500" : "border-gray-300"
+                  }`}
               />
-              {error.phone && (
-                <p className="text-red-500 text-sm mt-1">{error.phone}</p>
-              )}
+              {error.phone && <p className="text-red-500 text-sm mt-1">{error.phone}</p>}
             </div>
 
             <div className="space-y-2">
-              <span className="block text-sm font-medium text-gray-700">
-                Giới tính
-              </span>
+              <span className="block text-sm font-medium text-gray-700">Giới tính</span>
               <div className="flex space-x-4">
                 <label className="inline-flex items-center">
                   <input
                     type="radio"
                     name="gender"
                     value="male"
-                    checked={formData.gender === 'male'}
+                    checked={formData.gender === "male"}
                     onChange={handleInputChange}
                     className="w-4 h-4 text-blue-600"
                   />
@@ -124,7 +165,7 @@ const UserProfile = () => {
                     type="radio"
                     name="gender"
                     value="female"
-                    checked={formData.gender === 'female'}
+                    checked={formData.gender === "female"}
                     onChange={handleInputChange}
                     className="w-4 h-4 text-blue-600"
                   />
@@ -134,34 +175,25 @@ const UserProfile = () => {
             </div>
 
             <div className="space-y-2">
-              <label
-                htmlFor="birthDate"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="birthDay" className="block text-sm font-medium text-gray-700">
                 Ngày sinh
               </label>
               <input
                 type="date"
-                id="birthDate"
-                name="birthDate"
-                value={formData.birthDate}
+                id="birthDay"
+                name="birthDay"
+                value={formData.birthDay}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+              {error.birthDay && <p className="text-red-500 text-sm mt-1">{error.birthDay}</p>}
             </div>
 
             <div className="flex space-x-4 pt-4">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-[#EE1F5B] text-white rounded-md hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+              <button type="submit" className="px-4 py-2 bg-[#EE1F5B] text-white rounded-md hover:opacity-80">
                 Cập nhật
               </button>
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+              <button type="button" onClick={handleCancel} className="px-4 py-2 border border-gray-300 rounded-md">
                 Hủy
               </button>
             </div>
@@ -171,30 +203,13 @@ const UserProfile = () => {
         <>
           <h2 className="text-2xl font-bold mb-6">Thông tin người dùng</h2>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-2">
-              <span className="font-medium">Họ và tên:</span>
-              <span>{user.fullName}</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <span className="font-medium">Số điện thoại:</span>
-              <span>{user.phone}</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <span className="font-medium">Giới tính:</span>
-              <span>{user.gender === 'male' ? 'Nam' : 'Nữ'}</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <span className="font-medium">Ngày sinh:</span>
-              <span>{new Date(user.birthDate).toLocaleDateString('vi-VN')}</span>
-            </div>
-            <div className="pt-4">
-              <button
-                onClick={handleUpdateClick}
-                className="px-4 py-2 bg-[#EE1F5B] text-white rounded-md hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Cập nhật thông tin
-              </button>
-            </div>
+            <div>Họ và tên: {user.fullName}</div>
+            <div>Số điện thoại: {user.phone}</div>
+            <div>Giới tính: {user.gender === "male" ? "Nam" : "Nữ"}</div>
+            <div>Ngày sinh: {user.birthDay ? new Date(user.birthDay).toLocaleDateString("vi-VN") : ""}</div>
+            <button onClick={handleUpdateClick} className="px-4 py-2 bg-[#EE1F5B] text-white rounded-md">
+              Cập nhật thông tin
+            </button>
           </div>
         </>
       )}

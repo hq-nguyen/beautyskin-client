@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope, faLock, faMapMarkerAlt, faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -6,6 +5,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../../config/axios";
 
 const Modal = ({ isOpen, onClose, title, children }) => {
     if (!isOpen) return null;
@@ -29,29 +29,50 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 };
 
 const AccountContent = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState("hungtqse182075@fpt.edu.vn");
     const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [tempName, setTempName] = useState('');
+    const [passwordData, setPasswordData] = useState({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [defaultAddress, setDefaultAddress] = useState(null);
+    const [user, setUser] = useState({
+        fullName: '',
+        mail: '',
+    });
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserData = async () => {
-            try {
-                const response = await fetch('https://67825c10c51d092c3dcf2d8d.mockapi.io/User/1');
-                if (response.ok) {
-                    const userData = await response.json();
-                    setName(userData.name || '');
-                }
-            } catch (error) {
-                console.error("Error fetching user data", error);
-            }
-        };
+          try {
+            const response = await api.get("get");
+            //Lấy dữ liệu user từ localStorage với id
+            const userData = response.data.find(item => item.id == localStorage.getItem('id'));
+    
+            if (userData) {
+              const { fullName, mail } = userData;
 
+              setUser({
+                fullName,
+                mail
+              });
+              
+              setTempName(fullName);
+            } else {
+              console.log("User not found!");
+              setError("User not found!");
+            }
+    
+          } catch (error) {
+            console.error("Lỗi khi lấy dữ liệu người dùng:", error);
+            setError("Error fetching user data");
+          }
+        };
         fetchUserData();
     }, []);
 
@@ -80,21 +101,25 @@ const AccountContent = () => {
         setSuccessMessage('');
 
         try {
-            const response = await fetch('https://67825c10c51d092c3dcf2d8d.mockapi.io/User/1', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: tempName })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Có lỗi xảy ra khi cập nhật tên');
+            //lấy userId từ localStorage
+            const userId = localStorage.getItem('id');
+            if (!userId) {
+                throw new Error('User ID not found');
             }
 
-            const data = await response.json();
-            setName(data.name || tempName);
+            const response = await api.put(`update/${userId}`, {
+                fullName: tempName
+            });
+
+            if (response.status !== 200) {
+                throw new Error('Có lỗi xảy ra khi cập nhật tên');
+            }
+
+            setUser(prevUser => ({
+                ...prevUser,
+                fullName: tempName
+            }));
+            
             setSuccessMessage('Cập nhật tên thành công');
 
             setTimeout(() => {
@@ -109,8 +134,88 @@ const AccountContent = () => {
         }
     };
 
+    const handlePasswordChange = (e) => {
+        const { name, value } = e.target;
+        setPasswordData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handlePasswordSubmit = async () => {
+        // Reset error and success message
+        setError('');
+        setSuccessMessage('');
+        
+        // Validate password fields
+        if (!passwordData.oldPassword) {
+            setError('Vui lòng nhập mật khẩu hiện tại');
+            return;
+        }
+        
+        if (!passwordData.newPassword) {
+            setError('Vui lòng nhập mật khẩu mới');
+            return;
+        }
+        
+        if (passwordData.newPassword.length < 6) {
+            setError('Mật khẩu mới phải có ít nhất 6 ký tự');
+            return;
+        }
+        
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setError('Xác nhận mật khẩu không khớp');
+            return;
+        }
+        
+        setIsLoading(true);
+        
+        try {
+            // Get user ID from localStorage
+            const userId = localStorage.getItem('id');
+            if (!userId) {
+                throw new Error('User ID not found');
+            }
+            
+            // Call API to verify old password and update with new password
+            const response = await api.put(`update-password/${userId}`, {
+                oldPassword: passwordData.oldPassword,
+                newPassword: passwordData.newPassword
+            });
+            
+            if (response.status !== 200) {
+                throw new Error('Có lỗi xảy ra khi cập nhật mật khẩu');
+            }
+            
+            setSuccessMessage('Cập nhật mật khẩu thành công');
+            
+            // Reset password fields
+            setPasswordData({
+                oldPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            });
+            
+            // Close modal after 1.5 seconds
+            setTimeout(() => {
+                setIsPasswordModalOpen(false);
+                setSuccessMessage('');
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Error updating password: ', error);
+            if (error.response && error.response.status === 401) {
+                setError('Mật khẩu hiện tại không chính xác');
+            } else {
+                setError(error.message || 'Có lỗi xảy ra khi cập nhật mật khẩu');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleManageAddresses = () => {
-        navigate('/user/manage-address')
+        navigate('/user/manage-address');
     };
 
     return (
@@ -121,9 +226,9 @@ const AccountContent = () => {
                 <h3 className="text-[18px] font-bold mb-[10px]">Thông tin cá nhân</h3>
                 <div className="flex items-center gap-[15px] text-[16px] pb-4">
                     <FontAwesomeIcon icon={faUser} />
-                    <p className="flex-1">{name || 'Chưa có tên'}</p>
+                    <p className="flex-1">{user.fullName || 'Chưa có tên'}</p>
                     <button onClick={() => {
-                        setTempName(name);
+                        setTempName(user.fullName);
                         setError('');
                         setIsNameModalOpen(true);
                     }}
@@ -131,7 +236,7 @@ const AccountContent = () => {
                 </div>
                 <div className="flex items-center gap-[15px] text-[16px]">
                     <FontAwesomeIcon icon={faEnvelope} />
-                    <p className="flex-1">{email}</p>
+                    <p className="flex-1">{user.mail}</p>
                 </div>
             </div>
 
@@ -140,7 +245,20 @@ const AccountContent = () => {
                 <div className="flex items-center gap-[15px] text-[16px]">
                     <FontAwesomeIcon icon={faLock} />
                     <p className="flex-1">Mật khẩu</p>
-                    <button className="bg-white text-[#d90429] border border-[#d90429] px-[10px] py-[5px] rounded-[20px] hover:bg-[#d90429] hover:text-white transition-colors">Thay đổi</button>
+                    <button 
+                        onClick={() => {
+                            setPasswordData({
+                                oldPassword: '',
+                                newPassword: '',
+                                confirmPassword: ''
+                            });
+                            setError('');
+                            setIsPasswordModalOpen(true);
+                        }}
+                        className="bg-white text-[#d90429] border border-[#d90429] px-[10px] py-[5px] rounded-[20px] hover:bg-[#d90429] hover:text-white transition-colors"
+                    >
+                        Thay đổi
+                    </button>
                 </div>
             </div>
 
@@ -156,7 +274,7 @@ const AccountContent = () => {
                     ) : (
                         <p className="flex-1">Bạn chưa có địa chỉ mặc định</p>
                     )}
-                    <button 
+                    <button
                         onClick={handleManageAddresses}
                         className="bg-white text-[#d90429] border border-[#d90429] px-[10px] py-[5px] rounded-[20px] hover:bg-[#d90429] hover:text-white transition-colors"
                     >
@@ -165,6 +283,7 @@ const AccountContent = () => {
                 </div>
             </div>
 
+            {/* Name Change Modal */}
             <Modal
                 isOpen={isNameModalOpen}
                 onClose={() => {
@@ -180,7 +299,7 @@ const AccountContent = () => {
                         onChange={(e) => setTempName(e.target.value)}
                         placeholder="Nhập tên mới"
                         className="w-full p-2 border rounded-lg mb-4"
-                        disabled={isLoading} 
+                        disabled={isLoading}
                     />
                     {error && (
                         <p className="text-red-500 text-sm- mb-4">{error}</p>
@@ -200,10 +319,96 @@ const AccountContent = () => {
                             Hủy
                         </button>
                         <button
-                            onClick={handleNameSubmit} 
-                            className={`px-4 py-2 bg-[#d90429] text-white rounded-lg hover:bg-[#ef233c] ${
-                                isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                            }`} 
+                            onClick={handleNameSubmit}
+                            className={`px-4 py-2 bg-[#d90429] text-white rounded-lg hover:bg-[#ef233c] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Password Change Modal */}
+            <Modal
+                isOpen={isPasswordModalOpen}
+                onClose={() => {
+                    setIsPasswordModalOpen(false);
+                    setError('');
+                }}
+                title='Thay đổi mật khẩu'
+            >
+                <div className="p-4">
+                    <div className="mb-4">
+                        <label htmlFor="oldPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                            Mật khẩu hiện tại
+                        </label>
+                        <input
+                            type="password"
+                            id="oldPassword"
+                            name="oldPassword"
+                            value={passwordData.oldPassword}
+                            onChange={handlePasswordChange}
+                            placeholder="Nhập mật khẩu hiện tại"
+                            className="w-full p-2 border rounded-lg"
+                            disabled={isLoading}
+                        />
+                    </div>
+                    
+                    <div className="mb-4">
+                        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                            Mật khẩu mới
+                        </label>
+                        <input
+                            type="password"
+                            id="newPassword"
+                            name="newPassword"
+                            value={passwordData.newPassword}
+                            onChange={handlePasswordChange}
+                            placeholder="Nhập mật khẩu mới"
+                            className="w-full p-2 border rounded-lg"
+                            disabled={isLoading}
+                        />
+                    </div>
+                    
+                    <div className="mb-4">
+                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                            Xác nhận mật khẩu mới
+                        </label>
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            value={passwordData.confirmPassword}
+                            onChange={handlePasswordChange}
+                            placeholder="Xác nhận mật khẩu mới"
+                            className="w-full p-2 border rounded-lg"
+                            disabled={isLoading}
+                        />
+                    </div>
+                    
+                    {error && (
+                        <p className="text-red-500 text-sm mb-4">{error}</p>
+                    )}
+                    {successMessage && (
+                        <p className="text-green-500 text-sm mb-4">{successMessage}</p>
+                    )}
+                    
+                    <div className="flex justify-end gap-2">
+                        <button
+                            onClick={() => {
+                                setIsPasswordModalOpen(false);
+                                setError("");
+                            }}
+                            className="px-4 py-2 border rounded-lg hover:bg-gray-100"
+                            disabled={isLoading}
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            onClick={handlePasswordSubmit}
+                            className={`px-4 py-2 bg-[#d90429] text-white rounded-lg hover:bg-[#ef233c] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             disabled={isLoading}
                         >
                             {isLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
