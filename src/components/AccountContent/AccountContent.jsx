@@ -105,9 +105,13 @@ const AccountContent = () => {
             if (!userId) {
                 throw new Error('User ID not found');
             }
-
-            const response = await api.put(`update/${userId}`, {
+            const token = localStorage.getItem('token')
+            const response = await api.put(`user/update/${userId}`, {
                 fullName: tempName
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             if (response.status !== 200) {
@@ -179,7 +183,7 @@ const AccountContent = () => {
                 confirmPassword: passwordData.confirmPassword
             }, {
                 headers: {
-                    'Authorization': `Bearer ${token}` // Or whatever format your API expects
+                    'Authorization': `Bearer ${token}` 
                 }
             });
             
@@ -225,12 +229,6 @@ const AccountContent = () => {
                 <div className="flex items-center gap-[15px] text-[16px] pb-4">
                     <FontAwesomeIcon icon={faUser} />
                     <p className="flex-1">{user.fullName || 'Chưa có tên'}</p>
-                    <button onClick={() => {
-                        setTempName(user.fullName);
-                        setError('');
-                        setIsNameModalOpen(true);
-                    }}
-                        className="bg-white text-[#d90429] border border-[#d90429] px-[10px] py-[5px] rounded-[20px] hover:bg-[#d90429] hover:text-white transition-colors">Thay đổi</button>
                 </div>
                 <div className="flex items-center gap-[15px] text-[16px]">
                     <FontAwesomeIcon icon={faEnvelope} />
