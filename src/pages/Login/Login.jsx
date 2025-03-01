@@ -7,6 +7,8 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { Link, useNavigate } from "react-router-dom";
 import api from '../../config/axios';
 import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { login } from '../../redux/features/useSlice';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +21,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const validateForm = () => {
     const newErrors = {};
@@ -54,9 +57,11 @@ const Login = () => {
     try {
       const response = await api.post('login', newFormData);
       const { token, roleEnum, id } = response.data;
+      // console.log(response.data);
       localStorage.setItem('token', token);
       localStorage.setItem('id', id);
       toast.success("Đăng nhập thành công!");
+      dispatch(login(response.data))
 
       console.log(roleEnum);
 
