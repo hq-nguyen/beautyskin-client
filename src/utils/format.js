@@ -7,3 +7,13 @@ export const formatDate = (dateString) => {
     };
     return date.toLocaleDateString('vi-VN', options);
 };
+
+export const formatCurrency = (amount, symbol = true) => {
+    if (amount === null || amount === undefined) {
+        return symbol ? 'đ0' : '0';
+    };
+
+    const formattedAmount = amount.toLocaleString('vi-VN');
+
+    return symbol ? `${formattedAmount} đ` : formattedAmount;
+}

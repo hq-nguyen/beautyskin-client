@@ -1,13 +1,14 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { FaEye, FaHeart } from 'react-icons/fa';
+import { FaShoppingCart } from 'react-icons/fa';
 import StarRating from '../utils/StarRating';
+import { formatCurrency } from '../../utils/format';
 
 const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice }) => {
 
     return (
         <Link key={id} 
-            className="relative flex flex-col bg-white p-4 pb-8 hover:border hover:border-rose-500 transition-transform duration-150"
+            className="relative flex flex-col bg-white p-2 pb-8 hover:border hover:border-rose-500 transition-transform duration-150"
             to={`/product/${id}`}
         >
             <div className="relative h-60 group hover:scale-95 transition-transform duration-300">
@@ -23,21 +24,17 @@ const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice })
                     <span className="text-xs text-gray-500">(10)</span>
                 </div>
                 <div className="flex items-center">
-                    <span className="text-xs text-gray-500 line-through flex items-center"><span className='text-[10px]'>đ</span>{oldPrice}</span>
-                    <span className="ml-2 text-base font-semibold text-primary flex items-center"><span className='text-[12px]'>đ</span>{newPrice}</span>
+                    <span className="text-xs text-gray-500 line-through flex items-center">{formatCurrency(oldPrice)}</span>
+                    <span className="ml-2 text-base font-semibold text-primary flex items-center">{formatCurrency(newPrice)}</span>
                 </div>
 
-                <div className="flex space-x-2 mt-2">
+                {/* Full-width Add to Cart button */}
+                <div className="mt-2">
                     <button
-                        className="flex-1 bg-primary text-white py-2 rounded-md transition-colors duration-300 hover:opacity-80 flex items-center justify-center space-x-1"
+                        className="w-full bg-primary text-white py-2 rounded-md transition-colors duration-300 hover:opacity-80 flex items-center justify-center"
                     >
-                        <FaEye className="w-4 h-4" />
-                        <span>Xem nhanh</span>
-                    </button>
-                    <button
-                        className="bg-gray-100 p-2 rounded-md transition-colors duration-300 hover:opacity-90"
-                    >
-                        <FaHeart className="w-4 h-4 hover:text-red-500" />
+                        <FaShoppingCart className="w-4 h-4 mr-2" />
+                        <span>Thêm vào giỏ</span>
                     </button>
                 </div>
             </div>
@@ -55,4 +52,4 @@ ProductItem.propTypes = {
     newPrice: PropTypes.number
 };
 
-export default ProductItem
+export default ProductItem;
