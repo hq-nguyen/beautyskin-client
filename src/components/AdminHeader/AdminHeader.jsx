@@ -38,7 +38,7 @@ function AdminHeader({
           </div>
 
           {/* Profile */}
-          <div className="relative group">
+          <div className="relative group ml-auto">
             <button
               className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
@@ -57,7 +57,7 @@ function AdminHeader({
 
             {/* Profile Dropdown - Shows on hover */}
             {user && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150">
+              <div className="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150">
                 <div className="px-4 py-3 border-b border-gray-200">
                   <p className="font-medium"></p>
                   <p className="text-sm text-gray-600">Chào bạn {user?.username}</p>
