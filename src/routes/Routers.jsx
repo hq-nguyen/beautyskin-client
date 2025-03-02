@@ -32,6 +32,7 @@ import AddAddress from "../pages/Address/AddressForm/AddressForm";
 import AddressDefault from "../pages/Address/AddressManagement";
 import NotFoundPage from "../pages/NotFound/NotFoundPage";
 import ManageBlog from "../pages/Admin/ManageBlog/ManageBlog";
+import ManageQuiz from "../pages/Admin/ManageQuiz/ManageQuiz";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -171,6 +172,10 @@ const Routers = () => {
         {
           path: "blog",
           element: <ManageBlog />,
+        },
+        {
+          path: "quiz",
+          element: <ManageQuiz />,
         }
 
       ],
