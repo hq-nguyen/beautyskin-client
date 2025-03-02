@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
-import { MdOutlineDashboard, MdOutlineCategory } from "react-icons/md";
-import { BiUser, BiPackage, BiCart, BiCog } from "react-icons/bi"; // More comprehensive icon set
+import { MdOutlineDashboard, MdOutlineCategory, MdOutlineQuiz } from "react-icons/md";
+import { BiUser, BiPackage, BiCart } from "react-icons/bi"; // More comprehensive icon set
 import { assets } from '../../../assets/frontend_assets/assets';
 import { TbBrandBlogger } from "react-icons/tb";
 import SidebarLinkGroup from './SidebarLinkGroup';
@@ -119,11 +119,11 @@ function AdminSidebar({
       mark: 'blog',
     },
     {
-      id: 'settings',
-      label: 'Cài đặt',
-      icon: <BiCog size={20} />,
-      path: '/admin/info',
-      mark: 'setting',
+      id: 'quiz',
+      label: 'Danh sách câu hỏi',
+      icon: <MdOutlineQuiz size={20} />,
+      path: '/admin/quiz',
+      mark: 'quiz',
     },
   ];
 
