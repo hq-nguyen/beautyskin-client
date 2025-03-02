@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -76,7 +75,20 @@ const SkinTypeQuiz = () => {
 
   const handleAnswer = async (questionId, optionId, point) => {
     const newAnswer = { questionId, optionId, point };
-    const newAnswers = [...answers, newAnswer];
+    
+    // If we're updating an existing answer (going back and changing)
+    const answerIndex = answers.findIndex(a => a.questionId === questionId);
+    let newAnswers;
+    
+    if (answerIndex !== -1) {
+      // Replace the existing answer
+      newAnswers = [...answers];
+      newAnswers[answerIndex] = newAnswer;
+    } else {
+      // Add new answer
+      newAnswers = [...answers, newAnswer];
+    }
+    
     setAnswers(newAnswers);
     
     try {
@@ -113,6 +125,13 @@ const SkinTypeQuiz = () => {
       } finally {
         setShowResult(true);
       }
+    }
+  };
+
+  // Function to handle going back to the previous question
+  const handlePreviousQuestion = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
     }
   };
 
@@ -178,7 +197,6 @@ const SkinTypeQuiz = () => {
     );
   }
 
-  // Check if questions array is empty
   if (questions.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -247,25 +265,45 @@ const SkinTypeQuiz = () => {
 
                   <div className="space-y-3">
                     {questions[currentQuestion].options && questions[currentQuestion].options.length > 0 ? (
-                      questions[currentQuestion].options.map((option) => (
-                        <div 
-                          key={option.id} 
-                          className="flex justify-between items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                          onClick={() => handleAnswer(questions[currentQuestion].id, option.id, option.point)}
-                        >
-                          <span className="text-gray-700">{option.text}</span>
-                          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                            {option.point} điểm
-                          </span>
-                        </div>
-                      ))
+                      questions[currentQuestion].options.map((option) => {
+                        // Removed the highlighting effect for previously selected answers
+                        return (
+                          <div 
+                            key={option.id} 
+                            className="flex justify-between items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                            onClick={() => handleAnswer(questions[currentQuestion].id, option.id, option.point)}
+                          >
+                            <span className="text-gray-700">{option.text}</span>
+                            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                              {option.point} điểm
+                            </span>
+                          </div>
+                        );
+                      })
                     ) : (
                       <p className="text-center text-gray-500 py-4">Không có lựa chọn cho câu hỏi này</p>
                     )}
                   </div>
                   
-                  <div className="mt-6 text-center text-sm text-gray-500">
-                    Câu hỏi {currentQuestion + 1} / {questions.length}
+                  <div className="mt-6 flex justify-between items-center">
+                    <button 
+                      onClick={handlePreviousQuestion}
+                      disabled={currentQuestion === 0}
+                      className={`px-4 py-2 rounded-lg ${
+                        currentQuestion === 0 
+                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                          : 'bg-gray-600 text-white hover:bg-gray-700'
+                      }`}
+                    >
+                      Quay lại
+                    </button>
+                    
+                    <div className="text-center text-sm text-gray-500">
+                      Câu hỏi {currentQuestion + 1} / {questions.length}
+                    </div>
+                    
+                    {/* Spacer to keep the navigation balanced */}
+                    <div className="w-20"></div>
                   </div>
                 </div>
               )}
@@ -298,4 +336,4 @@ const SkinTypeQuiz = () => {
   );
 };
 
-export default SkinTypeQuiz;
+export default SkinTypeQuiz

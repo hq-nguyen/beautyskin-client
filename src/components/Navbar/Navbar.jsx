@@ -57,10 +57,10 @@ const Navbar = () => {
               <div className='absolute z-100 hidden right-0 pt-4 group-hover:block'>
                 <div className='dropdown-menu-box flex flex-col gap-1 w-48 py-2 px-5 bg-white text-gray-500 rounded shadow-lg'>
                   <div>
-                    <Link to='/profile' className='block cursor-pointer hover:text-rose-600 duration-300'>
+                    <Link to='/user' className='block cursor-pointer hover:text-rose-600 duration-300'>
                       Thông tin tài khoản
                     </Link>
-                  </div>
+                  </div>  
                   
                   <div>
                     <button 
