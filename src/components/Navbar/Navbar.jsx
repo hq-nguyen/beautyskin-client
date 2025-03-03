@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from 'react-toastify';
 import { assets } from '../../assets/frontend_assets/assets'
 import { logout } from '../../redux/features/useSlice'
 import './Navbar.css'
@@ -13,8 +14,10 @@ const Navbar = () => {
 
   const handleLogout = () => {
       dispatch(logout())
+      localStorage.removeItem('token')
+      localStorage.removeItem('id')
+      toast.success('Đăng xuất thành công')
       navigate('/')
-
   }
 
   return (
