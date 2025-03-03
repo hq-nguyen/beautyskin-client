@@ -32,10 +32,8 @@ const Footer = () => {
                         </div>
 
                         <LinkGroup header="DỊCH VỤ">
-                            <LinkMove link="/#" label="Tài khoản" />
-                            <LinkMove link="/#" label="Câu hỏi thường gặp" />
                             <LinkMove link="/#" label="Theo dõi đơn hàng" />
-                            <LinkMove link="/#" label="Điều khoản và điều kiện" />
+                            <LinkMove link="/support" label="Điều khoản và điều kiện" />
                             <LinkMove link="/#" label="Chính sách bảo mật" />
                         </LinkGroup>
                         <LinkGroup header="THÔNG TIN">

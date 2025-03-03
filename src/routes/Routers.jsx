@@ -33,6 +33,11 @@ import AddressDefault from "../pages/Address/AddressManagement";
 import NotFoundPage from "../pages/NotFound/NotFoundPage";
 import ManageBlog from "../pages/Admin/ManageBlog/ManageBlog";
 import ManageQuiz from "../pages/Admin/ManageQuiz/ManageQuiz";
+import SupportLayout from "../layout/SupportLayout";
+import TermsOfUsePage from "../components/Support/Term";
+import PrivacyPolicyPage from "../components/Support/Privacy";
+import PaymentPage from "../components/Support/Payment";
+import RefundPage from "../components/Support/Refund";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -178,6 +183,28 @@ const Routers = () => {
           element: <ManageQuiz />,
         }
 
+      ],
+    },
+    {
+      path: "/support",
+      element: <SupportLayout />,
+      children: [
+        {
+          index: true,
+          element: <TermsOfUsePage />,
+        },
+        {
+          path: "privacy",
+          element: <PrivacyPolicyPage />,
+        },
+        {
+          path: "payment",
+          element: <PaymentPage />,
+        },
+        {
+          path: "refund",
+          element: <RefundPage/>,
+        },
       ],
     }
   ]);
