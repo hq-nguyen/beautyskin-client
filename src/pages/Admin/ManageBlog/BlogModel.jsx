@@ -21,10 +21,11 @@ const BlogModel = ({ isOpen, onClose, onSubmit, initialValues }) => {
             title: initialValues?.title || '',
             slug: initialValues?.slug || '',
             author: initialValues?.author || '',
+            tag: initialValues?.tag || '',
             publish: initialValues?.publish ? dayjs(initialValues.publish) : dayjs(),
             deleted: initialValues?.deleted || false,
         });
-        setContent(initialValues?.content || '');
+        setContent(initialValues?.content || ''); // Cập nhật content ở đây
 
         if (initialValues?.image) {
             setFileList([{
@@ -39,11 +40,13 @@ const BlogModel = ({ isOpen, onClose, onSubmit, initialValues }) => {
 
     }, [initialValues, form]);
 
+
     const handleOk = () => {
         form.validateFields().then(async (values) => {
             const postData = {
                 title: values.title,
                 slug: values.slug,
+                tag: values.tag,
                 content: content,
                 image: fileList.length > 0 ? fileList[0].url : null,
                 author: values.author || '', // Author is optional
@@ -160,9 +163,18 @@ const BlogModel = ({ isOpen, onClose, onSubmit, initialValues }) => {
                             <DatePicker style={{ width: '100%' }} />
                         </Form.Item>
                         <Form.Item
+                            name="tag"
+                            label="Thẻ"
+                            className="w-1/3"
+                            rules={[{ required: true, message: 'Vui lòng nhập thẻ!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </div>
+                    {initialValues?.id && (
+                        <Form.Item
                             name="deleted"
                             label="Trạng thái"
-                            className="w-1/3"
                             rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
                         >
                             <Select>
@@ -170,13 +182,13 @@ const BlogModel = ({ isOpen, onClose, onSubmit, initialValues }) => {
                                 <Option value={false}>Công khai</Option>
                             </Select>
                         </Form.Item>
-                    </div>
+                    )}
                     <Form.Item
                         name="content"
                         label="Nội dung"
                         rules={[{ required: true, message: 'Vui lòng nhập nội dung!' }]}
                     >
-                        <ReactQuill value={content} onChange={handleContentChange} />
+                        <ReactQuill key={initialValues?.id} value={content} onChange={handleContentChange} />
                     </Form.Item>
                 </Form>
             </Modal>
@@ -192,6 +204,7 @@ BlogModel.propTypes = {
         title: PropTypes.string,
         slug: PropTypes.string,
         content: PropTypes.string,
+        tag: PropTypes.string,
         image: PropTypes.string,
         author: PropTypes.string,
         publish: PropTypes.string,

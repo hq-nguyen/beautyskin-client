@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import api from '../../apis/blog';
 import LatestPostsSidebar from '../../components/Sidebar/LatestPostsSidebar';
 import { formatDate } from '../../utils/format';
+import { FacebookOutlined, InstagramOutlined } from '@ant-design/icons';
 
 const BlogDetail = () => {
     const { slug } = useParams();
@@ -48,17 +49,34 @@ const BlogDetail = () => {
         return <div className="text-center py-8">Không tìm thấy bài viết.</div>;
     }
 
-    const { title, publish, author, image, content, tag } = post;
+    const handleFacebookShare = () => {
+        const url = window.location.href;
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+    };
+    
+    const handleInstagramShare = () => {
+        // Mở ứng dụng Instagram trên thiết bị di động hoặc trang chủ Instagram trên web
+        window.open('https://www.instagram.com/', '_blank');
+    };
+
+    const { title, publish, image, content } = post;
 
     return (
         <div className="container mx-auto px-4 py-8 flex flex-col lg:flex-row min-h-screen">
             {/* Main Content */}
             <main className="lg:w-4/5 pr-4 mb-6 lg:mb-0">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">{title}</h1>
-                <p className="text-gray-600 mb-4">Ngày đăng: {formatDate(publish)}</p>
-                <p className="text-gray-600 mb-4">Tags: {tag}</p>
-                <p className='mb-4'>Tác giả: {author}</p>
-
+                <div className="flex items-center mb-4">
+                    <p className="text-gray-600 mr-4">Ngày đăng: {formatDate(publish)}</p>
+                    <div className="w-px h-6 bg-gray-200 mx-4"></div>
+                    <button onClick={handleFacebookShare} className="mr-2">
+                        <FacebookOutlined />
+                    </button>
+                    <button onClick={handleInstagramShare}>
+                        <InstagramOutlined />
+                    </button>
+                </div>
+                <hr className="mb-8" />
                 <img src={image} alt={title} className="w-full rounded-lg mb-6" />
 
                 <div className="blog-content text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: content }} />
