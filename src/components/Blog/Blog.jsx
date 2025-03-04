@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import { fetchBlogs } from "../../apis/blog";
+import { fetchBlogsIsFalse } from "../../apis/blog";
 
 const BlogCard = React.memo(({ post }) => {
     return (
@@ -43,7 +43,7 @@ const Blog = () => {
     useEffect(() => {
         const getBlogs = async () => {
             try {
-                const data = await fetchBlogs();
+                const data = await fetchBlogsIsFalse();
                 // Lấy 4 blog mới nhất
                 const latestBlogs = data.sort((a, b) => new Date(b.publish) - new Date(a.publish)).slice(0, 4);
                 setBlogPosts(latestBlogs);

@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Button, Modal, Space, Table, Tag } from 'antd';
-import { deleteBlog, fetchBlogs } from '../../../apis/blog';
+import { deleteBlog, fetchBlogsIsFalse } from '../../../apis/blog';
 import dayjs from 'dayjs';
 import { MdOutlineDeleteOutline } from 'react-icons/md';
 import { CiEdit } from 'react-icons/ci';
 import BlogModel from './BlogModel';
-import { toast } from 'react-toastify';
 
 const ManageBlog = () => {
     const [blog, setBlog] = useState([]);
@@ -24,7 +23,7 @@ const ManageBlog = () => {
 
     const handleSubmit = async (values) => {
         console.log(values);
-        const updatedBlogs = await fetchBlogs();
+        const updatedBlogs = await fetchBlogsIsFalse();
         setBlog(updatedBlogs);
         setIsOpen(false);
         setInitialValues(null);
@@ -57,7 +56,7 @@ const ManageBlog = () => {
     useEffect(() => {
         const getBlog = async () => {
             try {
-                const data = await fetchBlogs();
+                const data = await fetchBlogsIsFalse();
                 setBlog(data);
             } catch (error) {
                 console.error("Error fetching blogs:", error);
