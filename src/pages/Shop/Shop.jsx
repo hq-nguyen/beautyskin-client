@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { assets } from "../../assets/frontend_assets/assets";
 import { fetchProducts } from '../../apis/product';
-import PropTypes from 'prop-types';
+import { ProductContext, ProductProvider } from '../../contexts/ProductContext'; // Import ProductContext and Provider
 import ProductItem from "../../components/Card/ProductItem";
 
 const Shop = () => {
@@ -137,7 +137,6 @@ const Shop = () => {
         setSortBy(sortType);
     };
 
-
     const FilterSection = ({ title, options, filterType }) => (
         <div className="mb-6">
             <h3 className="text-md font-semibold mb-2">{title}</h3>
@@ -158,120 +157,128 @@ const Shop = () => {
     );
 
     return (
-        <div className="min-h-screen bg-background bg-gray-50 my-8">
-            <div className="container mx-auto px-4 py-8">
-                <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Filters Sidebar */}
-                    <div className="lg:w-1/5 space-y-6 bg-card p-6 rounded-lg h-fit sticky top-4">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold">Mua hàng</h2>
-                            <button
-                                onClick={clearFilters}
-                                className="text-sm text-primary hover:text-primary/80"
-                            >
-                                Xóa lọc
-                            </button>
-                        </div>
-
-                        {/* test category */}
-                        <FilterSection title="Danh mục" options={categoriesTest} filterType="category" />
-
-                        {/* Price Range Filter */}
-                        <div className="mb-6">
-                            <h3 className="text-sm font-semibold mb-2">Lọc theo giá</h3>
-                            <div className="flex space-x-2">
-                                <input
-                                    type="number"
-                                    placeholder="Từ"
-                                    value={tempPriceRange.from}
-                                    onChange={(e) => handleFilterChange("priceRange", { from: e.target.value })}
-                                    className="w-full px-1 py-1 border rounded-md"
-                                />
-                                <input
-                                    type="number"
-                                    placeholder="Đến"
-                                    value={tempPriceRange.to}
-                                    onChange={(e) => handleFilterChange("priceRange", { to: e.target.value })}
-                                    className="w-full px-1 py-1 border rounded-md"
-                                />
+        <ProductProvider
+            products={filteredProducts}
+            categories={categories}
+            brands={brands}
+            skinTypes={skinTypes}
+            skinConcerns={skinConcerns}
+            textures={textures}
+            origins={origins}
+            filters={filters}
+            handleFilterChange={handleFilterChange}
+            applyPriceRangeFilter={applyPriceRangeFilter}
+            clearFilters={clearFilters}
+        >
+            <div className="min-h-screen bg-background bg-gray-50 my-8">
+                <div className="container mx-auto px-4 py-8">
+                    <div className="flex flex-col lg:flex-row gap-8">
+                        {/* Filters Sidebar */}
+                        <div className="lg:w-1/5 space-y-6 bg-card p-6 rounded-lg h-fit sticky top-4">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-bold">Mua hàng</h2>
+                                <button
+                                    onClick={clearFilters}
+                                    className="text-sm text-primary hover:text-primary/80"
+                                >
+                                    Xóa lọc
+                                </button>
                             </div>
-                            <button
-                                onClick={applyPriceRangeFilter}
-                                className="mt-2 w-full bg-primary text-white py-1 rounded-md hover:bg-primary/80"
-                            >
-                                Áp dụng
-                            </button>
+
+                            {/* test category */}
+                            <FilterSection title="Danh mục" options={categoriesTest} filterType="category" />
+
+                            {/* Price Range Filter */}
+                            <div className="mb-6">
+                                <h3 className="text-sm font-semibold mb-2">Lọc theo giá</h3>
+                                <div className="flex space-x-2">
+                                    <input
+                                        type="number"
+                                        placeholder="Từ"
+                                        value={tempPriceRange.from}
+                                        onChange={(e) => handleFilterChange("priceRange", { from: e.target.value })}
+                                        className="w-full px-1 py-1 border rounded-md"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Đến"
+                                        value={tempPriceRange.to}
+                                        onChange={(e) => handleFilterChange("priceRange", { to: e.target.value })}
+                                        className="w-full px-1 py-1 border rounded-md"
+                                    />
+                                </div>
+                                <button
+                                    onClick={applyPriceRangeFilter}
+                                    className="mt-2 w-full bg-primary text-white py-1 rounded-md hover:bg-primary/80"
+                                >
+                                    Áp dụng
+                                </button>
+                            </div>
+
+                            <FilterSection title="Brand" options={brands} filterType="brands" />
+                            <FilterSection title="Loại da" options={skinTypes} filterType="skinType" />
+                            <FilterSection title="Mối quan tâm về da" options={skinConcerns} filterType="skinConcern" />
+                            <FilterSection title="Kết cấu sản phẩm" options={textures} filterType="texture" />
+                            <FilterSection title="Xuất xứ sản phẩm" options={origins} filterType="origin" />
                         </div>
 
-                        <FilterSection title="Brand" options={brands} filterType="brands" />
-                        <FilterSection title="Loại da" options={skinTypes} filterType="skinType" />
-                        <FilterSection title="Mối quan tâm về da" options={skinConcerns} filterType="skinConcern" />
-                        <FilterSection title="Kết cấu sản phẩm" options={textures} filterType="texture" />
-                        <FilterSection title="Xuất xứ sản phẩm" options={origins} filterType="origin" />
-                    </div>
-
-                    {/* Product Listing */}
-                    <div className="lg:w-4/5">
-                        <div className='flex justify-between text-base sm:text-2xl mb-4'>
-                            <h1 className="text-black font-bold font-lg">Danh sách sản phẩm</h1>
-                        </div>
-                        <div className="my-2 bg-white border border-rose-200 rounded-md">
-                            <div className="flex items-center justify-between px-4 py-2">
-                                <div className="flex space-x-2 text-sm">
-                                    <span className="mr-2">Sắp xếp</span>
-                                    <button
-                                        className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "hot" ? "bg-primary text-white" : "bg-white"}`}
-                                        onClick={() => handleSort("hot")}
-                                    >
-                                        Bán chạy
-                                    </button>
-                                    <button
-                                        className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "newest" ? "bg-primary text-white" : "bg-white"}`}
-                                        onClick={() => handleSort("newest")}
-                                    >
-                                        Mới nhất
-                                    </button>
-                                    <button
-                                        className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "low-high" ? "bg-primary text-white" : "bg-white"}`}
-                                        onClick={() => handleSort("low-high")}
-                                    >
-                                        Giá thấp đến cao
-                                    </button>
-                                    <button
-                                        className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "high-low" ? "bg-primary text-white" : "bg-white"}`}
-                                        onClick={() => handleSort("high-low")}
-                                    >
-                                        Giá cao đến thấp
-                                    </button>
+                        {/* Product Listing */}
+                        <div className="lg:w-4/5">
+                            <div className='flex justify-between text-base sm:text-2xl mb-4'>
+                                <h1 className="text-black font-bold font-lg">Danh sách sản phẩm</h1>
+                            </div>
+                            <div className="my-2 bg-white border border-rose-200 rounded-md">
+                                <div className="flex items-center justify-between px-4 py-2">
+                                    <div className="flex space-x-2 text-sm">
+                                        <span className="mr-2">Sắp xếp</span>
+                                        <button
+                                            className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "hot" ? "bg-primary text-white" : "bg-white"}`}
+                                            onClick={() => handleSort("hot")}
+                                        >
+                                            Bán chạy
+                                        </button>
+                                        <button
+                                            className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "newest" ? "bg-primary text-white" : "bg-white"}`}
+                                            onClick={() => handleSort("newest")}
+                                        >
+                                            Mới nhất
+                                        </button>
+                                        <button
+                                            className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "low-high" ? "bg-primary text-white" : "bg-white"}`}
+                                            onClick={() => handleSort("low-high")}
+                                        >
+                                            Giá thấp đến cao
+                                        </button>
+                                        <button
+                                            className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "high-low" ? "bg-primary text-white" : "bg-white"}`}
+                                            onClick={() => handleSort("high-low")}
+                                        >
+                                            Giá cao đến thấp
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
-                            {filteredProducts.map((product, index) => (
-                                //  image, promotion, name, rating, oldPrice, newPrice
-                                <ProductItem
-                                    key={index}
-                                    id={product.id}
-                                    image={product.images && product.images.length > 0 ? product.images[0] : assets.product_new_1}
-                                    promotion={20}
-                                    name={product.name}
-                                    rating={product.rating}
-                                    oldPrice={product.price}
-                                    newPrice={product.price - product.price * 0.2}
-                                />
-                            ))}
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
+                                {filteredProducts.map((product, index) => (
+                                    //  image, promotion, name, rating, oldPrice, newPrice
+                                    <ProductItem
+                                        key={index}
+                                        id={product.id}
+                                        image={product.images && product.images.length > 0 ? product.images[0] : assets.product_new_1}
+                                        promotion={20}
+                                        name={product.name}
+                                        rating={product.rating}
+                                        oldPrice={product.price}
+                                        newPrice={product.price - product.price * 0.2}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </ProductProvider>
     );
-};
-
-Shop.propTypes = {
-    title: PropTypes.string,
-    options: PropTypes.array,
-    filterType: PropTypes.string,
 };
 
 export default Shop;
