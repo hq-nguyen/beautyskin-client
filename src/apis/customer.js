@@ -1,8 +1,5 @@
 import axios from 'axios';
 
-// Use environment variable for API URL (if available)
-// const API_BASE_URL = "https://67af2a599e85da2f020fbe91.mockapi.io";
-
 const API_BASE_URL = "http://14.225.210.92:8080/api";
 
 // Create an axios instance

@@ -6,11 +6,12 @@ const API_BASE_URL = 'http://14.225.210.92:8080/api/';
 const api = axios.create({
     baseURL: API_BASE_URL,
     timeout: 10000, // Optional: set a timeout
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
 });
 
 export default api;
-
-// import api from '../config/axios'
 
 // Fetch all blogs
 export const fetchBlogs = async () => {

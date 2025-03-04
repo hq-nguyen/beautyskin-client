@@ -38,6 +38,7 @@ import TermsOfUsePage from "../components/Support/Term";
 import PrivacyPolicyPage from "../components/Support/Privacy";
 import PaymentPage from "../components/Support/Payment";
 import RefundPage from "../components/Support/Refund";
+import ProductDetailModel from "../components/ProductDetailModel/ProductDetailModel";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -56,6 +57,10 @@ const Routers = () => {
         {
           path: '/shop',
           element: <Shop />,
+        },
+        {
+          path: '/product/:id',
+          element: <ProductDetailModel />,
         },
         {
           path: '/blog',

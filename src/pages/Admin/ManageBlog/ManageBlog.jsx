@@ -43,7 +43,7 @@ const ManageBlog = () => {
             cancelText: 'Không',
             onOk: async () => {
                 try {
-                    await deleteBlog(item.id); // Call your API to delete the blog
+                    await deleteBlog(item.id); 
                     setBlog(blog.filter(b => b.id !== item.id));
                     Modal.success({ content: 'Xóa blog thành công!' });
                 } catch (e) {
