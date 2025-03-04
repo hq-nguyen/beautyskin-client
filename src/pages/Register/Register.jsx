@@ -254,13 +254,13 @@ const Register = () => {
                         />
                         <label htmlFor="terms" className="ml-2 block text-sm text-foreground">
                             Tôi đồng ý với {" "}
-                            <a href="#" className="text-primary hover:underline">
+                            <Link to={'/support'} className="text-primary hover:underline">
                                 Điều khoản dịch vụ
-                            </a>{" "}
+                            </Link>{" "}
                             và{" "}
-                            <a href="#" className="text-primary hover:underline">
+                            <Link to={'/support/privacy'} className="text-primary hover:underline">
                                 Chính sách bảo mật
-                            </a>
+                            </Link>
                         </label>
                     </div>
                     {errors.terms && (
