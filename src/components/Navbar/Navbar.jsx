@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify';
 import { assets } from '../../assets/frontend_assets/assets'
 import { logout } from '../../redux/features/useSlice'
+import { IoIosLogIn } from "react-icons/io";
 import './Navbar.css'
 
 const Navbar = () => {
@@ -78,7 +79,7 @@ const Navbar = () => {
             </div>
           ) : (
             <div className='group relative'>
-              <img className='w-5 cursor-pointer' src={assets.profile_icon} alt="" />
+              <IoIosLogIn className='w-[1.6rem] h-[2rem] cursor-pointer' />
               <div className='absolute z-100 hidden right-0 pt-4 group-hover:block'>
                 <div className='dropdown-menu-box flex flex-col gap-2 w-36 py-3 px-5 bg-white text-gray-500 rounded'>
                   <Link to='/login' className='login-section cursor-pointer hover:text-white hover:bg-rose-500 duration-150'>Đăng nhập</Link>
