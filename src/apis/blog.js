@@ -45,9 +45,9 @@ export const addBlog = async (blog) => {
     }
 };
 
-export const editBlog = async (blog) => {
+export const editBlog = async (id) => {
     try {
-        const response = await api.put(`/blog/edit/${blog.id}`, blog);
+        const response = await api.put(`/blog/edit/${id}`);
         return response.data;
     } catch (error) {
         console.error("Error editing blog:", error);

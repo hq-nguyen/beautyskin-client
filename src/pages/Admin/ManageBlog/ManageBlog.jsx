@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, Popconfirm, Space, Table, Tag } from 'antd';
+import { Button, Modal, Space, Table, Tag } from 'antd';
 import { deleteBlog, fetchBlogs } from '../../../apis/blog';
 import dayjs from 'dayjs';
 import { MdOutlineDeleteOutline } from 'react-icons/md';
@@ -22,11 +22,12 @@ const ManageBlog = () => {
         setInitialValues(null);
     };
 
-    const handleSubmit = (values) => {
+    const handleSubmit = async (values) => {
         console.log(values);
+        const updatedBlogs = await fetchBlogs();
+        setBlog(updatedBlogs);
         setIsOpen(false);
         setInitialValues(null);
-        fetchBlogs();
     };
 
     const handleEdit = (record) => {
@@ -34,13 +35,24 @@ const ManageBlog = () => {
         handleOpenModel();
     }
 
-    const handleDelete = async (id) => {
-        const response = await deleteBlog(id);
-        if (response) {
-            toast.success('Xóa bài viết thành công');
-            fetchBlogs();
-        }
-    }
+    const handleDelete = (item) => {
+        Modal.confirm({
+            title: 'Bạn có chắc chắn muốn xóa khách hàng này?',
+            content: 'Hành động này không thể hoàn tác!',
+            okText: 'Có, xóa',
+            okType: 'danger',
+            cancelText: 'Không',
+            onOk: async () => {
+                try {
+                    await deleteBlog(item.id); // Call your API to delete the blog
+                    setBlog(blog.filter(b => b.id !== item.id));
+                    Modal.success({ content: 'Xóa blog thành công!' });
+                } catch (e) {
+                    Modal.error({ title: 'Xóa blog thất bại!', content: e.message });
+                }
+            },
+        });
+    };
 
     useEffect(() => {
         const getBlog = async () => {
@@ -111,14 +123,7 @@ const ManageBlog = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <Button onClick={() => handleEdit(record)} icon={<CiEdit className="text-blue-500 w-5 h-5" />} />
-                    <Popconfirm
-                        title="Bạn có chắc chắn muốn xóa bài viết này không?"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Có"
-                        cancelText="Không"
-                    >
-                    <Button onClick={() => handleDelete(record)} icon={<MdOutlineDeleteOutline className="text-red-500 w-5 h-5" />} />
-                    </Popconfirm>
+                    <Button onClick={() => handleDelete(record)} icon={<MdOutlineDeleteOutline className="text-blue-500 w-5 h-5"/>}></Button>
                 </Space>
             ),
         },
@@ -153,7 +158,7 @@ const ManageBlog = () => {
 
             <BlogModel
                 isOpen={isOpen}
-                onClose={handleCloseModel} // Pass handleCloseModel as onClose
+                onClose={handleCloseModel}
                 onSubmit={handleSubmit}
                 initialValues={initialValues}
             />
