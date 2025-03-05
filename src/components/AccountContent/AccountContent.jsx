@@ -78,7 +78,7 @@ const AccountContent = () => {
     useEffect(() => {
         const fetchDefaultAddress = async () => {
             try {
-                const response = await axios.get('https://67825c10c51d092c3dcf2d8d.mockapi.io/address');
+                const response = await api.get('address/getAvailable');
                 const defaultAddr = response.data.find(addr => addr.isDefault);
                 setDefaultAddress(defaultAddr || null);
             } catch (error) {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import api from "../../config/axios";
 
 const ShippingAddress = () => {
     const [addresses, setAddresses] = useState([]);
@@ -10,8 +11,7 @@ const ShippingAddress = () => {
         const fetchAddresses = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('https://67825c10c51d092c3dcf2d8d.mockapi.io/address');
-                // Sort addresses to show default address first
+                const response = await api.get('address/getAvailable');
                 const sortedAddresses = response.data.sort((a, b) => b.isDefault - a.isDefault);
                 setAddresses(sortedAddresses);
                 setLoading(false);
