@@ -102,14 +102,10 @@ function AdminSidebar({
     },
     {
       id: 'category',
-      label: 'Danh mục',
+      label: 'Thuộc tính',
       icon: <MdOutlineCategory size={20} />,
-      path: '/admin',
+      path: '/admin/category',
       mark: 'category',
-      subItems: [
-        { label: 'Xem danh mục', path: 'category' },
-        { label: 'Thêm danh mục', path: 'add-category' },
-      ],
     },
     {
       id: 'blog',
