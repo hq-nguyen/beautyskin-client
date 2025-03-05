@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
     Layout,
-    Menu,
     Select,
     Table,
     Button,
@@ -9,14 +8,16 @@ import {
     Form,
     Input,
     Upload,
-    message
+    message,
+    Space
 } from 'antd';
 import {
     PlusOutlined,
     EditOutlined,
     DeleteOutlined
 } from '@ant-design/icons';
-import { ProductAttributeService } from '../../../apis/productAttributes';
+import { ProductAttributeService } from '../../../apis/productAttribute';
+// import { ProductAttributeService } from '../../../apis/productAttributes';
 
 const { Sider, Content } = Layout;
 const { Option } = Select;
@@ -34,20 +35,26 @@ const ProductAttributeManagement = () => {
             switch (attributeType) {
                 case 'category':
                     response = await ProductAttributeService.getCategories();
+                    console.log('Categories Response:', response);
+                    // Directly use the response if it's an array
+                    setData(response);
                     break;
                 case 'brand':
                     response = await ProductAttributeService.getBrands();
+                    setData(response.data);
                     break;
                 case 'concern':
                     response = await ProductAttributeService.getConcerns();
+                    setData(response.data);
                     break;
                 case 'texture':
                     response = await ProductAttributeService.getTextures();
+                    setData(response.data);
                     break;
             }
-            setData(response.data);
         } catch (error) {
-            message.error('Failed to fetch data');
+            console.error('API Call Error:', error);
+            message.error(`Failed to fetch ${attributeType} data: ${error.message}`);
         }
     };
 
@@ -56,26 +63,36 @@ const ProductAttributeManagement = () => {
     }, [attributeType]);
 
     const handleDelete = async (id) => {
-        try {
-            switch (attributeType) {
-                case 'category':
-                    await ProductAttributeService.deleteCategory(id);
-                    break;
-                case 'brand':
-                    await ProductAttributeService.deleteBrand(id);
-                    break;
-                case 'concern':
-                    await ProductAttributeService.deleteConcern(id);
-                    break;
-                case 'texture':
-                    await ProductAttributeService.deleteTexture(id);
-                    break;
+        Modal.confirm({
+            title: 'Bạn có chắc chắn muốn xóa câu hỏi này không?',
+            content: 'Hành động này không thể hoàn lại.',
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    switch (attributeType) {
+                        case 'category':
+                            await ProductAttributeService.deleteCategory(id);
+                            break;
+                        case 'brand':
+                            await ProductAttributeService.deleteBrand(id);
+                            break;
+                        case 'concern':
+                            await ProductAttributeService.deleteConcern(id);
+                            break;
+                        case 'texture':
+                            await ProductAttributeService.deleteTexture(id);
+                            break;
+                    }
+                    message.success('Deleted successfully');
+                    fetchData();
+                } catch (error) {
+                    message.error('Failed to delete');
+                }
             }
-            message.success('Deleted successfully');
-            fetchData();
-        } catch (error) {
-            message.error('Failed to delete');
-        }
+        });
+
     };
 
     const handleSubmit = async (values) => {
@@ -154,12 +171,14 @@ const ProductAttributeManagement = () => {
                         key: 'name'
                     },
                     {
-                        title: 'Action',
-                        key: 'action',
-                        render: (text, record) => (
-                            <div>
+                        title: 'Hành động',
+                        key: 'actions',
+                        width: 150,
+                        render: (_, record) => (
+                            <Space>
                                 <Button
-                                    icon={<EditOutlined />}
+                                    icon={<EditOutlined className="text-blue-500 w-5 h-5" />}
+                                    type="text"
                                     onClick={() => {
                                         setEditingRecord(record);
                                         form.setFieldsValue(record);
@@ -168,11 +187,13 @@ const ProductAttributeManagement = () => {
                                 />
                                 <Button
                                     icon={<DeleteOutlined />}
+                                    type="text"
+                                    danger
                                     onClick={() => handleDelete(record.id)}
                                 />
-                            </div>
-                        )
-                    }
+                            </Space>
+                        ),
+                    },
                 ];
             case 'brand':
                 return [
