@@ -1,10 +1,12 @@
-/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { Edit, Trash2, X } from 'lucide-react';
-import axios from "axios";
 import { toast } from "react-toastify";
+import api from '../../config/axios';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const AddressManagement = () => {
+    const navigate = useNavigate();
     const [addresses, setAddresses] = useState([]);
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [addressToDelete, setAddressToDelete] = useState(null);
@@ -12,40 +14,84 @@ const AddressManagement = () => {
     const [editingAddress, setEditingAddress] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [errors, setErrors] = useState({});
-
+    const [isLoading, setIsLoading] = useState(false);
+    // New state for province/district/ward
+    const [province, setProvince] = useState([]);
+    const [district, setDistrict] = useState([]);
+    const [ward, setWard] = useState([]);
     const [newAddress, setNewAddress] = useState({
-        name: '',
-        phone: '',
-        address: '',
-        isDefault: false
-    }); 
+        userId: null,
+        name: "",
+        phone: "",
+        address: "",
+        province: "",
+        district: "",
+        ward: "",
+        default: false
+    });
+
+
+
+    useEffect(() => {
+        const userId = localStorage.getItem('id')
+        if (userId) {
+            setNewAddress(prev => ({ ...prev, userId: userId }))
+        }
+    }, [])
+
+    useEffect(() => {
+        axios.get('https://provinces.open-api.vn/api/?depth=3')
+            .then(response => {
+                setProvince(response.data);
+            })
+            .catch(error => console.error('Lỗi tải danh sách tỉnh:', error));
+    }, []);
+
+    useEffect(() => {
+        if (newAddress.province) {
+            const selectedProvince = province.find(prov => prov.name === newAddress.province);
+            setDistrict(selectedProvince ? selectedProvince.districts : []);
+            setNewAddress(prev => ({ ...prev, district: '', ward: '' }));
+        }
+    }, [newAddress.province, province]);
+
+    useEffect(() => {
+        if (newAddress.district) {
+            const selectedDistrict = district.find(dist => dist.name === newAddress.district);
+            setWard(selectedDistrict ? selectedDistrict.wards : []);
+            setNewAddress(prev => ({ ...prev, ward: '' }));
+        }
+    }, [newAddress.district, district]);
 
     const fetch = async () => {
         try {
+            setIsLoading(true);
             console.log("fetching address");
-            const response = await axios.get('https://67825c10c51d092c3dcf2d8d.mockapi.io/address');
-            let sortedAddresses = response.data.sort((a, b) => b.isDefault - a.isDefault);
+            const userId = localStorage.getItem('id')
+            const response = await api.get(`/address/getAvailable?uesrId=${userId}`);
+            let sortedAddresses = response.data.sort((a, b) => b.default - a.default);
             setAddresses(sortedAddresses);
             console.log("done fetching address");
         } catch (error) {
             console.error("Error fetching addresses", error);
+            toast.error("Không thể tải danh sách địa chỉ");
+        } finally {
+            setIsLoading(false);
         }
     };
-    
+
 
     useEffect(() => {
         fetch();
-    }, [])
+    }, []);
 
     useEffect(() => {
-        // Disable body scrolling when modal is open
         if (showAddModal || showEditModal || showConfirmDelete) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'auto';
         }
-        
-        // Cleanup function to restore scrolling when component unmounts
+
         return () => {
             document.body.style.overflow = 'auto';
         };
@@ -54,100 +100,134 @@ const AddressManagement = () => {
     const validateForm = (address) => {
         const newErrors = {};
         const phoneRegex = /^\d{10}$/;
-        
-        if (!address.name?.trim()) {
-            newErrors.name = "Vui lòng nhập tên người nhận";
-        }
 
-        if (!phoneRegex.test(address.phone)) {
-            newErrors.phone = "Số điện thoại không hợp lệ";
-        }
-        
-        if (!address.address?.trim()) {
-            newErrors.address = "Vui lòng nhập địa chỉ";
-        }
-        
+        if (!address.name?.trim()) newErrors.name = "Vui lòng nhập tên người nhận";
+        if (!phoneRegex.test(address.phone)) newErrors.phone = "Số điện thoại không hợp lệ";
+        if (!address.address?.trim()) newErrors.address = "Vui lòng nhập địa chỉ";
+        if (!address.province) newErrors.province = "Vui lòng chọn tỉnh/thành phố";
+        if (!address.district) newErrors.district = "Vui lòng chọn quận/huyện";
+        if (!address.ward) newErrors.ward = "Vui lòng chọn phường/xã";
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleAddAddress = () => {
         setNewAddress({
-            name: '',
-            phone: '',
-            address: '',
-            isDefault: false
+            name: "",
+            phone: "",
+            address: "",
+            province: "",
+            district: "",
+            ward: "",
+            default: false
         });
         setErrors({});
         setShowAddModal(true);
     };
 
     const handleSubmitNewAddress = async () => {
-        if (!validateForm(newAddress)) {
-            return;
-        }
-    
+        if (!validateForm(newAddress)) return;
         try {
-            if (newAddress.isDefault) {
-                await Promise.all(
-                    addresses
-                        .filter(addr => addr.isDefault)
-                        .map(addr => axios.put(
-                            `https://67825c10c51d092c3dcf2d8d.mockapi.io/address/${addr.id}`,
-                            { isDefault: false }
-                        ))
-                );
+            setIsLoading(true);
+            const userId = localStorage.getItem('id')
+            const addressData = {
+                ...newAddress,
+                userId: userId,
+                default: false
             }
-    
-            await axios.post('https://67825c10c51d092c3dcf2d8d.mockapi.io/address', newAddress);
+
+            if (addressData.default) {
+                const defaultAddresses = addresses.filter(addr => addr.default).map(addr => addr.id);
+                if (defaultAddresses.length > 0) {
+                    await api.put(`/address/update/${newAddress.userId}`,
+                        { default: false }
+                    )
+
+                }
+            }
+
+            const response = await api.post('/address/create', addressData);
+            const newAddressFromServer = response.data;
+            setAddresses(prevAddresses => {
+                let updatedAddresses = prevAddresses.map(addr => ({
+                    ...addr,
+                    default: addressData.default ? false : addr.default
+                }));
+                updatedAddresses = [...updatedAddresses, newAddressFromServer];
+                return updatedAddresses.sort((a, b) => b.default - a.default);
+            });
+            navigate('/user/manage-address')
+            setNewAddress({
+                userId: '',
+                province: '',
+                district: '',
+                ward: '',
+                address: '',
+                name: '',
+                phone: '',
+                //default: false
+            });
+            setShowAddModal(false)
             toast.success('Thêm địa chỉ thành công');
-            await fetch();
-            setShowAddModal(false);
         } catch (error) {
-            toast.error('Không thể thêm địa chỉ');
-            console.log("Error adding address", error);
+            console.error('Error adding address:', error);
+            toast.error(error.response?.data?.message || 'Không thể thêm địa chỉ');
+        } finally {
+            setIsLoading(false);
         }
     };
-    
+
 
     const handleEditAddress = (id) => {
+        console.log(id);
         const addressToEdit = addresses.find(addr => addr.id === id);
+        const userId = localStorage.getItem('id')
+        if (!addressToEdit) {
+            toast.error("Không tìm thấy địa chỉ");
+            return;
+        }
+        addressToEdit.userId = userId
         setEditingAddress(addressToEdit);
-        setErrors({});
         setShowEditModal(true);
+
     };
+
     const handleUpdateAddress = async () => {
         if (!validateForm(editingAddress)) {
             return;
         }
-    
+        console.log(editingAddress);
         try {
-            if (editingAddress.isDefault) {
-                // Cập nhật tất cả các địa chỉ khác thành isDefault: false trước khi cập nhật địa chỉ này
+            setIsLoading(true);
+            if (editingAddress.default) {
+                const defaultAddresses = addresses.filter(addr =>
+                    addr.id !== editingAddress.id && addr.default
+                );
+
                 await Promise.all(
-                    addresses
-                        .filter(addr => addr.id !== editingAddress.id && addr.isDefault)
-                        .map(addr => axios.put(
-                            `https://67825c10c51d092c3dcf2d8d.mockapi.io/address/${addr.id}`,
-                            { isDefault: false }
-                        ))
+                    defaultAddresses.map(addr =>
+                        api.put(`address/update/${addr.id}`, { default: false })
+                    )
                 );
             }
-    
-            await axios.put(
-                `https://67825c10c51d092c3dcf2d8d.mockapi.io/address/${editingAddress.id}`,
+
+            await api.put(
+                `address/update/${editingAddress.id}`,
                 editingAddress
             );
-    
+
             toast.success('Cập nhật địa chỉ thành công');
-            await fetch();
+            await fetch(); // Gọi lại danh sách địa chỉ
             setShowEditModal(false);
         } catch (error) {
             toast.error('Không thể cập nhật địa chỉ');
             console.log("Error updating address", error);
+        } finally {
+            setIsLoading(false);
         }
     };
-    
+
 
     const confirmDelete = (id) => {
         setAddressToDelete(id);
@@ -156,13 +236,16 @@ const AddressManagement = () => {
 
     const handleDeleteAddress = async () => {
         try {
-            const response = await axios.delete(`https://67825c10c51d092c3dcf2d8d.mockapi.io/address/${addressToDelete}`)
-            toast.success('successful delete address')
+            setIsLoading(true);
+            await api.delete(`address/delete/${addressToDelete}`);
+            toast.success('Xóa địa chỉ thành công');
             await fetch();
             setShowConfirmDelete(false);
         } catch (error) {
-            toast.error('Fail to delete address')
+            toast.error('Không thể xóa địa chỉ');
             console.log("Error deleting address", error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -176,6 +259,94 @@ const AddressManagement = () => {
         zIndex: 9999,
     };
 
+    const addressFields = (address, setAddress) => (
+        <>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tên người nhận</label>
+                <input
+                    type="text"
+                    value={address.name}
+                    onChange={(e) => setAddress({ ...address, name: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : ''}`}
+                />
+                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                <input
+                    type="text"
+                    value={address.phone}
+                    onChange={(e) => setAddress({ ...address, phone: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone ? 'border-red-500' : ''}`}
+                />
+                {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành phố</label>
+                <select
+                    value={address.province}
+                    onChange={(e) => setAddress({ ...address, province: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.province ? 'border-red-500' : ''}`}
+                >
+                    <option value="">Chọn tỉnh/thành phố</option>
+                    {province.map(prov => (
+                        <option key={prov.code} value={prov.name}>{prov.name}</option>
+                    ))}
+                </select>
+                {errors.province && <p className="mt-1 text-sm text-red-500">{errors.province}</p>}
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện</label>
+                <select
+                    value={address.district}
+                    onChange={(e) => setAddress({ ...address, district: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.district ? 'border-red-500' : ''}`}
+                >
+                    <option value="">Chọn quận/huyện</option>
+                    {district.map(dist => (
+                        <option key={dist.code} value={dist.name}>{dist.name}</option>
+                    ))}
+                </select>
+                {errors.district && <p className="mt-1 text-sm text-red-500">{errors.district}</p>}
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phường/Xã</label>
+                <select
+                    value={address.ward}
+                    onChange={(e) => setAddress({ ...address, ward: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.ward ? 'border-red-500' : ''}`}
+                >
+                    <option value="">Chọn phường/xã</option>
+                    {ward.map(ward => (
+                        <option key={ward.code} value={ward.name}>{ward.name}</option>
+                    ))}
+                </select>
+                {errors.ward && <p className="mt-1 text-sm text-red-500">{errors.ward}</p>}
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ chi tiết</label>
+                <textarea
+                    value={address.address}
+                    onChange={(e) => setAddress({ ...address, address: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.address ? 'border-red-500' : ''}`}
+                    rows={3}
+                />
+                {errors.address && <p className="mt-1 text-sm text-red-500">{errors.address}</p>}
+            </div>
+            <div className="flex items-center">
+                <input
+                    type="checkbox"
+                    checked={address.default}
+                    onChange={(e) => setAddress({ ...address, default: true })}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label className="ml-2 block text-sm text-gray-900">
+                    Đặt làm địa chỉ mặc định
+                </label>
+            </div>
+        </>
+    );
+
     return (
         <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px]">
             <h2 className="text-xl font-bold mb-4">Số địa chỉ nhận hàng</h2>
@@ -186,19 +357,23 @@ const AddressManagement = () => {
                         key={addr.id}
                         className="border rounded-lg p-4 flex justify-between items-center"
                     >
-                        <div>
+                        <div className="flex-1">
                             <div className="font-semibold">
                                 {addr.name} - {addr.phone}
-                                {addr.isDefault && (
-                                    <span className="ml-2 px-2 py-1 bg-red-100 text-red-600 rounded-md text-xs">
+                                {addr.default && (
+                                    <span className="ml-2 inline-block px-2 py-1 text-xs font-medium text-white bg-green-500 rounded-full">
                                         Mặc định
                                     </span>
                                 )}
                             </div>
-                            <div className="text-gray-600">{addr.address}</div>
+                            <div className="text-gray-600">
+                                <p>
+                                    {addr.address}, {addr.ward}, {addr.district}, {addr.province}
+                                </p>
+                            </div>
                         </div>
 
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 ml-4">
                             <button
                                 onClick={() => handleEditAddress(addr.id)}
                                 className="text-blue-500 hover:bg-blue-100 p-2 rounded-full"
@@ -222,73 +397,12 @@ const AddressManagement = () => {
                     <div className="bg-white rounded-lg p-6 w-[500px] max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold">Thêm địa chỉ mới</h3>
-                            <button 
-                                onClick={() => setShowAddModal(false)}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
+                            <button onClick={() => setShowAddModal(false)} className="text-gray-500 hover:text-gray-700">
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Tên người nhận
-                                </label>
-                                <input
-                                    type="text"
-                                    value={newAddress.name}
-                                    onChange={(e) => setNewAddress({...newAddress, name: e.target.value})}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                        errors.name ? 'border-red-500' : ''
-                                    }`}
-                                />
-                                {errors.name && (
-                                    <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Số điện thoại
-                                </label>
-                                <input
-                                    type="text"
-                                    value={newAddress.phone}
-                                    onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                        errors.phone ? 'border-red-500' : ''
-                                    }`}
-                                />
-                                {errors.phone && (
-                                    <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Địa chỉ
-                                </label>
-                                <textarea
-                                    value={newAddress.address}
-                                    onChange={(e) => setNewAddress({...newAddress, address: e.target.value})}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                        errors.address ? 'border-red-500' : ''
-                                    }`}
-                                    rows={3}
-                                />
-                                {errors.address && (
-                                    <p className="mt-1 text-sm text-red-500">{errors.address}</p>
-                                )}
-                            </div>
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    checked={newAddress.isDefault}
-                                    onChange={(e) => setNewAddress({...newAddress, isDefault: e.target.checked})}
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                />
-                                <label className="ml-2 block text-sm text-gray-900">
-                                    Đặt làm địa chỉ mặc định
-                                </label>
-                            </div>
+                            {addressFields(newAddress, setNewAddress)}
                         </div>
                         <div className="flex justify-end space-x-4 mt-6">
                             <button
@@ -314,73 +428,12 @@ const AddressManagement = () => {
                     <div className="bg-white rounded-lg p-6 w-[500px] max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold">Chỉnh sửa địa chỉ</h3>
-                            <button 
-                                onClick={() => setShowEditModal(false)}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
+                            <button onClick={() => setShowEditModal(false)} className="text-gray-500 hover:text-gray-700">
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Tên người nhận
-                                </label>
-                                <input
-                                    type="text"
-                                    value={editingAddress?.name || ''}
-                                    onChange={(e) => setEditingAddress({...editingAddress, name: e.target.value})}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                        errors.name ? 'border-red-500' : ''
-                                    }`}
-                                />
-                                {errors.name && (
-                                    <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Số điện thoại
-                                </label>
-                                <input
-                                    type="text"
-                                    value={editingAddress?.phone || ''}
-                                    onChange={(e) => setEditingAddress({...editingAddress, phone: e.target.value})}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                        errors.phone ? 'border-red-500' : ''
-                                    }`}
-                                />
-                                {errors.phone && (
-                                    <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Địa chỉ
-                                </label>
-                                <textarea
-                                    value={editingAddress?.address || ''}
-                                    onChange={(e) => setEditingAddress({...editingAddress, address: e.target.value})}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                        errors.address ? 'border-red-500' : ''
-                                    }`}
-                                    rows={3}
-                                />
-                                {errors.address && (
-                                    <p className="mt-1 text-sm text-red-500">{errors.address}</p>
-                                )}
-                            </div>
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    checked={editingAddress?.isDefault || false}
-                                    onChange={(e) => setEditingAddress({...editingAddress, isDefault: e.target.checked})}
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                />
-                                <label className="ml-2 block text-sm text-gray-900">
-                                    Đặt làm địa chỉ mặc định
-                                </label>
-                            </div>
+                            {addressFields(editingAddress, setEditingAddress)}
                         </div>
                         <div className="flex justify-end space-x-4 mt-6">
                             <button
@@ -406,7 +459,7 @@ const AddressManagement = () => {
                     <div className="bg-white rounded-lg p-6 w-96">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold">Xác nhận xóa</h3>
-                            <button 
+                            <button
                                 onClick={() => setShowConfirmDelete(false)}
                                 className="text-gray-500 hover:text-gray-700"
                             >
