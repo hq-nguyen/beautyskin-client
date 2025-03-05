@@ -21,8 +21,6 @@ import ManageStaff from "../pages/Admin/ManageStaff/ManageStaff";
 import AddStaff from "../pages/Admin/ManageStaff/AddStaff";
 import ManageCustomer from "../pages/Admin/ManageCustomer/ManageCustomer";
 import ManageOrder from "../pages/Admin/ManageOrder/ManageOrder";
-import ManageCategory from "../pages/Admin/ManageCategory/ManageCategory";
-import AddCategory from "../pages/Admin/ManageCategory/AddCategory";
 import Promotion from "../pages/PromotionManagement/promotion";
 import ShoppingCart from "../pages/ShoppingCart/Cart";
 import BlogDetail from "../pages/Blog/BlogDetail";
@@ -39,6 +37,7 @@ import PrivacyPolicyPage from "../components/Support/Privacy";
 import PaymentPage from "../components/Support/Payment";
 import RefundPage from "../components/Support/Refund";
 import ProductDetailModel from "../components/ProductDetailModel/ProductDetailModel";
+import ProductAttributeManagement from "../pages/Admin/ManageAttribute/ManageAttribute";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -173,11 +172,7 @@ const Routers = () => {
         },
         {
           path: "category",
-          element: <ManageCategory />,
-        },
-        {
-          path: "add-category",
-          element: <AddCategory />,
+          element: <ProductAttributeManagement />,
         },
         {
           path: "blog",
