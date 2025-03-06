@@ -15,6 +15,7 @@
     ];
 
     export const ProductAttributeService = {
+        // categories
         getCategories: async () => {
             try {
                 const response = await api.get('category/get');
@@ -24,6 +25,7 @@
                 throw new Error("Failed to fetch categories. Please try again later.");
             }
         },
+
         createCategory: async (data) => {
             try {
                 const response = await api.post('category/create', data);
@@ -33,6 +35,7 @@
                 throw new Error("Failed to create category. Please try again later.");
             }
         },
+
         updateCategory: async (id, data) => {
             try {
                 const response = await api.put(`category/update/${id}`, data);
@@ -42,6 +45,7 @@
                 throw new Error("Failed to update category. Please try again later.");
             }
         },
+
         deleteCategory: async (id) => {
             try {
                 const response = await api.delete(`category/delete/${id}`);
@@ -52,6 +56,7 @@
             }
         },
 
+        // brands
         getBrands: async () => {
             try {
                 const response = await api.get('brand/get');
@@ -91,45 +96,49 @@
                 throw new Error("Failed to delete brand. Please try again later.");
             }
         },
-
-        // getBrands: () => axios.get(`${API_BASE_URL}/brand`),
-        // createBrand: (data) => axios.post(`${API_BASE_URL}/brand`, data, {
-        //     headers: { 'Content-Type': 'multipart/form-data' }
-        // }),
-        // updateBrand: (id, data) => axios.put(`${API_BASE_URL}/brand/${id}`, data, {
-        //     headers: { 'Content-Type': 'multipart/form-data' }
-        // }),
-        // deleteBrand: (id) => axios.delete(`${API_BASE_URL}/brand/${id}`),
-
-        //   getConcerns: () => axios.get(`${API_BASE_URL}/concern`),
-        //   createConcern: (data) => axios.post(`${API_BASE_URL}/concern`, data),
-        //   updateConcern: (id, data) => axios.put(`${API_BASE_URL}/concern/${id}`, data),
-        //   deleteConcern: (id) => axios.delete(`${API_BASE_URL}/concern/${id}`),
-
         //   getTextures: () => axios.get(`${API_BASE_URL}/texture`),
         //   createTexture: (data) => axios.post(`${API_BASE_URL}/texture`, data),
         //   updateTexture: (id, data) => axios.put(`${API_BASE_URL}/texture/${id}`, data),
         //   deleteTexture: (id) => axios.delete(`${API_BASE_URL}/texture/${id}`)
 
-        getConcerns: () => Promise.resolve({ data: mockConcerns }),
-        createConcern: (data) => {
-            const newConcern = { ...data, id: mockConcerns.length + 1 };
-            mockConcerns.push(newConcern);
-            return Promise.resolve(newConcern);
-        },
-        updateConcern: (id, data) => {
-            const index = mockConcerns.findIndex(c => c.id === id);
-            if (index !== -1) {
-                mockConcerns[index] = { ...mockConcerns[index], ...data };
+        getSkinType: async () => {
+            try {
+                const response = await api.get('skinType/getAll');
+                return response.data;
+            } catch (error) {
+                console.error("Error fetching skin type:", error);
+                throw new Error("Failed to fetch skin type. Please try again later.");
             }
-            return Promise.resolve(mockConcerns[index]);
         },
-        deleteConcern: (id) => {
-            const index = mockConcerns.findIndex(c => c.id === id);
-            if (index !== -1) {
-                mockConcerns.splice(index, 1);
+
+        createSkinType: async (data) => {
+            try {
+                const response = await api.post('skinType/create', data);
+                return response.data;
+            } catch (error) {
+                console.error("Error creating skin type:", error);
+                throw new Error("Failed to create skin type. Please try again later.");
             }
-            return Promise.resolve();
+        },
+
+        updateSkinType: async (id, data) => {
+            try {
+                const response = await api.put(`skinType/update/${id}`, data);
+                return response.data;
+            } catch (error) {
+                console.error("Error updating skin type:", error);
+                throw new Error("Failed to update skin type. Please try again later.");
+            }
+        },
+
+        deleteSkinType: async (id) => {
+            try {
+                const response = await api.delete(`skinType/delete/${id}`);
+                return response.data;
+            } catch (error) {
+                console.error("Error deleting skin type:", error);
+                throw new Error("Failed to delete skin type. Please try again later.");
+            }
         },
 
         getTextures: () => Promise.resolve({ data: mockTextures }),
