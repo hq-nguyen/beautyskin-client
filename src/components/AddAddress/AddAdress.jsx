@@ -19,9 +19,9 @@ const AddressForm = () => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
-  const [successMessage, setSuccessMessage] = useState('');
+  //const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [addresses, setAddresses] = useState([]); // Added to manage existing addresses
+  const [addresses, setAddresses] = useState([]); 
 
   useEffect(() => {
     axios.get('https://provinces.open-api.vn/api/?depth=3')
@@ -76,14 +76,14 @@ const AddressForm = () => {
         };
 
         if (addressData.isDefault) {
-          const defaultAddresses = addresses.filter(addr => addr.isDefault).map(addr => addr.id);
-          if (defaultAddresses.length > 0) {
-            await api.put('/address/update-default', {
-              userId: userId,
-              currentDefaultAddressIds: defaultAddresses
-            });
+          const isDefaultAddresses = addresses.filter(addr => addr.isDefault).map(addr => addr.id);
+          if (isDefaultAddresses.length > 0) {
+              await api.put(`/address/update/${formData.userId}`,
+                  { isDefault: false }
+              )
+
           }
-        }
+      }
 
         // Create new address
         const response = await api.post('/address/create', addressData);

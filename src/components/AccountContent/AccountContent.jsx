@@ -78,7 +78,8 @@ const AccountContent = () => {
     useEffect(() => {
         const fetchDefaultAddress = async () => {
             try {
-                const response = await api.get('address/getAvailable');
+                const userId = localStorage.getItem('id')
+                const response = await api.get(`address/getByUser/${userId}`);
                 const defaultAddr = response.data.find(addr => addr.isDefault);
                 setDefaultAddress(defaultAddr || null);
             } catch (error) {
