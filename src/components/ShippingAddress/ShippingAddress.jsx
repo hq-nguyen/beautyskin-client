@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import api from "../../config/axios";
 
 const ShippingAddress = () => {
@@ -11,7 +10,8 @@ const ShippingAddress = () => {
         const fetchAddresses = async () => {
             try {
                 setLoading(true);
-                const response = await api.get('address/getAvailable');
+                const userId = localStorage.getItem('id')
+                const response = await api.get(`address/getByUser/${userId}`);
                 const sortedAddresses = response.data.sort((a, b) => b.isDefault - a.isDefault);
                 setAddresses(sortedAddresses);
                 setLoading(false);
@@ -52,7 +52,7 @@ const ShippingAddress = () => {
                                 <div className="flex justify-between">
                                     <div>
                                         <span className="px-2 py-1 bg-red-100 text-red-600 rounded-md text-xs mb-2 inline-block">
-                                            Địa chỉ mặc định
+                                            Mặc định
                                         </span>
                                         <h4 className="font-medium">{defaultAddress.name} - {defaultAddress.phone}</h4>
                                         <p className="text-gray-600 mt-1">{defaultAddress.address}</p>
