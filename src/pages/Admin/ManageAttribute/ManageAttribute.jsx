@@ -9,7 +9,8 @@ import {
     Input,
     Upload,
     message,
-    Space
+    Space,
+    Image
 } from 'antd';
 import {
     PlusOutlined,
@@ -17,7 +18,7 @@ import {
     DeleteOutlined
 } from '@ant-design/icons';
 import { ProductAttributeService } from '../../../apis/productAttribute';
-// import { ProductAttributeService } from '../../../apis/productAttributes';
+import uploadFile from '../../../utils/upload';
 
 const { Sider, Content } = Layout;
 const { Option } = Select;
@@ -28,6 +29,7 @@ const ProductAttributeManagement = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [editingRecord, setEditingRecord] = useState(null);
     const [form] = Form.useForm();
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -35,13 +37,12 @@ const ProductAttributeManagement = () => {
             switch (attributeType) {
                 case 'category':
                     response = await ProductAttributeService.getCategories();
-                    console.log('Categories Response:', response);
-                    // Directly use the response if it's an array
+                    // console.log('Categories Response:', response);
                     setData(response);
                     break;
                 case 'brand':
                     response = await ProductAttributeService.getBrands();
-                    setData(response.data);
+                    setData(Array.isArray(response) ? response : [response]);
                     break;
                 case 'concern':
                     response = await ProductAttributeService.getConcerns();
@@ -64,7 +65,7 @@ const ProductAttributeManagement = () => {
 
     const handleDelete = async (id) => {
         Modal.confirm({
-            title: 'Bạn có chắc chắn muốn xóa câu hỏi này không?',
+            title: 'Bạn có chắc chắn muốn xóa thuộc tính này không?',
             content: 'Hành động này không thể hoàn lại.',
             okText: 'Xóa',
             okType: 'danger',
@@ -85,10 +86,10 @@ const ProductAttributeManagement = () => {
                             await ProductAttributeService.deleteTexture(id);
                             break;
                     }
-                    message.success('Deleted successfully');
+                    message.success('Đã xóa thành công');
                     fetchData();
                 } catch (error) {
-                    message.error('Failed to delete');
+                    message.error('Có lỗi khi xóa', error.message);
                 }
             }
         });
@@ -96,7 +97,35 @@ const ProductAttributeManagement = () => {
     };
 
     const handleSubmit = async (values) => {
+        setIsSubmitted(true);
         try {
+            let imageUrl = editingRecord?.imageUrl;
+
+            // Handle file upload only if a new file is selected
+            if (values.image && values.image.file) {
+                try {
+                    imageUrl = await uploadFile(values.image.file);
+                    console.log('Uploaded Image URL:', imageUrl);
+                } catch (uploadError) {
+                    console.error('Image Upload Error:', uploadError);
+                    message.error('Failed to upload image');
+                    return;
+                }
+            }
+
+            const formData = {
+                name: values.name,
+                description: values.description || '',
+                imageUrl: imageUrl || ''
+            };
+
+            console.log('Submission Data:', {
+                isEditing: !!editingRecord,
+                attributeType,
+                data: formData
+            });
+
+
             if (editingRecord) {
                 // Update logic
                 switch (attributeType) {
@@ -104,11 +133,7 @@ const ProductAttributeManagement = () => {
                         await ProductAttributeService.updateCategory(editingRecord.id, values);
                         break;
                     case 'brand': {
-                        const formData = {
-                            name: values.name,
-                            description: values.description,
-                            image: values.image ? URL.createObjectURL(values.image.file) : editingRecord.image
-                        };
+                        console.log('Updating Brand:', editingRecord.id, formData);
                         await ProductAttributeService.updateBrand(editingRecord.id, formData);
                         break;
                     }
@@ -126,11 +151,6 @@ const ProductAttributeManagement = () => {
                         await ProductAttributeService.createCategory(values);
                         break;
                     case 'brand': {
-                        const formData = {
-                            name: values.name,
-                            description: values.description,
-                            image: URL.createObjectURL(values.image.file)
-                        };
                         await ProductAttributeService.createBrand(formData);
                         break;
                     }
@@ -147,7 +167,9 @@ const ProductAttributeManagement = () => {
             fetchData();
             form.resetFields();
         } catch (error) {
-            message.error('Operation failed');
+            message.error('Operation failed', error.message);
+        } finally {
+            setIsSubmitted(false);
         }
     };
 
@@ -166,7 +188,7 @@ const ProductAttributeManagement = () => {
                 return [
                     ...baseColumns,
                     {
-                        title: 'Category Name',
+                        title: 'Tên danh mục',
                         dataIndex: 'name',
                         key: 'name'
                     },
@@ -199,28 +221,40 @@ const ProductAttributeManagement = () => {
                 return [
                     ...baseColumns,
                     {
-                        title: 'Brand Name',
+                        title: 'Tên thương hiệu',
                         dataIndex: 'name',
                         key: 'name'
                     },
                     {
-                        title: 'Description',
+                        title: 'Thông tin mô tả',
                         dataIndex: 'description',
                         key: 'description'
                     },
                     {
-                        title: 'Image',
-                        dataIndex: 'image',
-                        key: 'image',
-                        render: (image) => <img src={image} style={{ maxWidth: 50 }} alt="Brand" />
+                        title: 'Logo',
+                        dataIndex: 'imageUrl',
+                        key: 'imageUrl',
+                        render: (imageUrl) => (
+                            <Image
+                                src={imageUrl}
+                                alt="Brand"
+                                style={{
+                                    maxWidth: 50,
+                                    maxHeight: 50,
+                                    objectFit: 'contain'
+                                }}
+                            />
+                        )
                     },
                     {
-                        title: 'Action',
-                        key: 'action',
-                        render: (text, record) => (
-                            <div>
+                        title: 'Hành động',
+                        key: 'actions',
+                        width: 150,
+                        render: (_, record) => (
+                            <Space>
                                 <Button
-                                    icon={<EditOutlined />}
+                                    icon={<EditOutlined className="text-blue-500 w-5 h-5" />}
+                                    type="text"
                                     onClick={() => {
                                         setEditingRecord(record);
                                         form.setFieldsValue(record);
@@ -229,11 +263,13 @@ const ProductAttributeManagement = () => {
                                 />
                                 <Button
                                     icon={<DeleteOutlined />}
+                                    type="text"
+                                    danger
                                     onClick={() => handleDelete(record.id)}
                                 />
-                            </div>
-                        )
-                    }
+                            </Space>
+                        ),
+                    },
                 ];
             case 'concern':
                 return [
@@ -336,18 +372,22 @@ const ProductAttributeManagement = () => {
                         <Form.Item
                             name="image"
                             label="Upload Image"
-                            rules={[
-                                { required: !editingRecord, message: 'Image is required' }
-                            ]}
+
                         >
                             <Upload
-                                name="image"
                                 listType="picture-card"
-                                className="image-uploader"
-                                showUploadList={true}
+                                fileList={form.getFieldValue('image')?.fileList}
                                 beforeUpload={() => false}
+                                onChange={({ fileList }) => {
+                                    form.setFieldsValue({
+                                        image: {
+                                            fileList: fileList,
+                                            file: fileList.length > 0 ? fileList[0].originFileObj : null,
+                                        },
+                                    });
+                                }}
                             >
-                                <PlusOutlined />
+                                {form.getFieldValue('image')?.fileList?.length >= 1 ? null : <PlusOutlined />}
                             </Upload>
                         </Form.Item>
                     </>
