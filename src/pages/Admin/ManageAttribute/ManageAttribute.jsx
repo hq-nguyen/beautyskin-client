@@ -44,9 +44,9 @@ const ProductAttributeManagement = () => {
                     response = await ProductAttributeService.getBrands();
                     setData(Array.isArray(response) ? response : [response]);
                     break;
-                case 'concern':
-                    response = await ProductAttributeService.getConcerns();
-                    setData(response.data);
+                case 'skinType':
+                    response = await ProductAttributeService.getSkinType();
+                    setData(Array.isArray(response) ? response : [response]);
                     break;
                 case 'texture':
                     response = await ProductAttributeService.getTextures();
@@ -79,8 +79,8 @@ const ProductAttributeManagement = () => {
                         case 'brand':
                             await ProductAttributeService.deleteBrand(id);
                             break;
-                        case 'concern':
-                            await ProductAttributeService.deleteConcern(id);
+                        case 'skinType':
+                            await ProductAttributeService.deleteSkinType(id);
                             break;
                         case 'texture':
                             await ProductAttributeService.deleteTexture(id);
@@ -113,56 +113,63 @@ const ProductAttributeManagement = () => {
                 }
             }
 
-            const formData = {
-                name: values.name,
-                description: values.description || '',
-                imageUrl: imageUrl || ''
-            };
+            // Create appropriate data object based on attribute type
+            let submitData;
 
-            console.log('Submission Data:', {
-                isEditing: !!editingRecord,
-                attributeType,
-                data: formData
-            });
-
+            switch (attributeType) {
+                case 'category':
+                case 'texture':
+                    submitData = values;
+                    break;
+                case 'brand':
+                    submitData = {
+                        name: values.name,
+                        description: values.description || '',
+                        imageUrl: imageUrl || ''
+                    };
+                    break;
+                case 'skinType':
+                    submitData = {
+                        name: values.name,
+                        description: values.description || '',
+                    };
+                    break;
+            }
 
             if (editingRecord) {
                 // Update logic
                 switch (attributeType) {
                     case 'category':
-                        await ProductAttributeService.updateCategory(editingRecord.id, values);
+                        await ProductAttributeService.updateCategory(editingRecord.id, submitData);
                         break;
-                    case 'brand': {
-                        console.log('Updating Brand:', editingRecord.id, formData);
-                        await ProductAttributeService.updateBrand(editingRecord.id, formData);
+                    case 'brand':
+                        await ProductAttributeService.updateBrand(editingRecord.id, submitData);
                         break;
-                    }
-                    case 'concern':
-                        await ProductAttributeService.updateConcern(editingRecord.id, values);
+                    case 'skinType':
+                        await ProductAttributeService.updateSkinType(editingRecord.id, submitData);
                         break;
                     case 'texture':
-                        await ProductAttributeService.updateTexture(editingRecord.id, values);
+                        await ProductAttributeService.updateTexture(editingRecord.id, submitData);
                         break;
                 }
             } else {
                 // Create logic
                 switch (attributeType) {
                     case 'category':
-                        await ProductAttributeService.createCategory(values);
+                        await ProductAttributeService.createCategory(submitData);
                         break;
-                    case 'brand': {
-                        await ProductAttributeService.createBrand(formData);
+                    case 'brand':
+                        await ProductAttributeService.createBrand(submitData);
                         break;
-                    }
-                    case 'concern':
-                        await ProductAttributeService.createConcern(values);
+                    case 'skinType':
+                        await ProductAttributeService.createSkinType(submitData);
                         break;
                     case 'texture':
-                        await ProductAttributeService.createTexture(values);
+                        await ProductAttributeService.createTexture(submitData);
                         break;
                 }
             }
-            message.success(`${editingRecord ? 'Updated' : 'Created'} successfully`);
+            message.success(`${editingRecord ? 'Cập nhật' : 'Tạo mới'} thành công`);
             setModalVisible(false);
             fetchData();
             form.resetFields();
@@ -271,34 +278,46 @@ const ProductAttributeManagement = () => {
                         ),
                     },
                 ];
-            case 'concern':
+            case 'skinType':
                 return [
                     ...baseColumns,
                     {
-                        title: 'Concern Name',
-                        dataIndex: 'name',
-                        key: 'name'
+                        title: 'Loại da',
+                        dataIndex: 'typeName',
+                        key: 'typeName'
                     },
                     {
-                        title: 'Action',
-                        key: 'action',
-                        render: (text, record) => (
-                            <div>
+                        title: 'Mô tả',
+                        dataIndex: 'description',
+                        key: 'description',
+                    },
+                    {
+                        title: 'Hành động',
+                        key: 'actions',
+                        width: 150,
+                        render: (_, record) => (
+                            <Space>
                                 <Button
-                                    icon={<EditOutlined />}
+                                    icon={<EditOutlined className="text-blue-500 w-5 h-5" />}
+                                    type="text"
                                     onClick={() => {
                                         setEditingRecord(record);
-                                        form.setFieldsValue(record);
+                                        form.setFieldsValue({
+                                            typeName: record.name,
+                                            description: record.description
+                                        });
                                         setModalVisible(true);
                                     }}
                                 />
                                 <Button
                                     icon={<DeleteOutlined />}
+                                    type="text"
+                                    danger
                                     onClick={() => handleDelete(record.id)}
                                 />
-                            </div>
-                        )
-                    }
+                            </Space>
+                        ),
+                    },
                 ];
             case 'texture':
                 return [
@@ -392,18 +411,29 @@ const ProductAttributeManagement = () => {
                         </Form.Item>
                     </>
                 );
-            case 'concern':
+            case 'skinType':
                 return (
-                    <Form.Item
-                        name="name"
-                        label="Concern Name"
-                        rules={[
-                            { required: true, message: 'Concern name is required' },
-                            { max: 100, message: 'Maximum 100 characters allowed' }
-                        ]}
-                    >
-                        <Input />
-                    </Form.Item>
+                    <>
+                        <Form.Item
+                            name="name"
+                            label="Tên loại da"
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập tên loại da' },
+                                { max: 100, message: 'Tối đa 100 kí tự' }
+                            ]}
+                        >
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
+                            name="description"
+                            label="Mô tả"
+                            rules={[
+                                { max: 500, message: 'Tối đa 500 kí tự' }
+                            ]}
+                        >
+                            <Input.TextArea />
+                        </Form.Item>
+                    </>
                 );
             case 'texture':
                 return (
@@ -432,7 +462,7 @@ const ProductAttributeManagement = () => {
                 >
                     <Option value="category">Category</Option>
                     <Option value="brand">Brand</Option>
-                    <Option value="concern">Concern</Option>
+                    <Option value="skinType">Loại da</Option>
                     <Option value="texture">Texture</Option>
                 </Select>
 
@@ -446,7 +476,7 @@ const ProductAttributeManagement = () => {
                     }}
                     style={{ marginBottom: 16, marginLeft: 16 }}
                 >
-                    Add New
+                    Thêm mới
                 </Button>
 
                 <Table
@@ -456,7 +486,7 @@ const ProductAttributeManagement = () => {
                 />
 
                 <Modal
-                    title={`${editingRecord ? 'Edit' : 'Add'} ${attributeType}`}
+                    title={`${editingRecord ? 'Chỉnh sửa' : 'Thêm mới'} ${attributeType}`}
                     visible={modalVisible}
                     onCancel={() => setModalVisible(false)}
                     onOk={() => form.submit()}
