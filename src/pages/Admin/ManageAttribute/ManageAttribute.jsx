@@ -48,9 +48,9 @@ const ProductAttributeManagement = () => {
                     response = await ProductAttributeService.getSkinType();
                     setData(Array.isArray(response) ? response : [response]);
                     break;
-                case 'texture':
-                    response = await ProductAttributeService.getTextures();
-                    setData(response.data);
+                case 'concern':
+                    response = await ProductAttributeService.getConcern();
+                    setData(Array.isArray(response) ? response : [response]);
                     break;
             }
         } catch (error) {
@@ -82,8 +82,8 @@ const ProductAttributeManagement = () => {
                         case 'skinType':
                             await ProductAttributeService.deleteSkinType(id);
                             break;
-                        case 'texture':
-                            await ProductAttributeService.deleteTexture(id);
+                        case 'concern':
+                            await ProductAttributeService.deleteConcern(id);
                             break;
                     }
                     message.success('Đã xóa thành công');
@@ -118,8 +118,11 @@ const ProductAttributeManagement = () => {
 
             switch (attributeType) {
                 case 'category':
-                case 'texture':
-                    submitData = values;
+                case 'concern':
+                    submitData = {
+                        name: values.name,
+                        description: values.description || '',
+                    };
                     break;
                 case 'brand':
                     submitData = {
@@ -148,8 +151,8 @@ const ProductAttributeManagement = () => {
                     case 'skinType':
                         await ProductAttributeService.updateSkinType(editingRecord.id, submitData);
                         break;
-                    case 'texture':
-                        await ProductAttributeService.updateTexture(editingRecord.id, submitData);
+                    case 'concern':
+                        await ProductAttributeService.updateConcern(editingRecord.id, submitData);
                         break;
                 }
             } else {
@@ -164,8 +167,8 @@ const ProductAttributeManagement = () => {
                     case 'skinType':
                         await ProductAttributeService.createSkinType(submitData);
                         break;
-                    case 'texture':
-                        await ProductAttributeService.createTexture(submitData);
+                    case 'concern':
+                        await ProductAttributeService.createConcern(submitData);
                         break;
                 }
             }
@@ -319,33 +322,44 @@ const ProductAttributeManagement = () => {
                         ),
                     },
                 ];
-            case 'texture':
+            case 'concern':
                 return [
                     ...baseColumns,
                     {
-                        title: 'Texture Name',
+                        title: 'Vấn đề về da',
                         dataIndex: 'name',
                         key: 'name'
                     },
                     {
+                        title: 'Mô tả',
+                        dataIndex: 'description',
+                        key: 'description'
+                    },
+                    {
                         title: 'Action',
                         key: 'action',
-                        render: (text, record) => (
-                            <div>
+                        render: (_, record) => (
+                            <Space>
                                 <Button
-                                    icon={<EditOutlined />}
+                                    icon={<EditOutlined className="text-blue-500 w-5 h-5" />}
+                                    type="text"
                                     onClick={() => {
                                         setEditingRecord(record);
-                                        form.setFieldsValue(record);
+                                        form.setFieldsValue({
+                                            name: record.name,
+                                            description: record.description
+                                        });
                                         setModalVisible(true);
                                     }}
                                 />
                                 <Button
                                     icon={<DeleteOutlined />}
+                                    type="text"
+                                    danger
                                     onClick={() => handleDelete(record.id)}
                                 />
-                            </div>
-                        )
+                            </Space>
+                        ),
                     }
                 ];
         }
@@ -435,18 +449,29 @@ const ProductAttributeManagement = () => {
                         </Form.Item>
                     </>
                 );
-            case 'texture':
+            case 'concern':
                 return (
-                    <Form.Item
-                        name="name"
-                        label="Texture Name"
-                        rules={[
-                            { required: true, message: 'Texture name is required' },
-                            { max: 100, message: 'Maximum 100 characters allowed' }
-                        ]}
-                    >
-                        <Input />
-                    </Form.Item>
+                    <>
+                        <Form.Item
+                            name="name"
+                            label="Tên vấn đề về da"
+                            rules={[
+                                { required: true, message: 'concern name is required' },
+                                { max: 100, message: 'Maximum 100 characters allowed' }
+                            ]}
+                        >
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
+                            name="description"
+                            label="Mô tả"
+                            rules={[
+                                { max: 500, message: 'Tối đa 500 kí tự' }
+                            ]}
+                        >
+                            <Input.TextArea />
+                        </Form.Item>
+                    </>
                 );
         }
     };
@@ -463,7 +488,7 @@ const ProductAttributeManagement = () => {
                     <Option value="category">Category</Option>
                     <Option value="brand">Brand</Option>
                     <Option value="skinType">Loại da</Option>
-                    <Option value="texture">Texture</Option>
+                    <Option value="concern">Vấn đề da</Option>
                 </Select>
 
                 <Button

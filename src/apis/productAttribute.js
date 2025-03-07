@@ -96,11 +96,8 @@
                 throw new Error("Failed to delete brand. Please try again later.");
             }
         },
-        //   getTextures: () => axios.get(`${API_BASE_URL}/texture`),
-        //   createTexture: (data) => axios.post(`${API_BASE_URL}/texture`, data),
-        //   updateTexture: (id, data) => axios.put(`${API_BASE_URL}/texture/${id}`, data),
-        //   deleteTexture: (id) => axios.delete(`${API_BASE_URL}/texture/${id}`)
 
+        // skin types
         getSkinType: async () => {
             try {
                 const response = await api.get('skinType/getAll');
@@ -141,24 +138,44 @@
             }
         },
 
-        getTextures: () => Promise.resolve({ data: mockTextures }),
-        createTexture: (data) => {
-            const newTexture = { ...data, id: mockTextures.length + 1 };
-            mockTextures.push(newTexture);
-            return Promise.resolve(newTexture);
-        },
-        updateTexture: (id, data) => {
-            const index = mockTextures.findIndex(t => t.id === id);
-            if (index !== -1) {
-                mockTextures[index] = { ...mockTextures[index], ...data };
+        // skin concerns
+        getConcern: async () => {
+            try {
+                const response = await api.get('skinConcern/get');
+                return response.data;
+            } catch (error) {
+                console.error("Error fetching skin concern:", error);
+                throw new Error("Failed to fetch skin concern. Please try again later.");
             }
-            return Promise.resolve(mockTextures[index]);
         },
-        deleteTexture: (id) => {
-            const index = mockTextures.findIndex(t => t.id === id);
-            if (index !== -1) {
-                mockTextures.splice(index, 1);
+
+        createConcern: async (data) => {
+            try {
+                const response = await api.post('skinConcern/create', data);
+                return response.data;
+            } catch (error) {
+                console.error("Error creating skin concern:", error);
+                throw new Error("Failed to create skin concern. Please try again later.");
             }
-            return Promise.resolve();
-        }
+        },
+
+        updateConcern: async (id, data) => {
+            try {
+                const response = await api.put(`skinConcern/update/${id}`, data);
+                return response.data;
+            } catch (error) {
+                console.error("Error updating skin concern:", error);
+                throw new Error("Failed to update skin concern. Please try again later.");
+            }
+        },
+
+        deleteConcern: async (id) => {
+            try {
+                const response = await api.delete(`skinConcern/delete/${id}`);
+                return response.data;
+            } catch (error) {
+                console.error("Error deleting skin concern:", error);
+                throw new Error("Failed to delete skin concern. Please try again later.");
+            }
+        },
     };
