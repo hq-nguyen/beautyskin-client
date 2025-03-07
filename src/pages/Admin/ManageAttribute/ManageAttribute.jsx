@@ -283,8 +283,8 @@ const ProductAttributeManagement = () => {
                     ...baseColumns,
                     {
                         title: 'Loại da',
-                        dataIndex: 'typeName',
-                        key: 'typeName'
+                        dataIndex: 'name',
+                        key: 'name'
                     },
                     {
                         title: 'Mô tả',
@@ -303,7 +303,7 @@ const ProductAttributeManagement = () => {
                                     onClick={() => {
                                         setEditingRecord(record);
                                         form.setFieldsValue({
-                                            typeName: record.name,
+                                            name: record.name,
                                             description: record.description
                                         });
                                         setModalVisible(true);
