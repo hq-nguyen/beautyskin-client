@@ -5,9 +5,9 @@ import {
     Select,
     Button,
     Divider,
-    Modal
+    Modal,
 } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import { SaveOutlined, PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -35,7 +35,7 @@ const QuestionForm = ({
 
             const formattedValues = {
                 ...values,
-                answer: values.answers.map(ans => ({
+                answer: values.answers?.map(ans => ({
                     ...ans,
                     point: parseInt(ans.points, 10)
                 }))
@@ -87,10 +87,21 @@ const QuestionForm = ({
                     <TextArea placeholder="Nhập mô tả cho câu hỏi" rows={2} />
                 </Form.Item>
 
-                <Divider>Câu trả lời với số điểm tương ứng (1-4)</Divider>
+                <Divider>Câu trả lời với số điểm tương ứng (1-5)</Divider>
 
-                <Form.List name="answers">
-                    {(fields) => (
+                <Form.List name="answers"
+                    rules={[
+                        {
+                            validator: async (_, answers) => {
+                                if (!answers || answers.length < 1) {
+                                    return Promise.reject(new Error('Cần có ít nhất 1 câu trả lời'));
+                                }
+                                return Promise.resolve();
+                            },
+                        },
+                    ]}
+                >
+                    {(fields, { add, remove }, { errors }) => (
                         <>
                             {fields.map((field, index) => (
                                 <div key={field.key} style={{ display: 'flex', marginBottom: '8px' }}>
@@ -108,17 +119,41 @@ const QuestionForm = ({
                                         {...field}
                                         name={[field.name, 'points']}
                                         fieldKey={[field.fieldKey, 'point']}
-                                        style={{ width: '150px', marginBottom: '8px' }}
+                                        style={{ width: '150px', marginRight: '12px', marginBottom: '8px' }}
+                                        rules={[{ required: true, message: 'Chọn điểm số' }]}
                                     >
                                         <Select placeholder="Points">
                                             <Option value="1">1 điểm</Option>
                                             <Option value="2">2 điểm</Option>
                                             <Option value="3">3 điểm</Option>
                                             <Option value="4">4 điểm</Option>
+                                            <Option value="5">5 điểm</Option>
                                         </Select>
                                     </Form.Item>
+
+                                    {fields.length > 1 && (
+                                        <Button
+                                            type="text"
+                                            danger
+                                            icon={<MinusCircleOutlined />}
+                                            onClick={() => remove(field.name)}
+                                            style={{ marginBottom: '8px' }}
+                                        />
+                                    )}
                                 </div>
                             ))}
+
+                            <Form.Item>
+                                <Button
+                                    type="dashed"
+                                    onClick={() => add({ answer: '', points: '1' })}
+                                    icon={<PlusOutlined />}
+                                    style={{ width: '100%' }}
+                                >
+                                    Thêm câu trả lời
+                                </Button>
+                                <Form.ErrorList errors={errors} />
+                            </Form.Item>
                         </>
                     )}
                 </Form.List>
