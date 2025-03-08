@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Table, Tag, Space, Modal, Button, Image } from 'antd';
+import { Table, Tag, Space, Modal, Button, Image, Badge } from 'antd';
 import { CiEdit } from "react-icons/ci";
 import { MdOutlineDeleteOutline, MdOutlineRemoveRedEye } from "react-icons/md";
 import { fetchProducts, deleteProduct } from '../../../apis/product';
@@ -29,14 +29,13 @@ const ManageProduct = () => {
     }, []);
 
     const handleEdit = (product) => {
-        console.log("Product to edit:", product); // Debugging
         setCurrentProduct(product);
         setIsModalVisible(true);
     };
 
     const handleCloseModal = () => {
         setIsModalVisible(false);
-        setCurrentProduct(null); // Reset currentProduct when closing
+        setCurrentProduct(null);
     };
 
     const handleQuickView = (product) => {
@@ -45,18 +44,16 @@ const ManageProduct = () => {
     };
 
     const handleCloseQuickView = () => {
-        setIsQuickViewOpen(false); // Corrected: Close QuickView modal
+        setIsQuickViewOpen(false);
         setCurrentProduct(null);
     };
 
     const handleSaveProduct = (updatedProduct) => {
-        console.log("Updated Product:", updatedProduct); // Debugging
-        console.log("Updated product images:", updatedProduct.images);
         const updatedProducts = products.map(product =>
             product.id === updatedProduct.id ? updatedProduct : product
         );
         setProducts(updatedProducts);
-        setIsModalVisible(false); // Close the modal
+        setIsModalVisible(false);
         setCurrentProduct(null);
     };
 
@@ -84,26 +81,41 @@ const ManageProduct = () => {
         });
     };
 
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'AVAILABLE':
+                return 'green';
+            case 'OUT_OF_STOCK':
+                return 'red';
+            case 'LOW_STOCK':
+                return 'orange';
+            default:
+                return 'default';
+        }
+    };
+
     const columns = [
         {
             title: 'Id',
             dataIndex: 'id',
             key: 'id',
+            width: 80,
         },
         {
             title: 'Ảnh',
-            dataIndex: 'images',
-            key: 'images',
+            dataIndex: 'image',
+            key: 'image',
+            width: 80,
             render: (images) => {
-                if (images && images.length > 0) { // Make sure images exist and is an array
+                if (images && images.length > 0) {
                     return (
                         <Image
-                            src={images[0]} // Display the first image
+                            src={images[0]}
                             alt="product"
-                            style={{ width: 50, height: 50 }}
+                            style={{ width: 50, height: 50, objectFit: 'cover' }}
                             onError={(e) => {
-                                e.target.onerror = null; // Prevent infinite loop
-                                e.target.src = "no img"; // Replace with a default image URL
+                                e.target.onerror = null;
+                                e.target.src = "/images/no-image.png";
                             }}
                         />
                     );
@@ -116,42 +128,63 @@ const ManageProduct = () => {
             title: 'Tên sản phẩm',
             dataIndex: 'name',
             key: 'name',
+            ellipsis: true,
+        },
+        {
+            title: 'Mô tả',
+            dataIndex: 'description',
+            key: 'description',
+            ellipsis: true,
+            width: 200,
         },
         {
             title: 'Danh mục',
-            dataIndex: 'category',
-            key: 'category',
-            render: (category) => {
-                const categories = Array.isArray(category) ? category : [category || 'No Category'];
-                return categories.map((cat, index) => (
-                    <Tag color="blue" key={`${cat}-${index}`}>{cat}</Tag>
-                ));
-            }
-        },
-        {
-            title: 'Thương hiệu',
-            dataIndex: 'brand',
-            key: 'brand',
+            dataIndex: 'categoryId',
+            key: 'categoryId',
+            render: (categoryId) => (
+                <Tag color="blue">{categoryId}</Tag>
+            )
         },
         {
             title: 'Giá tiền',
             dataIndex: 'price',
             key: 'price',
-            render: (price) => `${price.toLocaleString()} đ`
+            render: (price) => price ? `${price.toLocaleString()} đ` : 'N/A'
         },
         {
-            title: 'Đánh giá',
-            dataIndex: 'rating',
-            key: 'rating',
+            title: 'Tồn kho',
+            dataIndex: 'stock',
+            key: 'stock',
+            render: (stock) => stock ? stock.toLocaleString() : 0
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'status',
+            key: 'status',
+            render: (status) => (
+                <Badge 
+                    status={getStatusColor(status)} 
+                    text={status === 'AVAILABLE' ? 'Có sẵn' : 
+                           status === 'OUT_OF_STOCK' ? 'Hết hàng' : 
+                           status === 'LOW_STOCK' ? 'Sắp hết' : status} 
+                />
+            )
+        },
+        {
+            title: 'Ngày tạo',
+            dataIndex: 'createDateTime',
+            key: 'createDateTime',
+            render: (date) => new Date(date).toLocaleDateString('vi-VN')
         },
         {
             title: 'Hành động',
             key: 'action',
+            width: 150,
             render: (_, record) => (
                 <Space size="middle">
                     <Button onClick={() => handleEdit(record)} icon={<CiEdit className="text-blue-500 w-5 h-5" />} />
                     <Button onClick={() => handleDelete(record)} icon={<MdOutlineDeleteOutline className="text-red-500 w-5 h-5" />} />
-                    <Button onClick={() => handleQuickView(record)} icon={<MdOutlineRemoveRedEye className="text-blue-500 w-5 h-5" />}></Button>
+                    <Button onClick={() => handleQuickView(record)} icon={<MdOutlineRemoveRedEye className="text-blue-500 w-5 h-5" />} />
                 </Space>
             ),
         },
@@ -175,12 +208,13 @@ const ManageProduct = () => {
                     pagination={{ position: ['bottomRight'] }}
                     rowClassName={(_, index) => (index % 2 === 0 ? "bg-gray-100" : "bg-white")}
                     className="w-full border rounded-lg shadow-md"
+                    scroll={{ x: 1200 }}
                 />
             )}
 
             {currentProduct && (
                 <ProductModel
-                    key={currentProduct.id} // Use a stable key
+                    key={currentProduct.id}
                     product={currentProduct}
                     onSave={handleSaveProduct}
                     onCancel={handleCloseModal}

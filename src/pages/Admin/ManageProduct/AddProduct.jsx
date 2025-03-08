@@ -1,25 +1,56 @@
-import { useState, useEffect } from 'react';
-import { Input, Button, Form, Checkbox, Select, Row, Col, Image, Upload, message, DatePicker } from 'antd';
+import { useEffect, useState } from 'react';
+import {
+  Input, Button, Form, Select, Row, Col, Image, Upload, message, DatePicker, InputNumber, Card, Typography, Space
+} from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import './ProductModel.css'; // Reuse the same CSS for consistent styling
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import './ProductModel.css';
 import { addProduct } from '../../../apis/product';
 import uploadFile from '../../../utils/upload';
+import dayjs from 'dayjs';
+import { ProductAttributeService } from '../../../apis/productAttribute';
 
 const { TextArea } = Input;
+const { Option } = Select;
+const { Title } = Typography;
 
 const AddProductPage = () => {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Use useNavigate for navigation
+  const [categories, setCategories] = useState([]);
+  const [textures, setTextures] = useState([]);
+  const [skinTypes, setSkinTypes] = useState([]);
+  const [skinConcerns, setSkinConcerns] = useState([]);
+  const navigate = useNavigate();
+
+  const fetchCategories = async () => {
+    const cate = await ProductAttributeService.getCategories();
+    setCategories(cate);
+  };
+  const fetchTextures = async () => {
+    const text = await ProductAttributeService.getTextures();
+    setTextures(text);
+  };
+  const fetchSkinTypes = async () => {
+    const skinTypes = await ProductAttributeService.getSkinType();
+    setSkinTypes(skinTypes);
+  };
+  const fetchSkinConcerns = async () => {
+    const skinConcerns = await ProductAttributeService.getConcern();
+    setSkinConcerns(skinConcerns);
+  };
+
   useEffect(() => {
-    // console.log("fileList changed:", fileList);
-    // Debugging
-  }, [fileList]);
+    fetchCategories();
+    fetchTextures();
+    fetchSkinTypes();
+    fetchSkinConcerns();
+  }, []);
 
   const handleSave = async () => {
-
     form
       .validateFields()
       .then(async (values) => {
@@ -29,37 +60,53 @@ const AddProductPage = () => {
           // Upload images to Firebase Storage
           const imageUrls = await Promise.all(
             fileList.map(async (file) => {
-              const url = await uploadFile(file.originFileObj); // Assuming uploadFile returns a single URL
+              const url = await uploadFile(file.originFileObj);
               return url;
             })
           );
 
-          // Add the image URLs to the values object
-          const productData = { ...values, images: imageUrls };  // Use "images" to match your API
+          // Format the data according to the new schema
+          const currentDate = new Date().toISOString();
+
+          const productData = {
+            name: values.name,
+            description: values.description,
+            stock: parseInt(values.stock) || 0,
+            createDateTime: currentDate,
+            lastUpdateDateTime: currentDate,
+            expiredDateTime: values.expiredDateTime ? values.expiredDateTime.toISOString() : currentDate,
+            status: values.status || "AVAILABLE",
+            image: imageUrls,
+            price: parseFloat(values.price) || 0,
+            ingredients: values.ingredients || "",
+            instruction: values.instruction || "",
+            categoryId: values.categoryId || 0,
+            skinTypeId: values.skinTypeId || [],
+            skinConcernId: values.skinConcernId || [],
+            tagId: values.tagId || [],
+            routineSteps: values.routineSteps || [],
+            forms: values.forms || [],
+            deleted: false
+          };
 
           // Call the addProduct API with the complete product data
-          const newProduct = await addProduct(productData);
+          await addProduct(productData);
 
           message.success('Đã thêm thành công sản phẩm!');
-          form.resetFields(); // Clear the form after successful add
-          setFileList([]); // Clear image list
-          navigate('/admin/list-products'); // Redirect to manage product page
+          form.resetFields();
+          setFileList([]);
+          navigate('/admin/list-products');
         } catch (error) {
           message.error(error.message || 'Thêm sản phẩm thất bại.');
         } finally {
           setLoading(false);
         }
-        console.log('Received values:', values);
-
       })
       .catch((info) => {
         console.log('Validate Failed:', info);
       });
-
-
   };
 
-  // upload image handler
   const getBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -71,15 +118,6 @@ const AddProductPage = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
 
-  // const [fileList, setFileList] = useState([
-  //   {
-  //     uid: '-1',
-  //     name: 'image.png',
-  //     status: 'done',
-  //     url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-  //   },
-  // ]);
-
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
@@ -87,9 +125,9 @@ const AddProductPage = () => {
     setPreviewImage(file.url || file.preview);
     setPreviewOpen(true);
   };
+
   const handleChange = ({ fileList: newFileList }) => {
     setFileList(newFileList);
-    console.log("New fileList:", newFileList); // Debugging
   };
 
   const uploadButton = (
@@ -124,240 +162,231 @@ const AddProductPage = () => {
     return isJpgOrPng && isLt2M;
   };
 
-  // const uploadImage = async (options) => {
-  //   const { onSuccess, onError, file } = options;
-  //   const formData = new FormData();
-  //   formData.append("image", file);
-
-  //   try {
-  //     const res = await uploadFile(file);
-
-  //     if (res.data.success) {
-  //       form.setFieldsValue({ imageUrl: res.data.imageUrl });
-  //       setFileList([{
-  //         uid: '-1',
-  //         name: file.name,
-  //         status: 'done',
-  //         url: res.data.imageUrl,
-  //       }]);
-  //       onSuccess("Ok");
-  //     } else {
-  //       onError("Upload failed");
-  //       message.error("Upload failed: " + res.data.message);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error uploading image:", error);
-  //     onError("Upload failed");
-  //     message.error("Upload failed: " + error.message);
-  //   }
-  // };
-
-  // const handleImageRemove = () => {
-  //   form.setFieldsValue({ imageUrl: null });
-  //   setFileList([]);
-  // };
-
-  // const customRequest = (options) => {
-  //   uploadImage(options);
-  // };
-
   const handleCancel = () => {
-    navigate('/admin/list-products'); // Redirect to manage product page
+    navigate('/admin/list-products');
   };
+
+  const disabledDate = (current) => {
+    return current && current < dayjs().startOf('day');
+  };
+
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      [{ 'color': [] }, { 'background': [] }],
+      ['link', 'image'],
+      ['clean']
+    ],
+  };
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'color', 'background',
+    'link', 'image'
+  ];
 
   return (
     <div className="p-4">
-      <div className='flex justify-between items-center mb-4'>
-        <h1 className="text-2xl font-bold mb-4 text-black">Thêm sản phẩm</h1>
-      </div>
+      <Title level={2} className="mb-4">Thêm sản phẩm</Title>
       <Form
         form={form}
         layout="vertical"
         style={{ width: '100%' }}
+        initialValues={{
+          status: "AVAILABLE",
+          stock: 0,
+          price: 0
+        }}
       >
-        <div className="product-model-content">
-          <div className="flex flex-wrap" style={{ width: '100%' }}>
-            {/* Basic information */}
-            <div style={{ width: '60%', padding: '20px' }}>
-              <h3 className="text-lg font-semibold">Thông tin cơ bản</h3>
-
+        <Row gutter={[24, 24]}>
+          {/* Column 1 */}
+          <Col xs={24} md={12}>
+            <Card title={<Title level={4}>Thông tin cơ bản</Title>} bordered={false}>
               <Form.Item label="Tên sản phẩm" name="name" rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm!' }]}>
                 <Input />
               </Form.Item>
-
               <Form.Item label="Mô tả sản phẩm" name="description" rules={[{ required: true, message: 'Vui lòng nhập mô tả sản phẩm!' }]}>
-                <TextArea rows={4} />
-              </Form.Item>
-
-              <Form.Item label="Hướng dẫn sử dụng" name="usageInstruction">
-                <TextArea rows={4} />
-              </Form.Item>
-
-              {/* Categories */}
-              <Form.Item label="Danh mục" name="category">
-                <Checkbox.Group>
-                  <Row>
-                    {['Chăm sóc da', 'Makeup', 'Đặc trị', 'Dưỡng da', 'Thiết bị'].map((cat) => (
-                      <Col span={8} key={cat}>
-                        <Checkbox value={cat}>{cat}</Checkbox>
-                      </Col>
-                    ))}
-                  </Row>
-                </Checkbox.Group>
-              </Form.Item>
-
-              {/* Brand */}
-              <Form.Item label="Thương hiệu" name="brand">
-                <Select>
-                  {['Brand A', 'Brand B', 'Brand C', 'Brand D'].map((brand) => (
-                    <Select.Option key={brand} value={brand}>
-                      {brand}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              {/* Publish */}
-              <Form.Item name="publish" label="Ngày xuất khẩu" rules={[{ required: true }]}>
-                <DatePicker />
-              </Form.Item>
-
-              {/* Price */}
-              <Form.Item label="Giá tiền" name="price" rules={[{ required: true, message: 'Vui lòng nhập giá tiền!' }]}>
-                <Input type="number" />
-              </Form.Item>
-
-              {/* Status */}
-              <Form.Item label="Trạng thái" name="status">
-                <Select>
-                  <Select.Option value="còn hàng">Còn hàng</Select.Option>
-                  <Select.Option value="hết hàng">Hết hàng</Select.Option>
-                </Select>
-              </Form.Item>
-
-              {/* Tags */}
-              <Form.Item label="Tags" name="tag">
-                <Checkbox.Group>
-                  <Row>
-                    {['Sản phẩm mới', 'Bán chạy', 'Hàng giới hạn', 'Phổ biến', 'Mềm', 'Mùi thơm'].map((tag) => (
-                      <Col span={8} key={tag}>
-                        <Checkbox value={tag}>{tag}</Checkbox>
-                      </Col>
-                    ))}
-                  </Row>
-                </Checkbox.Group>
-              </Form.Item>
-            </div>
-
-            {/* Specific details */}
-            <div style={{ width: '40%', padding: '20px' }}>
-              <h3 className="text-lg font-semibold">Chi tiết cụ thể</h3>
-
-              {/* Volume */}
-              <Form.Item label="Dung tích (hoặc khối lượng)" name="capacity">
-                <Checkbox.Group>
-                  <Row>
-                    {['100ml', '80ml', '100g', '80g'].map((tag) => (
-                      <Col span={8} key={tag}>
-                        <Checkbox value={tag}>{tag}</Checkbox>
-                      </Col>
-                    ))}
-                  </Row>
-                </Checkbox.Group>
-              </Form.Item>
-
-              {/* Type of skin */}
-              <Form.Item label="Loại da" name="skin_type">
-                <Checkbox.Group>
-                  <Row>
-                    {['Da dầu', 'Da khô', 'Da tổng hợp', 'Da thường'].map((type) => (
-                      <Col className='mr-4' span={8} key={type}>
-                        <Checkbox value={type}>{type}</Checkbox>
-                      </Col>
-                    ))}
-                  </Row>
-                </Checkbox.Group>
-              </Form.Item>
-
-              <Form.Item name="skinConcern" label="Vấn đề da">
-                <Checkbox.Group>
-                  <Row>
-                    {['Da mụn', 'Da lão hóa', 'Da lỗ chân lông', 'Da có nếp nhăn'].map((type) => (
-                      <Col className="mr-4" span={10} key={type}>
-                        <Checkbox value={type}>{type}</Checkbox>
-                      </Col>
-                    ))}
-                  </Row>
-                </Checkbox.Group>
-              </Form.Item>
-
-              <Form.Item
-                name="ingredients"
-                label="Thành phần"
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item name="texture" label="Chất liệu">
-                <Select>
-                  {['Dạng dung dịch', 'Dạng kem', 'Serum', 'Tạo bọt', 'Kết cấu gel'].map((texture) => (
-                    <Select.Option key={texture} value={texture}>
-                      {texture}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item name="origin" label="Xuất xứ">
-                <Select>
-                  {['Hàn Quốc', 'Trung Quốc', 'Việt Nam', 'Ấn Độ', 'Singapore', 'England', 'US'].map((origin) => (
-                    <Select.Option key={origin} value={origin}>
-                      {origin}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              {/* stock */}
-              <Form.Item label="Số lượng sản phẩm" name="stock" rules={[{ required: true, message: 'Vui lòng nhập tồn kho!' }]}>
-                <Input type="number" />
-              </Form.Item>
-            </div>
-
-            {/* upload image */}
-            <div style={{ width: '100%', padding: '20px' }}>
-              <h3 className="text-lg font-semibold">Hình ảnh sản phẩm</h3>
-
-              <Upload
-                listType="picture-card"
-                fileList={fileList}
-                beforeUpload={beforeUpload}
-                onChange={handleChange}
-                onPreview={handlePreview}
-              >
-                {fileList.length >= 8 ? null : uploadButton}
-              </Upload>
-              {previewImage && (
-                <Image
-                  wrapperStyle={{
-                    display: 'none',
-                  }}
-                  preview={{
-                    visible: previewOpen,
-                    onVisibleChange: (visible) => setPreviewOpen(visible),
-                    afterOpenChange: (visible) => !visible && setPreviewImage(''),
-                  }}
-                  src={previewImage}
+                <ReactQuill
+                  theme="snow"
+                  modules={modules}
+                  formats={formats}
+                  style={{ height: '200px', marginBottom: '60px' }}
                 />
-              )}
+              </Form.Item>
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={8}>
+                  <Form.Item label="Danh mục" name="categoryId" rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}>
+                    <Select mode='single'>
+                      {categories.map((category) => (
+                        <Option key={category.id} value={category.id}>{category.name}</Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
 
-            </div>
-            <div style={{ width: '100%', padding: '20px', textAlign: 'right' }}>
+                <Col xs={24} md={8}>
+                  <Form.Item label="Giá tiền" name="price" rules={[{ required: true, message: 'Vui lòng nhập giá tiền!' }]}>
+                    <InputNumber
+                      style={{ width: '100%' }}
+                      formatter={(value) => ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                      parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                    />
+                  </Form.Item>
+                </Col>
+                {/* <Col xs={24} md={8}>
+                                    <Form.Item label="Trạng thái" name="status">
+                                        <Select>
+                                            <Option value="AVAILABLE">Có sẵn</Option>
+                                            <Option value="OUT_OF_STOCK">Hết hàng</Option>
+                                            <Option value="LOW_STOCK">Sắp hết hàng</Option>
+                                        </Select>
+                                    </Form.Item>
+                                </Col> */}
+              </Row>
+              <Form.Item label="Thành phần" name="ingredients">
+                <TextArea rows={4} />
+              </Form.Item>
+            </Card>
+          </Col>
+
+          {/* Column 2 */}
+          <Col xs={24} md={12}>
+            <Card title={<Title level={4}>Chi tiết sản phẩm</Title>} bordered={false}>
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Số lượng sản phẩm" name="stock" rules={[{ required: true, message: 'Vui lòng nhập tồn kho!' }]}>
+                    <Input type="number" min={0} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="expiredDateTime"
+                    label="Hạn sử dụng"
+                    rules={[
+                      {
+                        validator: (_, value) => {
+                          if (value && value < dayjs().startOf('day')) {
+                            return Promise.reject('Ngày hết hạn không thể trước ngày hiện tại!');
+                          }
+                          return Promise.resolve();
+                        }
+                      }
+                    ]}
+                  >
+                    <DatePicker
+                      style={{ width: '100%' }}
+                      format="DD/MM/YYYY"
+                      disabledDate={disabledDate}
+                      placeholder="Chọn hạn sử dụng"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Form.Item label="Hướng dẫn sử dụng" name="instruction">
+                <ReactQuill
+                  theme="snow"
+                  modules={modules}
+                  formats={formats}
+                  style={{ height: '200px', marginBottom: '60px' }}
+                />
+              </Form.Item>
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Dạng sản phẩm" name="forms">
+                    <Select mode="single">
+                      {textures.map((texture) => (
+                        <Select.Option key={texture.id} value={texture.id}>{texture.name}</Select.Option>
+                      ))}
+                      </Select>
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Loại da" name="skinTypeId">
+                    <Select mode="multiple">
+                      {skinTypes.map((skinType) => (
+                        <Select.Option key={skinType.id} value={skinType.id}>{skinType.name}</Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={12}>
+                  <Form.Item name="skinConcernId" label="Vấn đề da">
+                    <Select mode="multiple">
+                      {skinConcerns.map((skinConcern) => (
+                        <Select.Option key={skinConcern.id} value={skinConcern.id}>{skinConcern.name}</Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item name="routineSteps" label="Sử dụng trong quy trình">
+                    <Select mode="multiple">
+                      <Option value={1}>Làm sạch</Option>
+                      <Option value={2}>Tẩy trang</Option>
+                      <Option value={3}>Toner</Option>
+                      <Option value={4}>Serum</Option>
+                      <Option value={5}>Kem dưỡng</Option>
+                      <Option value={6}>Chống nắng</Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Form.Item label="Tags" name="tagId">
+                <Select mode="multiple">
+                  <Option value={1}>Sản phẩm mới</Option>
+                  <Option value={2}>Bán chạy</Option>
+                  <Option value={3}>Hàng giới hạn</Option>
+                  <Option value={4}>Phổ biến</Option>
+                  <Option value={5}>Mềm</Option>
+                  <Option value={6}>Mùi thơm</Option>
+                </Select>
+              </Form.Item>
+            </Card>
+          </Col>
+
+          {/* Image Upload (Full Width) */}
+          <Col xs={24}>
+            <Card title={<Title level={4}>Hình ảnh sản phẩm</Title>} bordered={false}>
+              <Form.Item>
+                <Upload
+                  listType="picture-card"
+                  fileList={fileList}
+                  beforeUpload={beforeUpload}
+                  onChange={handleChange}
+                  onPreview={handlePreview}
+                >
+                  {fileList.length >= 8 ? null : uploadButton}
+                </Upload>
+                {previewImage && (
+                  <Image
+                    wrapperStyle={{
+                      display: 'none',
+                    }}
+                    preview={{
+                      visible: previewOpen,
+                      onVisibleChange: (visible) => setPreviewOpen(visible),
+                      afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                    }}
+                    src={previewImage}
+                  />
+                )}
+              </Form.Item>
+            </Card>
+          </Col>
+
+          {/* Buttons (Full Width) */}
+          <Col xs={24} style={{ textAlign: 'right' }}>
+            <Space>
+              <Button onClick={handleCancel}>Hủy</Button>
               <Button type="primary" onClick={handleSave} loading={loading}>Lưu</Button>
-              <Button onClick={handleCancel} style={{ marginLeft: 8 }}>Hủy</Button>
-            </div>
-          </div>
-        </div>
+            </Space>
+          </Col>
+        </Row>
       </Form>
     </div>
   );

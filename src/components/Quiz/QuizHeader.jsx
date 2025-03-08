@@ -1,10 +1,12 @@
+import { assets } from "../../assets/frontend_assets/assets";
+
 const QuizHeader = ({ questionsCount }) => (
     <header className="text-center mb-8">
       <h1 className="text-2xl font-bold text-blue-800 mb-4">BÀI KIỂM TRA LOẠI DA & CÁCH CHĂM SÓC</h1>
       
       <div className="bg-white rounded-lg overflow-hidden shadow-md mb-6">
         <img 
-          src="src/assets/frontend_assets/SkinType.jpg" 
+          src={assets.skintest_banner} 
           alt="Chuyên gia da liễu tư vấn" 
           className="w-full h-auto"
         />
