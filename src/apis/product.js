@@ -1,18 +1,4 @@
-import axios from 'axios';
 import api from '../config/axios';
-
-// Use environment variable for API URL (if available)
-// const API_BASE_URL = "https://6785075f1ec630ca33a6df91.mockapi.io";
-
-// Create an axios instance
-// const api = axios.create({
-//     baseURL: API_BASE_URL,
-//     timeout: 10000, // Optional: set a timeout
-//     headers: {
-//       'Authorization': `Bearer ${localStorage.getItem('token')}`
-//     }
-// });
-
 
 // Fetch all products
 export const fetchProducts = async () => {

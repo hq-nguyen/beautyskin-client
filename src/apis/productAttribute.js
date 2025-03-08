@@ -43,45 +43,45 @@ export const ProductAttributeService = {
     },
 
     // brands
-    getBrands: async () => {
-        try {
-            const response = await api.get('brand/get');
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching brands:", error);
-            throw new Error("Failed to fetch brands. Please try again later.");
-        }
-    },
+    // getBrands: async () => {
+    //     try {
+    //         const response = await api.get('brand/get');
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error("Error fetching brands:", error);
+    //         throw new Error("Failed to fetch brands. Please try again later.");
+    //     }
+    // },
 
-    createBrand: async (data) => {
-        try {
-            const response = await api.post('brand/create', data);
-            return response.data;
-        } catch (error) {
-            console.error("Error creating brand:", error);
-            throw new Error("Failed to create brand. Please try again later.");
-        }
-    },
+    // createBrand: async (data) => {
+    //     try {
+    //         const response = await api.post('brand/create', data);
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error("Error creating brand:", error);
+    //         throw new Error("Failed to create brand. Please try again later.");
+    //     }
+    // },
 
-    updateBrand: async (id, data) => {
-        try {
-            const response = await api.put(`brand/update/${id}`, data);
-            return response.data;
-        } catch (error) {
-            console.error("Error updating brand:", error);
-            throw new Error("Failed to update brand. Please try again later.");
-        }
-    },
+    // updateBrand: async (id, data) => {
+    //     try {
+    //         const response = await api.put(`brand/update/${id}`, data);
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error("Error updating brand:", error);
+    //         throw new Error("Failed to update brand. Please try again later.");
+    //     }
+    // },
 
-    deleteBrand: async (id) => {
-        try {
-            const response = await api.delete(`brand/delete/${id}`);
-            return response.data;
-        } catch (error) {
-            console.error("Error deleting brand:", error);
-            throw new Error("Failed to delete brand. Please try again later.");
-        }
-    },
+    // deleteBrand: async (id) => {
+    //     try {
+    //         const response = await api.delete(`brand/delete/${id}`);
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error("Error deleting brand:", error);
+    //         throw new Error("Failed to delete brand. Please try again later.");
+    //     }
+    // },
 
     // skin types
     getSkinType: async () => {
@@ -205,4 +205,84 @@ export const ProductAttributeService = {
             throw new Error("Failed to delete texture. Please try again later.");
         }
     },
+
+    // tags
+    getTags : async () => {
+        try {
+            const response = await api.get('tag/getAll');
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching tags:", error);
+            throw new Error("Failed to fetch tags. Please try again later.");
+        }
+    },
+
+    createTag: async (data) => {
+        try {
+            const response = await api.post('tag/create', data);
+            return response.data;
+        } catch (error) {
+            console.error("Error creating tag:", error);
+            throw new Error("Failed to create tag. Please try again later.");
+        }
+    },
+
+    updateTag: async (id, data) => {
+        try {
+            const response = await api.put(`tag/update/${id}`, data);
+            return response.data;
+        } catch (error) {
+            console.error("Error updating tag:", error);
+            throw new Error("Failed to update tag. Please try again later.");
+        }
+    },
+
+    deleteTag: async (id) => {
+        try {
+            const response = await api.delete(`tag/delete/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error deleting tag:", error);
+            throw new Error("Failed to delete tag. Please try again later.");
+        }
+    },
+
+    // image
+    getImages: async () => {
+        try {
+            const response = await api.get('image/get');
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching images:", error);
+            throw new Error("Failed to fetch images. Please try again later.");
+        }
+    },
+    uploadImage: async (data) => {
+        try {
+            const response = await api.post('image/create', data);
+            return response.data;
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            throw new Error("Failed to upload image. Please try again later.");
+        }
+    },
+    deleteImage: async (id) => {
+        try {
+            const response = await api.delete(`image/delete/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error deleting image:", error);
+            throw new Error("Failed to delete image. Please try again later.");
+        }
+    },
+    updateImage: async (id, data) => {
+        try {
+            const response = await api.put(`image/update/${id}`, data);
+            return response.data;
+        } catch (error) {
+            console.error("Error updating image:", error);
+            throw new Error("Failed to update image. Please try again later.");
+        }
+    },
+
 };

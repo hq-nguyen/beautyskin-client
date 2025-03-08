@@ -1,441 +1,468 @@
-import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { Input, Button, Form, Checkbox, Select, Row, Col, Upload, message, Modal, Image, DatePicker } from 'antd';
+import { useEffect, useState } from 'react';
+import {
+  Input, Button, Form, Select, Row, Col, Image, Upload, message, DatePicker, InputNumber, Modal, Space
+} from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import './ProductModel.css';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { updateProduct } from '../../../apis/product';
 import uploadFile from '../../../utils/upload';
+import dayjs from 'dayjs';
+import { ProductAttributeService } from '../../../apis/productAttribute';
 
 const { TextArea } = Input;
+const { Option } = Select;
 
 const ProductModel = ({ product, onSave, onCancel, visible }) => {
-    const [form] = Form.useForm();
-    const [fileList, setFileList] = useState([]);
-    const [isDirty, setIsDirty] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [previewOpen, setPreviewOpen] = useState(false);
-    const [previewImage, setPreviewImage] = useState('');
+  const [form] = Form.useForm();
+  const [fileList, setFileList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [textures, setTextures] = useState([]);
+  const [skinTypes, setSkinTypes] = useState([]);
+  const [skinConcerns, setSkinConcerns] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
 
-    useEffect(() => {
-        console.log("Product prop changed:", product); // Debugging
-        // Load Existing Images
-        if (product && product.images && Array.isArray(product.images)) {
-            const initialFileList = product.images.filter(imageUrl => imageUrl !== null).map((imageUrl, index) => ({
-                uid: `existing-${product.id}-${index}`, // Unique and stable ID
-                name: `image-${index}`,
-                status: 'done',
-                url: imageUrl,  // This is CRUCIAL!
-            }));
-            setFileList(initialFileList);
-        } else {
-            setFileList([]);
-        }
+  const fetchCategories = async () => {
+    const cate = await ProductAttributeService.getCategories();
+    setCategories(cate);
+  };
+  
+  const fetchTextures = async () => {
+    const text = await ProductAttributeService.getTextures();
+    setTextures(text);
+  };
+  
+  const fetchSkinTypes = async () => {
+    const skinTypes = await ProductAttributeService.getSkinType();
+    setSkinTypes(skinTypes);
+  };
+  
+  const fetchSkinConcerns = async () => {
+    const skinConcerns = await ProductAttributeService.getConcern();
+    setSkinConcerns(skinConcerns);
+  };
+  
+  const fetchTags = async () => {
+    const tags = await ProductAttributeService.getTags();
+    setTags(tags);
+  };
 
-        // Load other form values
-        form.setFieldsValue({
-            name: product?.name || '',
-            description: product?.description || '',
-            category: product?.category || [],
-            brand: product?.brand || '',
-            price: product?.price || 0,
-            status: product?.status || 'còn hàng',
-            tag: product?.tag || [],
-            capacity: product?.capacity || [],
-            skinType: product?.skinType || [],
-            // new fields
-            usageInstruction: product?.usageInstruction || '',
-            skinConcern: product?.skinConcern || [],
-            texture: product?.texture || '',
-            ingredients: product?.ingredients || '',
-            stock: product?.stock || 0,
-        });
-        setIsDirty(false);
-    }, [product, form]);
+  useEffect(() => {
+    fetchCategories();
+    fetchTextures();
+    fetchSkinTypes();
+    fetchSkinConcerns();
+    fetchTags();
+  }, []);
 
-    const handleSave = async () => {
+  // Initialize form values when product changes
+  useEffect(() => {
+    if (product && visible) {
+      // Set initial form values from product data
+      form.setFieldsValue({
+        name: product.name,
+        description: product.description,
+        stock: product.stock,
+        price: product.price,
+        ingredient: product.ingredient,
+        instruction: product.instruction,
+        categoryId: product.categoryId || (product.category ? product.category.id : null),
+        expiredDateTime: product.expiredDateTime ? dayjs(product.expiredDateTime) : null,
+        status: product.status || "AVAILABLE",
+        skinTypeId: product.skinTypes?.map(type => type.id) || [],
+        skinConcernId: product.skinConcerns?.map(concern => concern.id) || [],
+        tagId: product.tags?.map(tag => tag.id) || [],
+        forms: product.forms && product.forms.length > 0 ? product.forms[0] : null,
+      });
+
+      // Initialize file list with existing images
+      if (product.images && product.images.length > 0) {
+        const initialFileList = product.images.map((image, index) => ({
+          uid: `-${index}`,
+          name: `image-${index}`,
+          status: 'done',
+          url: image.url
+        }));
+        setFileList(initialFileList);
+      } else {
+        setFileList([]);
+      }
+    }
+  }, [product, visible, form]);
+
+  const handleSave = async () => {
+    form
+      .validateFields()
+      .then(async (values) => {
+        setLoading(true);
+
         try {
-            const values = await form.validateFields();
-            setLoading(true);
+          // Handle existing and new images
+          let imageIds = [];
+          
+          // Keep existing images that weren't removed
+          if (product.images) {
+            const existingImageUrls = fileList
+              .filter(file => file.url)
+              .map(file => file.url);
+              
+            const keptImages = product.images
+              .filter(image => existingImageUrls.includes(image.url))
+              .map(image => image.id);
+              
+            imageIds = [...keptImages];
+          }
 
-            // Extract image URLs directly from fileList and filter out null values
-            const imageUrls = fileList.map(file => file.url).filter(url => url !== null);
+          // Upload new images
+          const newFiles = fileList.filter(file => file.originFileObj);
+          
+          if (newFiles.length > 0) {
+            // Upload new files to Firebase
+            const newImageUrls = await Promise.all(
+              newFiles.map(async (file) => {
+                const url = await uploadFile(file.originFileObj);
+                return url;
+              })
+            );
 
-            const updatedValues = { ...values, images: imageUrls };
+            // Register images with the API
+            const newImageIds = await Promise.all(
+              newImageUrls.map(async (url) => {
+                const res = await ProductAttributeService.uploadImage({ url: url });
+                return res.id;
+              })
+            );
+            
+            imageIds = [...imageIds, ...newImageIds];
+          }
 
-            const updatedProduct = await updateProduct(product.id, updatedValues);
+          // Extract IDs for routineSteps and promotions
+          const routineStepIds = product.routineSteps ? product.routineSteps.map(step => 
+            typeof step === 'object' ? step.id : step
+          ) : [];
+          
+          const promotionIds = product.promotions ? product.promotions.map(promo => 
+            typeof promo === 'object' ? promo.id : promo
+          ) : [];
 
-            message.success('Cập nhật sản phẩm thành công!');
-            onSave(updatedProduct); // Pass the updated product (including images) back to the parent
-            form.resetFields();  // Reset the form
-            setFileList([]); // Clear the fileList
+          // Create updated product data
+          const updatedProductData = {
+            id: product.id,
+            name: values.name,
+            description: values.description,
+            stock: parseInt(values.stock) || 0,
+            createDateTime: product.createDateTime || new Date().toISOString(),
+            lastUpdateDateTime: new Date().toISOString(),
+            expiredDateTime: values.expiredDateTime ? values.expiredDateTime.toISOString() : null,
+            status: values.status || product.status || "AVAILABLE",
+            instruction: values.instruction || "",
+            categoryId: values.categoryId || 0,
+            price: parseFloat(values.price) || 0,
+            ingredient: values.ingredient || "",
+            skinTypeId: values.skinTypeId || [],
+            skinConcernId: values.skinConcernId || [],
+            tagId: values.tagId || [],
+            routineSteps: routineStepIds,
+            forms: values.forms ? [values.forms] : [],
+            images: imageIds,
+            promotions: promotionIds,
+            deleted: false
+          };
 
+          // Call the updateProduct API
+          await updateProduct(product.id, updatedProductData);
+          message.success('Đã cập nhật thành công sản phẩm!');
+          
+          // Notify parent component
+          if (onSave) {
+            onSave(updatedProductData);
+          }
         } catch (error) {
-            message.error(error.message || 'Cập nhật sản phẩm không thành công!');
-            console.error("Error updating product:", error);
+          message.error(error.message || 'Cập nhật sản phẩm thất bại.');
+          console.error('Update error:', error);
         } finally {
-            setLoading(false);
-            onCancel();
+          setLoading(false);
         }
-    };
+      })
+      .catch((info) => {
+        console.log('Validate Failed:', info);
+      });
+  };
 
-    const handleCancel = () => {
-        if (isDirty) {
-            Modal.confirm({
-                title: 'Bạn có chắc chắn muốn hủy?',
-                content: 'Bạn có những thay đổi chưa được lưu. Bạn có muốn tiếp tục?',
-                okText: 'Có',
-                cancelText: 'Không',
-                onOk() {
-                    onCancel();
-                },
-            });
-        } else {
-            onCancel();
-        }
-    };
+  const getBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
 
-    // upload image handler
-    const getBase64 = (file) =>
-        new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (error) => reject(error);
-        });
+  const handlePreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+  };
 
+  const handleChange = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+  };
 
-    const handlePreview = async (file) => {
-        if (!file.url && !file.preview) {
-            file.preview = await getBase64(file.originFileObj);
-        }
-        setPreviewImage(file.url || file.preview);
-        setPreviewOpen(true);
-    };
+  const beforeUpload = (file) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    if (!isJpgOrPng) {
+      message.error('You can only upload JPG/PNG file!');
+    }
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      message.error('Image must smaller than 2MB!');
+    }
+    return isJpgOrPng && isLt2M;
+  };
 
-    const handleChange = ({ fileList: newFileList }) => {
-        // console.log('newFileList', newFileList)
-        const customFileList = newFileList.map(file => {
-            if (file.response) {
-                return {
-                    ...file,
-                    url: file.response,
-                };
-            }
-            return file;
-        });
-        setFileList(customFileList);
-        setIsDirty(true);
-    };
+  const disabledDate = (current) => {
+    return current && current < dayjs().startOf('day');
+  };
 
-    const uploadButton = (
-        <button
-            style={{
-                border: 0,
-                background: 'none',
-                cursor: 'pointer',
-            }}
-            type="button"
-        >
-            <PlusOutlined />
-            <div
-                style={{
-                    marginTop: 8,
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      [{ 'color': [] }, { 'background': [] }],
+      ['link', 'image'],
+      ['clean']
+    ],
+  };
+  
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'color', 'background',
+    'link', 'image'
+  ];
+
+  const uploadButton = (
+    <button
+      style={{
+        border: 0,
+        background: 'none',
+        cursor: 'pointer',
+      }}
+      type="button"
+    >
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>
+        Upload
+      </div>
+    </button>
+  );
+
+  return (
+    <Modal
+      title="Chỉnh sửa sản phẩm"
+      open={visible}
+      onCancel={onCancel}
+      width={1000}
+      footer={null}
+      destroyOnClose
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        style={{ width: '100%' }}
+        preserve={false}
+      >
+        <Row gutter={[16, 16]}>
+          {/* Basic Info */}
+          <Col xs={24} md={12}>
+            <Form.Item 
+              label="Tên sản phẩm" 
+              name="name" 
+              rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm!' }]}
+            >
+              <Input />
+            </Form.Item>
+            
+            <Form.Item 
+              label="Mô tả sản phẩm" 
+              name="description" 
+              rules={[{ required: true, message: 'Vui lòng nhập mô tả sản phẩm!' }]}
+            >
+              <ReactQuill
+                theme="snow"
+                modules={modules}
+                formats={formats}
+                style={{ height: '150px', marginBottom: '40px' }}
+              />
+            </Form.Item>
+          </Col>
+
+          {/* Product Details */}
+          <Col xs={24} md={12}>
+            <Row gutter={[16, 0]}>
+              <Col xs={24} md={12}>
+                <Form.Item 
+                  label="Danh mục" 
+                  name="categoryId" 
+                  rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
+                >
+                  <Select>
+                    {categories.map((category) => (
+                      <Option key={category.id} value={category.id}>{category.name}</Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              
+              <Col xs={24} md={12}>
+                <Form.Item 
+                  label="Giá tiền" 
+                  name="price" 
+                  rules={[{ required: true, message: 'Vui lòng nhập giá tiền!' }]}
+                >
+                  <InputNumber
+                    style={{ width: '100%' }}
+                    formatter={(value) => ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            
+            <Row gutter={[16, 0]}>
+              <Col xs={24} md={12}>
+                <Form.Item 
+                  label="Số lượng sản phẩm" 
+                  name="stock" 
+                  rules={[{ required: true, message: 'Vui lòng nhập tồn kho!' }]}
+                >
+                  <InputNumber style={{ width: '100%' }} min={0} />
+                </Form.Item>
+              </Col>
+              
+              <Col xs={24} md={12}>
+                <Form.Item
+                  name="expiredDateTime"
+                  label="Hạn sử dụng"
+                >
+                  <DatePicker
+                    style={{ width: '100%' }}
+                    format="DD/MM/YYYY"
+                    disabledDate={disabledDate}
+                    placeholder="Chọn hạn sử dụng"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            
+            <Form.Item
+              name="status"
+              label="Trạng thái"
+              rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
+            >
+              <Select>
+                <Option value="AVAILABLE">Có sẵn</Option>
+                <Option value="OUT_OF_STOCK">Hết hàng</Option>
+                <Option value="DISCONTINUED">Ngừng kinh doanh</Option>
+              </Select>
+            </Form.Item>
+          </Col>
+
+          {/* Product Attributes */}
+          <Col xs={24} md={12}>
+            <Form.Item label="Dạng sản phẩm" name="forms">
+              <Select>
+                {textures.map((texture) => (
+                  <Option key={texture.id} value={texture.id}>{texture.name}</Option>
+                ))}
+              </Select>
+            </Form.Item>
+            
+            <Form.Item label="Loại da" name="skinTypeId">
+              <Select mode="multiple">
+                {skinTypes.map((skinType) => (
+                  <Option key={skinType.id} value={skinType.id}>{skinType.name}</Option>
+                ))}
+              </Select>
+            </Form.Item>
+            
+            <Form.Item name="skinConcernId" label="Vấn đề da">
+              <Select mode="multiple">
+                {skinConcerns.map((skinConcern) => (
+                  <Option key={skinConcern.id} value={skinConcern.id}>{skinConcern.name}</Option>
+                ))}
+              </Select>
+            </Form.Item>
+            
+            <Form.Item label="Tags" name="tagId">
+              <Select mode="multiple">
+                {tags.map((tag) => (
+                  <Option key={tag.id} value={tag.id}>{tag.name}</Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+
+          {/* Additional Info */}
+          <Col xs={24} md={12}>
+            <Form.Item label="Thành phần" name="ingredient">
+              <TextArea rows={4} />
+            </Form.Item>
+            
+            <Form.Item label="Hướng dẫn sử dụng" name="instruction">
+              <ReactQuill
+                theme="snow"
+                modules={modules}
+                formats={formats}
+                style={{ height: '150px', marginBottom: '40px' }}
+              />
+            </Form.Item>
+          </Col>
+
+          {/* Images */}
+          <Col xs={24}>
+            <Form.Item label="Hình ảnh sản phẩm">
+              <Upload
+                listType="picture-card"
+                fileList={fileList}
+                beforeUpload={beforeUpload}
+                onChange={handleChange}
+                onPreview={handlePreview}
+              >
+                {fileList.length >= 8 ? null : uploadButton}
+              </Upload>
+              
+              <Image
+                style={{ display: 'none' }}
+                preview={{
+                  visible: previewOpen,
+                  onVisibleChange: (visible) => setPreviewOpen(visible),
+                  afterVisibleChange: (visible) => !visible && setPreviewImage(''),
                 }}
-            >
-                Upload
-            </div>
-        </button>
-    );
+                src={previewImage}
+              />
+            </Form.Item>
+          </Col>
 
-    const beforeUpload = (file) => {
-        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-        if (!isJpgOrPng) {
-            message.error('You can only upload JPG/PNG file!');
-        }
-        const isLt2M = file.size / 1024 / 1024 < 2;
-        if (!isLt2M) {
-            message.error('Image must smaller than 2MB!');
-        }
-        return isJpgOrPng && isLt2M;
-    };
-
-    const uploadImage = async (options) => {
-        const { onSuccess, onError, file } = options;
-
-        try {
-            const res = await uploadFile(file); // Use your Firebase upload function
-
-            console.log("uploadFile returned:", res);  // Debugging
-
-            // Check if res is defined and has the success property
-            if (res) {
-                // Construct an object that the Upload component expects
-                const imageUrl = res;
-
-                // Update the fileList state *immediately* with the new URL
-                setFileList(prevFileList => {
-                    const updatedFileList = prevFileList.map(item => {
-                        if (item.uid === file.uid) {
-                            return { ...item, url: imageUrl, status: 'done' }; // Update existing item
-                        }
-                        return item;
-                    });
-                    return updatedFileList;
-                });
-
-                onSuccess("Ok"); // Inform Upload component of success
-                message.success("Upload successful!"); // Provide user feedback
-            } else {
-                // Handle the error if uploadFile failed
-                console.error("Upload failed:", res); // Log the response for debugging
-                onError("Upload failed");
-                message.error("Upload failed. Please try again.");
-            }
-        } catch (error) {
-            console.error("Error during upload:", error);
-            onError("Upload failed");
-            message.error("Upload failed: " + error.message); // Show user-friendly error
-        }
-    };
-
-    const customRequest = async ({ file, onSuccess, onError }) => {
-        try {
-            const imageUrl = await uploadFile(file);
-            onSuccess(imageUrl);
-        } catch (error) {
-            onError(error);
-        }
-    };
-
-
-    const handleRemove = (file) => {
-        setFileList((prevFileList) => {
-            const newFileList = prevFileList.filter((item) => item.uid !== file.uid);
-            return newFileList;
-        });
-    };
-
-    return (
-        <Modal
-            title="Chỉnh sửa sản phẩm"
-            open={visible}
-            onCancel={onCancel}
-            footer={[
-                <Button key="cancel" onClick={onCancel}>
-                    Hủy
-                </Button>,
-                <Button key="save" type="primary" loading={loading} onClick={handleSave}>
-                    Lưu
-                </Button>,
-            ]}
-        >
-            <Form
-                form={form}
-                layout="vertical"
-            >
-                <Form.Item
-                    name="name"
-                    label="Tên sản phẩm"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Vui lòng nhập tên sản phẩm!',
-                        },
-                    ]}
-                >
-                    <Input />
-                </Form.Item>
-
-                <Form.Item
-                    name="description"
-                    label="Mô tả sản phẩm"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Vui lòng nhập mô tả sản phẩm!',
-                        },
-                    ]}
-                >
-                    <TextArea rows={4} />
-                </Form.Item>
-                <Form.Item
-                    name="usageInstruction"
-                    label="Hướng dẫn sử dụng"
-                >
-                    <TextArea rows={4} />
-                </Form.Item>
-
-                <Form.Item name="category" label="Danh mục">
-                    <Checkbox.Group>
-                        <Row>
-                            {['Chăm sóc da', 'Makeup', 'Đặc trị', 'Dưỡng da', 'Thiết bị'].map((cat) => (
-                                <Col span={8} key={cat}>
-                                    <Checkbox value={cat}>{cat}</Checkbox>
-                                </Col>
-                            ))}
-                        </Row>
-                    </Checkbox.Group>
-                </Form.Item>
-
-                <Form.Item name="brand" label="Thương hiệu">
-                    <Select>
-                        {['Brand A', 'Brand B', 'Brand C', 'Brand D'].map((brand) => (
-                            <Select.Option key={brand} value={brand}>
-                                {brand}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                </Form.Item>
-
-                <Form.Item name="publish" label="Ngày xuất khẩu" rules={[{ required: true }]}>
-                    <DatePicker />
-                </Form.Item>
-
-                <Form.Item
-                    name="price"
-                    label="Giá tiền"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Vui lòng nhập giá tiền!',
-                        },
-                    ]}
-                >
-                    <Input type="number" />
-                </Form.Item>
-
-                <Form.Item name="status" label="Trạng thái">
-                    <Select>
-                        <Select.Option value="còn hàng">Còn hàng</Select.Option>
-                        <Select.Option value="hết hàng">Hết hàng</Select.Option>
-                        <Select.Option value="hết hàng">Ngừng kinh doanh</Select.Option>
-                    </Select>
-                </Form.Item>
-
-                <Form.Item name="tag" label="Tags">
-                    <Checkbox.Group>
-                        <Row>
-                            {['Sản phẩm mới', 'Bán chạy', 'Hàng giới hạn', 'Phổ biến', 'Mềm', 'Mùi thơm'].map((tag) => (
-                                <Col span={8} key={tag}>
-                                    <Checkbox value={tag}>{tag}</Checkbox>
-                                </Col>
-                            ))}
-                        </Row>
-                    </Checkbox.Group>
-                </Form.Item>
-
-                <h3 className="text-xl font-semibold mb-4">Chi tiết cụ thể</h3>
-
-                <Form.Item name="capacity" label="Dung tích / khối lượng">
-                    <Checkbox.Group>
-                        <Row>
-                            {['100ml', '80ml', '100g', '80g'].map((tag) => (
-                                <Col span={8} key={tag}>
-                                    <Checkbox value={tag}>{tag}</Checkbox>
-                                </Col>
-                            ))}
-                        </Row>
-                    </Checkbox.Group>
-                </Form.Item>
-
-                <Form.Item name="skinType" label="Loại da">
-                    <Checkbox.Group>
-                        <Row>
-                            {['Da dầu', 'Da khô', 'Da tổng hợp', 'Da thường'].map((type) => (
-                                <Col className="mr-4" span={8} key={type}>
-                                    <Checkbox value={type}>{type}</Checkbox>
-                                </Col>
-                            ))}
-                        </Row>
-                    </Checkbox.Group>
-                </Form.Item>
-
-                <Form.Item name="skinConcern" label="Vấn đề da">
-                    <Checkbox.Group>
-                        <Row>
-                            {['Da mụn', 'Da lão hóa', 'Da lỗ chân lông', 'Da có nếp nhăn'].map((type) => (
-                                <Col className="mr-4" span={8} key={type}>
-                                    <Checkbox value={type}>{type}</Checkbox>
-                                </Col>
-                            ))}
-                        </Row>
-                    </Checkbox.Group>
-                </Form.Item>
-
-                <Form.Item
-                    name="ingredients"
-                    label="Thành phần"
-                >
-                    <Input />
-                </Form.Item>
-
-                <Form.Item name="texture" label="Chất liệu">
-                    <Select>
-                        {['Dạng dung dịch', 'Dạng kem', 'Serum', 'Tạo bọt', 'Kết cấu gel'].map((texture) => (
-                            <Select.Option key={texture} value={texture}>
-                                {texture}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                </Form.Item>
-
-                <Form.Item name="origin" label="Xuất xứ">
-                    <Select>
-                        {['Hàn Quốc', 'Trung Quốc', 'Việt Nam', 'Ấn Độ', 'Singapore', 'England', 'US'].map((origin) => (
-                            <Select.Option key={origin} value={origin}>
-                                {origin}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                </Form.Item>
-
-                <Form.Item
-                    name="stock"
-                    label="Tồn kho"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Vui lòng nhập tồn kho!',
-                        },
-                    ]}
-                >
-                    <Input type="number" />
-                </Form.Item>
-                <Form.Item label="Hình ảnh sản phẩm">
-                    <Upload
-                        listType="picture-card"
-                        fileList={fileList}
-                        beforeUpload={beforeUpload}
-                        onChange={handleChange}
-                        customRequest={customRequest}
-                        onRemove={handleRemove}
-                        onPreview={handlePreview}
-                    >
-                        {fileList.length >= 8 ? null : uploadButton}
-                    </Upload>
-                    {previewImage && (
-                        <Image
-                            wrapperStyle={{
-                                display: 'none',
-                            }}
-                            preview={{
-                                visible: previewOpen,
-                                onVisibleChange: (visible) => setPreviewOpen(visible),
-                                afterOpenChange: (visible) => !visible && setPreviewImage(''),
-                            }}
-                            src={previewImage}
-                        />
-                    )}
-                </Form.Item>
-            </Form>
-        </Modal>
-    );
-};
-ProductModel.propTypes = {
-    product: PropTypes.object.isRequired,
-    onSave: PropTypes.func.isRequired,
-    onCancel: PropTypes.func.isRequired,
-    visible: PropTypes.bool.isRequired,
+          {/* Buttons */}
+          <Col xs={24} style={{ textAlign: 'right' }}>
+            <Space>
+              <Button onClick={onCancel}>Hủy</Button>
+              <Button type="primary" onClick={handleSave} loading={loading}>
+                Lưu thay đổi
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      </Form>
+    </Modal>
+  );
 };
 
 export default ProductModel;
