@@ -84,13 +84,26 @@ const ManageProduct = () => {
     const getStatusColor = (status) => {
         switch (status) {
             case 'AVAILABLE':
-                return 'green';
+                return 'success';
             case 'OUT_OF_STOCK':
-                return 'red';
+                return 'error';
             case 'LOW_STOCK':
-                return 'orange';
+                return 'warning';
             default:
                 return 'default';
+        }
+    };
+
+    const getStatusText = (status) => {
+        switch (status) {
+            case 'AVAILABLE':
+                return 'Có sẵn';
+            case 'OUT_OF_STOCK':
+                return 'Hết hàng';
+            case 'LOW_STOCK':
+                return 'Sắp hết';
+            default:
+                return status;
         }
     };
 
@@ -103,14 +116,13 @@ const ManageProduct = () => {
         },
         {
             title: 'Ảnh',
-            dataIndex: 'image',
             key: 'image',
             width: 80,
-            render: (images) => {
-                if (images && images.length > 0) {
+            render: (record) => {
+                if (record.images && record.images.length > 0) {
                     return (
                         <Image
-                            src={images[0]}
+                            src={record.images[0].url}
                             alt="product"
                             style={{ width: 50, height: 50, objectFit: 'cover' }}
                             onError={(e) => {
@@ -131,19 +143,15 @@ const ManageProduct = () => {
             ellipsis: true,
         },
         {
-            title: 'Mô tả',
-            dataIndex: 'description',
-            key: 'description',
-            ellipsis: true,
-            width: 200,
-        },
-        {
             title: 'Danh mục',
-            dataIndex: 'categoryId',
-            key: 'categoryId',
-            render: (categoryId) => (
-                <Tag color="blue">{categoryId}</Tag>
-            )
+            key: 'category',
+            render: (record) => {
+                if (record.category) {
+                    return <Tag color="blue">{record.category.name}</Tag>;
+                } else {
+                    return <Tag color="default">Chưa phân loại</Tag>;
+                }
+            }
         },
         {
             title: 'Giá tiền',
@@ -164,9 +172,7 @@ const ManageProduct = () => {
             render: (status) => (
                 <Badge 
                     status={getStatusColor(status)} 
-                    text={status === 'AVAILABLE' ? 'Có sẵn' : 
-                           status === 'OUT_OF_STOCK' ? 'Hết hàng' : 
-                           status === 'LOW_STOCK' ? 'Sắp hết' : status} 
+                    text={getStatusText(status)} 
                 />
             )
         },

@@ -53,81 +53,9 @@ const ProductAttributeManagement = () => {
                     component: <Input />
                 }
             ],
-            createData: (values, imageUrl) => ({
+            createData: (values) => ({
                 name: values.name,
                 description: values.description || '',
-            })
-        },
-        brand: {
-            title: 'Thương hiệu',
-            fetchMethod: ProductAttributeService.getBrands,
-            createMethod: ProductAttributeService.createBrand,
-            updateMethod: ProductAttributeService.updateBrand,
-            deleteMethod: ProductAttributeService.deleteBrand,
-            columns: [
-                { title: 'Tên thương hiệu', dataIndex: 'name', key: 'name' },
-                { title: 'Thông tin mô tả', dataIndex: 'description', key: 'description' },
-                {
-                    title: 'Logo',
-                    dataIndex: 'imageUrl',
-                    key: 'imageUrl',
-                    render: (imageUrl) => (
-                        <Image
-                            src={imageUrl}
-                            alt="Brand"
-                            style={{
-                                maxWidth: 50,
-                                maxHeight: 50,
-                                objectFit: 'contain'
-                            }}
-                        />
-                    )
-                }
-            ],
-            formItems: [
-                {
-                    name: "name",
-                    label: "Brand Name",
-                    rules: [
-                        { required: true, message: 'Brand name is required' },
-                        { max: 100, message: 'Maximum 100 characters allowed' }
-                    ],
-                    component: <Input />
-                },
-                {
-                    name: "description",
-                    label: "Description",
-                    rules: [
-                        { max: 500, message: 'Maximum 500 characters allowed' }
-                    ],
-                    component: <Input.TextArea />
-                },
-                {
-                    name: "image",
-                    label: "Upload Image",
-                    component: (form) => (
-                        <Upload
-                            listType="picture-card"
-                            fileList={form.getFieldValue('image')?.fileList}
-                            beforeUpload={() => false}
-                            onChange={({ fileList }) => {
-                                form.setFieldsValue({
-                                    image: {
-                                        fileList: fileList,
-                                        file: fileList.length > 0 ? fileList[0].originFileObj : null,
-                                    },
-                                });
-                            }}
-                        >
-                            {form.getFieldValue('image')?.fileList?.length >= 1 ? null : <PlusOutlined />}
-                        </Upload>
-                    )
-                }
-            ],
-            createData: (values, imageUrl) => ({
-                name: values.name,
-                description: values.description || '',
-                imageUrl: imageUrl || ''
             })
         },
         skinType: {
@@ -231,7 +159,31 @@ const ProductAttributeManagement = () => {
                 name: values.name,
                 description: values.description || '',
             })
-        }
+        },
+        tag: {
+            title: 'Tag',
+            fetchMethod: ProductAttributeService.getTags,
+            createMethod: ProductAttributeService.createTag,
+            updateMethod: ProductAttributeService.updateTag,
+            deleteMethod: ProductAttributeService.deleteTag,
+            columns: [
+                { title: 'Tags', dataIndex: 'name', key: 'name' },
+            ],
+            formItems: [
+                {
+                    name: "name",
+                    label: "Tên thẻ",
+                    rules: [
+                        { required: true, message: 'Vui lòng nhập tên thẻ' },
+                        { max: 100, message: 'Tối đa 100 kí tự' }
+                    ],
+                    component: <Input />
+                }
+            ],
+            createData: (values) => ({
+                name: values.name,
+            })
+        },
     };
 
     const fetchData = async () => {

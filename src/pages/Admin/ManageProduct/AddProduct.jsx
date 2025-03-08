@@ -24,6 +24,7 @@ const AddProductPage = () => {
   const [textures, setTextures] = useState([]);
   const [skinTypes, setSkinTypes] = useState([]);
   const [skinConcerns, setSkinConcerns] = useState([]);
+  const [tags, setTags] = useState([]);
   const navigate = useNavigate();
 
   const fetchCategories = async () => {
@@ -42,18 +43,22 @@ const AddProductPage = () => {
     const skinConcerns = await ProductAttributeService.getConcern();
     setSkinConcerns(skinConcerns);
   };
+  const fetchTags = async () => {
+    const tags = await ProductAttributeService.getTags();
+    setTags(tags);
+  };
 
   useEffect(() => {
     fetchCategories();
     fetchTextures();
     fetchSkinTypes();
     fetchSkinConcerns();
+    fetchTags();
   }, []);
 
   const handleSave = async () => {
     form
-      .validateFields()
-      .then(async (values) => {
+      .validateFields().then(async (values) => {
         setLoading(true);
 
         try {
@@ -65,27 +70,36 @@ const AddProductPage = () => {
             })
           );
 
-          // Format the data according to the new schema
+          const imageIds = await Promise.all(
+            imageUrls.map(async (url) => {
+              const res = await ProductAttributeService.uploadImage({ url: url });
+              return res.id;
+            })
+          )
+
+          // Get current date for default values
           const currentDate = new Date().toISOString();
 
+          // Format the data according to the new schema
           const productData = {
             name: values.name,
             description: values.description,
             stock: parseInt(values.stock) || 0,
             createDateTime: currentDate,
             lastUpdateDateTime: currentDate,
-            expiredDateTime: values.expiredDateTime ? values.expiredDateTime.toISOString() : currentDate,
-            status: values.status || "AVAILABLE",
-            image: imageUrls,
-            price: parseFloat(values.price) || 0,
-            ingredients: values.ingredients || "",
+            expiredDateTime: values.expiredDateTime ? values.expiredDateTime.toISOString() : null,
+            status: "AVAILABLE", // Default value
             instruction: values.instruction || "",
             categoryId: values.categoryId || 0,
+            price: parseFloat(values.price) || 0,
+            ingredient: values.ingredient || "", // Changed from ingredients to ingredient
             skinTypeId: values.skinTypeId || [],
             skinConcernId: values.skinConcernId || [],
             tagId: values.tagId || [],
             routineSteps: values.routineSteps || [],
-            forms: values.forms || [],
+            forms: values.forms ? [values.forms] : [], // Ensure forms is an array
+            images: imageIds, // Changed from image to images
+            promotions: [], // Empty array for promotions
             deleted: false
           };
 
@@ -196,7 +210,6 @@ const AddProductPage = () => {
         layout="vertical"
         style={{ width: '100%' }}
         initialValues={{
-          status: "AVAILABLE",
           stock: 0,
           price: 0
         }}
@@ -236,17 +249,8 @@ const AddProductPage = () => {
                     />
                   </Form.Item>
                 </Col>
-                {/* <Col xs={24} md={8}>
-                                    <Form.Item label="Trạng thái" name="status">
-                                        <Select>
-                                            <Option value="AVAILABLE">Có sẵn</Option>
-                                            <Option value="OUT_OF_STOCK">Hết hàng</Option>
-                                            <Option value="LOW_STOCK">Sắp hết hàng</Option>
-                                        </Select>
-                                    </Form.Item>
-                                </Col> */}
               </Row>
-              <Form.Item label="Thành phần" name="ingredients">
+              <Form.Item label="Thành phần" name="ingredient">
                 <TextArea rows={4} />
               </Form.Item>
             </Card>
@@ -300,7 +304,7 @@ const AddProductPage = () => {
                       {textures.map((texture) => (
                         <Select.Option key={texture.id} value={texture.id}>{texture.name}</Select.Option>
                       ))}
-                      </Select>
+                    </Select>
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
@@ -323,7 +327,7 @@ const AddProductPage = () => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col xs={24} md={12}>
+                {/* <Col xs={24} md={12}>
                   <Form.Item name="routineSteps" label="Sử dụng trong quy trình">
                     <Select mode="multiple">
                       <Option value={1}>Làm sạch</Option>
@@ -334,18 +338,18 @@ const AddProductPage = () => {
                       <Option value={6}>Chống nắng</Option>
                     </Select>
                   </Form.Item>
+                </Col> */}
+                <Col xs={24} md={12}>
+                  <Form.Item label="Tags" name="tagId">
+                    <Select mode="multiple">
+                      {tags.map((tag) => (
+                        <Option key={tag.id} value={tag.id}>{tag.name}</Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
                 </Col>
               </Row>
-              <Form.Item label="Tags" name="tagId">
-                <Select mode="multiple">
-                  <Option value={1}>Sản phẩm mới</Option>
-                  <Option value={2}>Bán chạy</Option>
-                  <Option value={3}>Hàng giới hạn</Option>
-                  <Option value={4}>Phổ biến</Option>
-                  <Option value={5}>Mềm</Option>
-                  <Option value={6}>Mùi thơm</Option>
-                </Select>
-              </Form.Item>
+
             </Card>
           </Col>
 
