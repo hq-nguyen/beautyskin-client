@@ -38,6 +38,7 @@ import PaymentPage from "../components/Support/Payment";
 import RefundPage from "../components/Support/Refund";
 import ProductDetailModel from "../components/ProductDetailModel/ProductDetailModel";
 import ProductAttributeManagement from "../pages/Admin/ManageAttribute/ManageAttribute";
+import CheckoutLayout from "../layout/CheckoutLayout";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -77,10 +78,7 @@ const Routers = () => {
           path: '/test-skin',
           element: <TestSkinType />,
         },
-        {
-          path: '/shopping-cart',
-          element: <ShoppingCart />,
-        },
+        
         {
           path: '/login',
           element: <Login />,
@@ -92,11 +90,7 @@ const Routers = () => {
         {
           path: '/register',
           element: <Register />,
-        },
-        {
-          path: "checkout",
-          element: <CheckoutPage />,
-        },
+        },    
         {
           path: '*',
           element: <NotFoundPage />,
@@ -136,6 +130,20 @@ const Routers = () => {
           element: <Promotion />,
         }
 
+      ],
+    },
+    {
+      path: "/checkout",
+      element: <CheckoutLayout />,
+      children: [
+        {
+          path: "cart",   
+          element: <ShoppingCart />,
+        },
+        {
+          index: true,   
+          element: <CheckoutPage />,
+        },
       ],
     },
     {

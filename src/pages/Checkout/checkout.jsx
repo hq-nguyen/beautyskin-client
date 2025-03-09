@@ -1,17 +1,49 @@
   import { Trash2, X } from 'lucide-react';
-  import React, { useState } from 'react';
+  import React, { useEffect, useState } from 'react';
   import { toast } from "react-toastify";
+import api from '../../config/axios';
 
   const CheckoutPage = () => {
-    const [useShippingAsBilling, setUseShippingAsBilling] = useState(true);
-    const [agreeToTerms, setAgreeToTerms] = useState(false);
-    const [showConfirmDelete, setShowConfirmDelete] = useState(false)
-    const [productToDelete, setProductToDelete] = useState(false)
-    const [quantities, setQuantities] = useState({
-      product1: 1,
-      product2: 1,
-      product3: 1
-    });
+    const [useShippingAsBilling] = useState(true);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [quantities, setQuantities] = useState({
+    product1: 1,
+    product2: 1,
+    product3: 1
+  });
+  const [defaultAddress, setDefaultAddress] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod' or 'direct'
+  const [error, setError] = useState('');
+  const [tempName, setTempName] = useState('');
+  const [user, setUser] = useState({
+    fullName: '',
+});
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await api.get("get");
+        const userData = response.data.find(item => item.id == localStorage.getItem('id'));
+        if (userData) {
+          const { fullName } = userData;
+          setUser({
+            fullName
+          });
+          setTempName(fullName);
+        } else {
+          console.log("User not found!");
+          setError("User not found!");
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu người dùng:", error);
+        setError("Error fetching user data");
+      }
+    };
+    fetchUserData();
+}, []);
 
     const updateQuantity = (product, value) => {
       if (value >= 1) {
@@ -146,7 +178,7 @@
         <div className="flex flex-col md:flex-row gap-6">
           {/* Main Cart Column */}
           <div className="flex-1">
-            <h1 className="text-2xl font-medium text-red-800 mb-4">Giỏ hàng của bạn ( có {Object.values(quantities).reduce((a, b) => a + b, 0)} sản phẩm)</h1>
+            <h1 className="text-2xl font-medium text-[#d90429] mb-4">Giỏ hàng của bạn ( có {Object.values(quantities).reduce((a, b) => a + b, 0)} sản phẩm)</h1>
             
             <div className="border-t border-b border-gray-200 py-3 mb-4 text-sm">
               <p className="text-red-600">
@@ -233,7 +265,7 @@
                   placeholder="Nhập mã giảm giá" 
                   className="flex-1 border border-gray-300 rounded-l p-2"
                 />
-                <button className="bg-red-800 text-white px-4 py-2 rounded-r uppercase text-sm font-medium">
+                <button className="bg-[#EE1F5B] text-white px-4 py-2 rounded-r uppercase text-sm font-medium">
                   Áp dụng
                 </button>
               </div>
@@ -250,7 +282,7 @@
                   <a href="#" className="text-red-800 text-sm underline">Xem quy định tích lũy điểm</a>
                   <p className="text-sm mt-2">Đơn hàng này thành công bạn sẽ tích lũy được <span className="text-red-600 font-bold">30 điểm</span></p>
                 </div>
-                <button className="bg-red-800 text-white px-4 py-2 rounded uppercase text-sm font-medium">
+                <button className="bg-[#EE1F5B] text-white px-4 py-2 rounded uppercase text-sm font-medium">
                   Sử dụng
                 </button>
               </div>
@@ -282,7 +314,7 @@
 
             {/* Shipping Method */}
             <div className="mt-8">
-              <h2 className="text-xl font-medium text-red-800 mb-4">Phương thức vận chuyển</h2>
+              <h2 className="text-xl font-medium text-[#d90429] mb-4">Phương thức vận chuyển</h2>
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex items-center">
                   <input type="radio" id="free-shipping" name="shipping" className="mr-2" checked readOnly />
@@ -293,7 +325,7 @@
 
             {/* Payment Method */}
             <div className="mt-8">
-              <h2 className="text-xl font-medium text-red-800 mb-4">Phương thức thanh toán</h2>
+              <h2 className="text-xl font-medium text-[#d90429] mb-4">Phương thức thanh toán</h2>
               <div className="border-t border-gray-200 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="border rounded bg-gray-700 text-white p-4 flex flex-col items-center justify-center">
@@ -311,7 +343,7 @@
                 </div>
                 
                 <div className="border rounded p-4 mt-6">
-                  <h3 className="font-medium text-red-800 mb-2">Thanh toán khi nhận hàng</h3>
+                  <h3 className="font-medium text-[#d90429] mb-2">Thanh toán khi nhận hàng</h3>
                   <p className="text-gray-700">Quý khách sẽ thanh toán bằng <span className="font-medium">tiền mặt</span> khi đơn vị vận chuyển giao hàng tận nơi.</p>
                 </div>
               </div>
@@ -331,7 +363,7 @@
               </div>
               
               <button 
-                className={`bg-red-800 text-white py-3 px-6 rounded text-lg font-medium ${!agreeToTerms ? 'opacity-60 cursor-not-allowed' : ''}`}
+                className={`bg-[#EE1F5B] text-white py-3 px-6 rounded text-lg font-medium ${!agreeToTerms ? 'opacity-60 cursor-not-allowed' : ''}`}
                 disabled={!agreeToTerms}
               >
                 Thanh toán 1.544.000 đ (CoD)
