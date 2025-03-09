@@ -36,10 +36,10 @@ import TermsOfUsePage from "../components/Support/Term";
 import PrivacyPolicyPage from "../components/Support/Privacy";
 import PaymentPage from "../components/Support/Payment";
 import RefundPage from "../components/Support/Refund";
-import ProductDetailModel from "../components/ProductDetailModel/ProductDetailModel";
 import ProductAttributeManagement from "../pages/Admin/ManageAttribute/ManageAttribute";
 import ProtectedRoute from "./ProtectedRoute";
 import Unauthorized from "../pages/Unauthorized/Unauthorized";
+import ProductDetail from "../components/ProductDetail/ProductDetail";
 
 
 const Routers = () => {
@@ -62,7 +62,7 @@ const Routers = () => {
         },
         {
           path: '/product/:id',
-          element: <ProductDetailModel />,
+          element: <ProductDetail />,
         },
         {
           path: '/blog',

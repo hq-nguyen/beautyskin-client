@@ -11,7 +11,6 @@ const Shop = () => {
   const [skinTypes, setSkinTypes] = useState([]);
   const [skinConcerns, setSkinConcerns] = useState([]);
   const [textures, setTextures] = useState([]);
-  const [tags, setTags] = useState([]);
 
   const [filters, setFilters] = useState({
     category: [],
@@ -46,14 +45,12 @@ const Shop = () => {
           ProductAttributeService.getTextures(),
           ProductAttributeService.getSkinType(),
           ProductAttributeService.getConcern(),
-          ProductAttributeService.getTags(), // Assuming this method exists
         ]);
 
         setCategories(cate);
         setTextures(text);
         setSkinTypes(skinType);
         setSkinConcerns(concerns);
-        setTags(tagList);
       } catch (error) {
         console.error("Error fetching product attributes:", error);
       }
