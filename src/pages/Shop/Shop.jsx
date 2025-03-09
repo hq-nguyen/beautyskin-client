@@ -1,284 +1,376 @@
 import { useState, useEffect, useMemo } from "react";
+import { Slider } from "antd";
 import { assets } from "../../assets/frontend_assets/assets";
 import { fetchProducts } from '../../apis/product';
-import { ProductContext, ProductProvider } from '../../contexts/ProductContext'; // Import ProductContext and Provider
+import { ProductAttributeService } from "../../apis/productAttribute";
 import ProductItem from "../../components/Card/ProductItem";
 
 const Shop = () => {
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [brands, setBrands] = useState([]);
-    const [skinTypes, setSkinTypes] = useState([]);
-    const [skinConcerns, setSkinConcerns] = useState([]);
-    const [textures, setTextures] = useState([]);
-    const [origins, setOrigins] = useState([]);
-    const [filters, setFilters] = useState({
-        category: [],
-        priceRange: { from: "", to: "" },
-        brands: [],
-        skinType: [],
-        skinConcern: [],
-        texture: [],
-        origin: []
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [skinTypes, setSkinTypes] = useState([]);
+  const [skinConcerns, setSkinConcerns] = useState([]);
+  const [textures, setTextures] = useState([]);
+
+  const [filters, setFilters] = useState({
+    category: [],
+    priceRange: [0, 10000000], // Default price range in VND
+    skinType: [],
+    skinConcern: [],
+    texture: []
+  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState(""); // Added sortBy state
+
+  // Fetch products
+  useEffect(() => {
+    const getProducts = async () => {
+      try {
+        const data = await fetchProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    getProducts();
+  }, []);
+
+  // Fetch product attributes
+  useEffect(() => {
+    const fetchAttributes = async () => {
+      try {
+        const [cate, text, skinType, concerns, tagList] = await Promise.all([
+          ProductAttributeService.getCategories(),
+          ProductAttributeService.getTextures(),
+          ProductAttributeService.getSkinType(),
+          ProductAttributeService.getConcern(),
+        ]);
+
+        setCategories(cate);
+        setTextures(text);
+        setSkinTypes(skinType);
+        setSkinConcerns(concerns);
+      } catch (error) {
+        console.error("Error fetching product attributes:", error);
+      }
+    };
+
+    fetchAttributes();
+  }, []);
+
+  // Function to count products for each filter option
+  const getFilterCounts = (filterType, options) => {
+    const counts = {};
+    
+    options.forEach(option => {
+      let count = 0;
+      
+      products.forEach(product => {
+        if (filterType === 'category') {
+          if (product.category && product.category.id === option.id) count++;
+        } 
+        else if (filterType === 'skinType') {
+          if (product.skinTypes && product.skinTypes.some(type => type.id === option.id)) count++;
+        }
+        else if (filterType === 'skinConcern') {
+          if (product.skinConcerns && product.skinConcerns.some(concern => concern.id === option.id)) count++;
+        }
+        else if (filterType === 'texture') {
+          if (product.forms && product.forms.some(form => form.id === option.id)) count++;
+        }
+      });
+      
+      counts[option.id] = count;
+    });
+    
+    return counts;
+  };
+
+  // Filter and sort products
+  const filteredAndSortedProducts = useMemo(() => {
+    // First filter the products
+    let filtered = products.filter(product => {
+      // Price range filter
+      const priceInRange = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
+
+      // Category filter
+      const matchesCategory = filters.category.length === 0 || 
+        filters.category.some(catId => product.category && product.category.id === catId);
+      
+      // Skin type filter
+      const matchesSkinType = filters.skinType.length === 0 || 
+        (product.skinTypes && product.skinTypes.some(type => filters.skinType.includes(type.id)));
+      
+      // Skin concern filter
+      const matchesSkinConcern = filters.skinConcern.length === 0 || 
+        (product.skinConcerns && product.skinConcerns.some(concern => filters.skinConcern.includes(concern.id)));
+      
+      // Texture filter
+      const matchesTexture = filters.texture.length === 0 || 
+        (product.forms && product.forms.some(form => filters.texture.includes(form.id)));
+      
+      // Search query filter
+      const matchesSearch = !searchQuery || 
+        (product.name && product.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      return priceInRange && matchesCategory && matchesSkinType && 
+             matchesSkinConcern && matchesTexture && matchesSearch;
     });
 
-    const [sortBy, setSortBy] = useState("newest");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [searchBrand, setSearchBrand] = useState("");
-    const [tempPriceRange, setTempPriceRange] = useState({ from: "", to: "" }); // Temporary state for price range
+    // Then apply sorting
+    switch (sortBy) {
+      case "low-high":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "high-low":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "hot":
+        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case "newest":
+        // API now returns products in the order of newest already
+        // If you have a createdAt field, you could uncomment this:
+        // filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      default:
+        break;
+    }
 
-    useEffect(() => {
-        const getProductsAndFilters = async () => {
-            try {
-                const data = await fetchProducts();
-                setProducts(data);
+    return filtered;
+  }, [filters, products, searchQuery, sortBy]); // Added sortBy to dependencies
 
-                // Extract distinct values from the product data
-                const distinctCategories = [...new Set(data.map(product => product.category))];
-                const distinctBrands = [...new Set(data.map(product => product.brand))];
-                const distinctSkinTypes = [...new Set(data.flatMap(product => product.skinType))]; // Use flatMap if skinType is an array
-                const distinctSkinConcerns = [...new Set(data.flatMap(product => product.skinConcern))];
-                const distinctTextures = [...new Set(data.map(product => product.texture))];
-                const distinctOrigins = [...new Set(data.map(product => product.origin))];
+  // Handle sorting
+  const handleSort = (sortType) => {
+    setSortBy(sortType);
+  };
 
-                setCategories(distinctCategories);
-                setBrands(distinctBrands);
-                setSkinTypes(distinctSkinTypes);
-                setSkinConcerns(distinctSkinConcerns);
-                setTextures(distinctTextures);
-                setOrigins(distinctOrigins);
+  // Handle filter changes
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => {
+      if (filterType === "priceRange") {
+        return { ...prev, priceRange: value };
+      }
+      
+      const updatedValues = prev[filterType].includes(value)
+        ? prev[filterType].filter(item => item !== value)
+        : [...prev[filterType], value];
+      
+      return { ...prev, [filterType]: updatedValues };
+    });
+    setCurrentPage(1);
+  };
 
-            } catch (error) {
-                console.error("Error fetching products:", error);
-            }
-        };
-        getProductsAndFilters();
-    }, []);
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      category: [],
+      priceRange: [0, 10000000],
+      skinType: [],
+      skinConcern: [],
+      texture: []
+    });
+    setSearchQuery("");
+    setSortBy(""); // Reset sorting as well
+  };
 
-    // test only
-    const categoriesTest = ['Đặc trị', 'Chăm sóc da', 'Thiết bị', 'Makeup'];
-
-
-    const filteredProducts = useMemo(() => {
-        let filtered = products.filter(product => {
-            const priceInRange = (!filters.priceRange.from || product.price >= Number(filters.priceRange.from)) &&
-                (!filters.priceRange.to || product.price <= Number(filters.priceRange.to));
-
-            const matchesCategory = filters.category.length === 0 || filters.category.includes(product.category);
-            const matchesBrand = filters.brands.length === 0 || filters.brands.includes(product.brand);
-            const matchesSkinType = filters.skinType.length === 0 ||
-                filters.skinType.some(type => product.skinType.includes(type));
-            const matchesTexture = filters.texture.length === 0 || filters.texture.includes(product.texture);
-            const matchesOrigin = filters.origin.length === 0 || filters.origin.includes(product.origin);
-            const matchesSkinConcern = filters.skinConcern.length === 0 ||
-                filters.skinConcern.some(concern => product.skinConcern.includes(concern));
-
-            return priceInRange && matchesCategory && matchesBrand && matchesSkinType &&
-                matchesTexture && matchesOrigin && matchesSkinConcern;
-        });
-
-        // Apply sorting
-        switch (sortBy) {
-            case "low-high":
-                filtered.sort((a, b) => a.price - b.price);
-                break;
-            case "high-low":
-                filtered.sort((a, b) => b.price - a.price);
-                break;
-            case "hot":
-                filtered.sort((a, b) => b.rating - a.rating);
-                break;
-            case "newest":
-                // API now returns products in the order of newest already, implement a sorting for dates here
-                break;
-            default:
-                break;
-        }
-        return filtered;
-    }, [filters, products, sortBy]);
-
-    const handleFilterChange = (filterType, value) => {
-        setFilters(prev => {
-            if (filterType === "priceRange") {
-                // Store the temporary price range values
-                setTempPriceRange({ ...prev.priceRange, ...value });
-                return prev; // Return the previous state without applying the filter
-            }
-            const updatedValues = prev[filterType].includes(value)
-                ? prev[filterType].filter(item => item !== value)
-                : [...prev[filterType], value];
-            return { ...prev, [filterType]: updatedValues };
-        });
-        setCurrentPage(1);
-    };
-
-    // Function to apply the temporary price range filter
-    const applyPriceRangeFilter = () => {
-        setFilters(prev => ({
-            ...prev,
-            priceRange: { ...tempPriceRange } // Apply the temporary price range values
-        }));
-        setCurrentPage(1);
-    };
-
-    const clearFilters = () => {
-        setFilters({
-            category: [],
-            priceRange: { from: "", to: "" },
-            brands: [],
-            skinType: [],
-            skinConcern: [],
-            texture: [],
-            origin: []
-        });
-    };
-
-    const handleSort = (sortType) => {
-        setSortBy(sortType);
-    };
-
-    const FilterSection = ({ title, options, filterType }) => (
-        <div className="mb-6">
-            <h3 className="text-md font-semibold mb-2">{title}</h3>
-            <div className="space-y-2">
-                {options.map(option => (
-                    <label key={option} className="flex items-center space-x-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={filters[filterType].includes(option)}
-                            onChange={() => handleFilterChange(filterType, option)}
-                            className="form-checkbox text-primary h-4 w-4"
-                        />
-                        <span className="text-sm">{option}</span>
-                    </label>
-                ))}
-            </div>
-        </div>
-    );
-
+  // Updated Filter section component with counts
+  const FilterSection = ({ title, options, filterType }) => {
+    const counts = getFilterCounts(filterType, options);
+    
     return (
-        <ProductProvider
-            products={filteredProducts}
-            categories={categories}
-            brands={brands}
-            skinTypes={skinTypes}
-            skinConcerns={skinConcerns}
-            textures={textures}
-            origins={origins}
-            filters={filters}
-            handleFilterChange={handleFilterChange}
-            applyPriceRangeFilter={applyPriceRangeFilter}
-            clearFilters={clearFilters}
-        >
-            <div className="min-h-screen bg-background bg-gray-50 my-8">
-                <div className="container mx-auto px-4 py-8">
-                    <div className="flex flex-col lg:flex-row gap-8">
-                        {/* Filters Sidebar */}
-                        <div className="lg:w-1/5 space-y-6 bg-card p-6 rounded-lg h-fit sticky top-4">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-bold">Mua hàng</h2>
-                                <button
-                                    onClick={clearFilters}
-                                    className="text-sm text-primary hover:text-primary/80"
-                                >
-                                    Xóa lọc
-                                </button>
-                            </div>
-
-                            {/* test category */}
-                            <FilterSection title="Danh mục" options={categoriesTest} filterType="category" />
-
-                            {/* Price Range Filter */}
-                            <div className="mb-6">
-                                <h3 className="text-sm font-semibold mb-2">Lọc theo giá</h3>
-                                <div className="flex space-x-2">
-                                    <input
-                                        type="number"
-                                        placeholder="Từ"
-                                        value={tempPriceRange.from}
-                                        onChange={(e) => handleFilterChange("priceRange", { from: e.target.value })}
-                                        className="w-full px-1 py-1 border rounded-md"
-                                    />
-                                    <input
-                                        type="number"
-                                        placeholder="Đến"
-                                        value={tempPriceRange.to}
-                                        onChange={(e) => handleFilterChange("priceRange", { to: e.target.value })}
-                                        className="w-full px-1 py-1 border rounded-md"
-                                    />
-                                </div>
-                                <button
-                                    onClick={applyPriceRangeFilter}
-                                    className="mt-2 w-full bg-primary text-white py-1 rounded-md hover:bg-primary/80"
-                                >
-                                    Áp dụng
-                                </button>
-                            </div>
-
-                            <FilterSection title="Brand" options={brands} filterType="brands" />
-                            <FilterSection title="Loại da" options={skinTypes} filterType="skinType" />
-                            <FilterSection title="Mối quan tâm về da" options={skinConcerns} filterType="skinConcern" />
-                            <FilterSection title="Kết cấu sản phẩm" options={textures} filterType="texture" />
-                            <FilterSection title="Xuất xứ sản phẩm" options={origins} filterType="origin" />
-                        </div>
-
-                        {/* Product Listing */}
-                        <div className="lg:w-4/5">
-                            <div className='flex justify-between text-base sm:text-2xl mb-4'>
-                                <h1 className="text-black font-bold font-lg">Danh sách sản phẩm</h1>
-                            </div>
-                            <div className="my-2 bg-white border border-rose-200 rounded-md">
-                                <div className="flex items-center justify-between px-4 py-2">
-                                    <div className="flex space-x-2 text-sm">
-                                        <span className="mr-2">Sắp xếp</span>
-                                        <button
-                                            className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "hot" ? "bg-primary text-white" : "bg-white"}`}
-                                            onClick={() => handleSort("hot")}
-                                        >
-                                            Bán chạy
-                                        </button>
-                                        <button
-                                            className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "newest" ? "bg-primary text-white" : "bg-white"}`}
-                                            onClick={() => handleSort("newest")}
-                                        >
-                                            Mới nhất
-                                        </button>
-                                        <button
-                                            className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "low-high" ? "bg-primary text-white" : "bg-white"}`}
-                                            onClick={() => handleSort("low-high")}
-                                        >
-                                            Giá thấp đến cao
-                                        </button>
-                                        <button
-                                            className={`text-xs px-2 text-black hover:border-rose-500 hover:border ${sortBy === "high-low" ? "bg-primary text-white" : "bg-white"}`}
-                                            onClick={() => handleSort("high-low")}
-                                        >
-                                            Giá cao đến thấp
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
-                                {filteredProducts.map((product, index) => (
-                                    //  image, promotion, name, rating, oldPrice, newPrice
-                                    <ProductItem
-                                        key={index}
-                                        id={product.id}
-                                        image={product.images && product.images.length > 0 ? product.images[0] : assets.product_new_1}
-                                        promotion={20}
-                                        name={product.name}
-                                        rating={product.rating}
-                                        oldPrice={product.price}
-                                        newPrice={product.price - product.price * 0.2}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </ProductProvider>
+      <div className="mb-6">
+        <h3 className="text-md font-semibold mb-2">{title}</h3>
+        <div className="space-y-2">
+          {options.map(option => (
+            <label key={option.id} className="flex items-center justify-between cursor-pointer">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={filters[filterType].includes(option.id)}
+                  onChange={() => handleFilterChange(filterType, option.id)}
+                  className="form-checkbox text-primary h-4 w-4"
+                />
+                <span className="text-sm">{option.name}</span>
+              </div>
+              <span className="text-sm text-gray-500">({counts[option.id]})</span>
+            </label>
+          ))}
+        </div>
+      </div>
     );
+  };
+
+  // Function to get promotional discount percentage
+  const getPromotionPercentage = (product) => {
+    if (product.promotions && product.promotions.length > 0) {
+      return 20; // Default 20% discount
+    }
+    return 20;
+  };
+
+  // Function to calculate discounted price
+  const getDiscountedPrice = (product) => {
+    if (product.promotions && product.promotions.length > 0) {
+      return product.price - (product.price * 0.2); // 20% discount
+    }
+    return product.price;
+  };
+
+  // Function to get the first image from product images array
+  const getProductImage = (product) => {
+    if (product.images && product.images.length > 0) {
+      return product.images[0].url;
+    }
+    return assets.product_new_1;
+  };
+
+  return (
+    <div className="min-h-screen bg-background bg-gray-50 my-8">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <div className="lg:w-1/5 space-y-6 bg-card p-6 rounded-lg h-fit sticky top-4">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">Mua hàng</h2>
+              <button
+                onClick={clearFilters}
+                className="text-sm text-primary hover:text-primary/80"
+              >
+                Xóa lọc
+              </button>
+            </div>
+
+            {/* Search bar */}
+            <div className="mb-6">
+              <h3 className="text-md font-semibold mb-2">Tìm kiếm</h3>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm sản phẩm..."
+                  className="w-full p-2 pr-8 border rounded-lg"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <svg
+                  className="absolute right-3 top-3 h-4 w-4 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            <FilterSection title="Danh mục" options={categories} filterType="category" />
+
+            {/* Price Range Filter with Slider */}
+            <div className="mb-6">
+              <h3 className="text-md font-semibold mb-2">Lọc theo giá</h3>
+              <Slider
+                range
+                min={0}
+                max={10000000}
+                step={100000}
+                defaultValue={[0, 10000000]}
+                value={filters.priceRange}
+                onChange={(value) => handleFilterChange("priceRange", value)}
+                tipFormatter={(value) => `${value.toLocaleString()} đ`}
+              />
+              <div className="flex justify-between mt-2 text-sm text-gray-600">
+                <span>{filters.priceRange[0].toLocaleString()} đ</span>
+                <span>{filters.priceRange[1].toLocaleString()} đ</span>
+              </div>
+            </div>
+
+            <FilterSection title="Loại da" options={skinTypes} filterType="skinType" />
+            <FilterSection title="Mối quan tâm về da" options={skinConcerns} filterType="skinConcern" />
+            <FilterSection title="Kết cấu sản phẩm" options={textures} filterType="texture" />
+          </div>
+
+          {/* Product Listing */}
+          <div className="lg:w-4/5">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl text-primary font-bold">Tất cả sản phẩm</h2>
+              <div className="text-sm">
+                Hiển thị {filteredAndSortedProducts.length} sản phẩm
+              </div>
+            </div>
+
+            {/* Sorting options */}
+            <div className="flex items-center justify-between px-4 py-2 mb-4 bg-white rounded-lg shadow-sm">
+              <div className="flex space-x-2 text-sm">
+                <span className="mr-2">Sắp xếp</span>
+                <button
+                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${sortBy === "hot" ? "bg-primary text-white" : "bg-white border"}`}
+                  onClick={() => handleSort("hot")}
+                >
+                  Bán chạy
+                </button>
+                <button
+                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${sortBy === "newest" ? "bg-primary text-white" : "bg-white border"}`}
+                  onClick={() => handleSort("newest")}
+                >
+                  Mới nhất
+                </button>
+                <button
+                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${sortBy === "low-high" ? "bg-primary text-white" : "bg-white border"}`}
+                  onClick={() => handleSort("low-high")}
+                >
+                  Giá thấp đến cao
+                </button>
+                <button
+                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${sortBy === "high-low" ? "bg-primary text-white" : "bg-white border"}`}
+                  onClick={() => handleSort("high-low")}
+                >
+                  Giá cao đến thấp
+                </button>
+              </div>
+            </div>
+
+            {/* Products grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {filteredAndSortedProducts.map((product) => (
+                <ProductItem
+                  key={product.id}
+                  id={product.id}
+                  image={getProductImage(product)}
+                  promotion={getPromotionPercentage(product)}
+                  name={product.name}
+                  rating={product.rating || 5}
+                  oldPrice={product.price}
+                  newPrice={getDiscountedPrice(product)}
+                  stock={product.stock}
+                  status={product.status}
+                />
+              ))}
+            </div>
+
+            {/* Empty state */}
+            {filteredAndSortedProducts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-lg text-gray-600">Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</p>
+                <button
+                  onClick={clearFilters}
+                  className="mt-4 px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/80"
+                >
+                  Xóa bộ lọc
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Shop;

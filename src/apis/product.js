@@ -1,22 +1,9 @@
-import axios from 'axios';
-
-// Use environment variable for API URL (if available)
-const API_BASE_URL = "https://6785075f1ec630ca33a6df91.mockapi.io";
-
-// Create an axios instance
-const axiosInstance = axios.create({
-    baseURL: API_BASE_URL,
-    timeout: 10000, // Optional: set a timeout
-    // Optional: Add common headers here (e.g., authorization)
-    // headers: {
-    //   'Authorization': `Bearer ${localStorage.getItem('token')}`
-    // }
-});
+import api from '../config/axios';
 
 // Fetch all products
 export const fetchProducts = async () => {
     try {
-        const response = await axiosInstance.get('/Product'); // Use relative URL
+        const response = await api.get('/product/get');
         return response.data;
     } catch (error) {
         console.error("Error fetching products:", error);
@@ -24,11 +11,22 @@ export const fetchProducts = async () => {
     }
 };
 
+// Fetch a product by ID
+export const fetchProductById = async (productId) => {
+    try {
+        const response = await api.get(`/product/get/${productId}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching product with ID ${productId}:`, error);
+        throw new Error("Failed to fetch product. Please try again later.");
+    }
+};
+
 // Update a product
 export const updateProduct = async (productId, productData) => {
     try {
-        const response = await axiosInstance.put(`/Product/${productId}`, productData);
-        return response.data; // Or handle response as needed
+        const response = await api.put(`/product/update/${productId}`, productData);
+        return response.data; 
     } catch (error) {
         console.error(`Error updating product with ID ${productId}:`, error);
         throw new Error(`Failed to update product. Please try again later.`);
@@ -38,7 +36,7 @@ export const updateProduct = async (productId, productData) => {
 // Add a new product
 export const addProduct = async (productData) => {
     try {
-        const response = await axiosInstance.post('/Product', productData);
+        const response = await api.post('/product/create', productData);
         return response.data;
     } catch (error) {
         console.error("Error adding product:", error);
@@ -50,7 +48,7 @@ export const addProduct = async (productData) => {
 // Delete a product
 export const deleteProduct = async (productId) => {
     try {
-        const response = await axiosInstance.delete(`/Product/${productId}`);
+        const response = await api.delete(`/product/delete/${productId}`);
         // debug
         console.log(response);
         return response;
@@ -60,4 +58,4 @@ export const deleteProduct = async (productId) => {
     }
 };
 
-export default axiosInstance; 
+export default api; 

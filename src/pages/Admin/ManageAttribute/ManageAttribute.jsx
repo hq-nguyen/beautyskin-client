@@ -20,7 +20,7 @@ import {
 import { ProductAttributeService } from '../../../apis/productAttribute';
 import uploadFile from '../../../utils/upload';
 
-const { Sider, Content } = Layout;
+const { Content } = Layout;
 const { Option } = Select;
 
 const ProductAttributeManagement = () => {
@@ -31,28 +31,166 @@ const ProductAttributeManagement = () => {
     const [form] = Form.useForm();
     const [isSubmitted, setIsSubmitted] = useState(false);
 
+    // Configuration object mapping attribute types to their properties and methods
+    const attributeConfig = {
+        category: {
+            title: 'Danh mục',
+            fetchMethod: ProductAttributeService.getCategories,
+            createMethod: ProductAttributeService.createCategory,
+            updateMethod: ProductAttributeService.updateCategory,
+            deleteMethod: ProductAttributeService.deleteCategory,
+            columns: [
+                { title: 'Tên danh mục', dataIndex: 'name', key: 'name' }
+            ],
+            formItems: [
+                {
+                    name: "name",
+                    label: "Category Name",
+                    rules: [
+                        { required: true, message: 'Category name is required' },
+                        { max: 100, message: 'Maximum 100 characters allowed' }
+                    ],
+                    component: <Input />
+                }
+            ],
+            createData: (values) => ({
+                name: values.name,
+                description: values.description || '',
+            })
+        },
+        skinType: {
+            title: 'Loại da',
+            fetchMethod: ProductAttributeService.getSkinType,
+            createMethod: ProductAttributeService.createSkinType,
+            updateMethod: ProductAttributeService.updateSkinType,
+            deleteMethod: ProductAttributeService.deleteSkinType,
+            columns: [
+                { title: 'Loại da', dataIndex: 'name', key: 'name' },
+                { title: 'Mô tả', dataIndex: 'description', key: 'description' }
+            ],
+            formItems: [
+                {
+                    name: "name",
+                    label: "Tên loại da",
+                    rules: [
+                        { required: true, message: 'Vui lòng nhập tên loại da' },
+                        { max: 100, message: 'Tối đa 100 kí tự' }
+                    ],
+                    component: <Input />
+                },
+                {
+                    name: "description",
+                    label: "Mô tả",
+                    rules: [
+                        { max: 500, message: 'Tối đa 500 kí tự' }
+                    ],
+                    component: <Input.TextArea />
+                }
+            ],
+            createData: (values) => ({
+                name: values.name,
+                description: values.description || '',
+            })
+        },
+        concern: {
+            title: 'Vấn đề da',
+            fetchMethod: ProductAttributeService.getConcern,
+            createMethod: ProductAttributeService.createConcern,
+            updateMethod: ProductAttributeService.updateConcern,
+            deleteMethod: ProductAttributeService.deleteConcern,
+            columns: [
+                { title: 'Vấn đề về da', dataIndex: 'name', key: 'name' },
+                { title: 'Mô tả', dataIndex: 'description', key: 'description' }
+            ],
+            formItems: [
+                {
+                    name: "name",
+                    label: "Tên vấn đề về da",
+                    rules: [
+                        { required: true, message: 'concern name is required' },
+                        { max: 100, message: 'Maximum 100 characters allowed' }
+                    ],
+                    component: <Input />
+                },
+                {
+                    name: "description",
+                    label: "Mô tả",
+                    rules: [
+                        { max: 500, message: 'Tối đa 500 kí tự' }
+                    ],
+                    component: <Input.TextArea />
+                }
+            ],
+            createData: (values) => ({
+                name: values.name,
+                description: values.description || '',
+            })
+        },
+        texture: {
+            title: 'Kết cấu sản phẩm',
+            fetchMethod: ProductAttributeService.getTextures,
+            createMethod: ProductAttributeService.createTexture,
+            updateMethod: ProductAttributeService.updateTexture,
+            deleteMethod: ProductAttributeService.deleteTexture,
+            columns: [
+                { title: 'Kết cấu sản phẩm', dataIndex: 'name', key: 'name' },
+                { title: 'Mô tả', dataIndex: 'description', key: 'description' }
+            ],
+            formItems: [
+                {
+                    name: "name",
+                    label: "Loại kết cấu",
+                    rules: [
+                        { required: true, message: 'concern name is required' },
+                        { max: 100, message: 'Maximum 100 characters allowed' }
+                    ],
+                    component: <Input />
+                },
+                {
+                    name: "description",
+                    label: "Mô tả",
+                    rules: [
+                        { max: 500, message: 'Tối đa 500 kí tự' }
+                    ],
+                    component: <Input.TextArea />
+                }
+            ],
+            createData: (values) => ({
+                name: values.name,
+                description: values.description || '',
+            })
+        },
+        tag: {
+            title: 'Tag',
+            fetchMethod: ProductAttributeService.getTags,
+            createMethod: ProductAttributeService.createTag,
+            updateMethod: ProductAttributeService.updateTag,
+            deleteMethod: ProductAttributeService.deleteTag,
+            columns: [
+                { title: 'Tags', dataIndex: 'name', key: 'name' },
+            ],
+            formItems: [
+                {
+                    name: "name",
+                    label: "Tên thẻ",
+                    rules: [
+                        { required: true, message: 'Vui lòng nhập tên thẻ' },
+                        { max: 100, message: 'Tối đa 100 kí tự' }
+                    ],
+                    component: <Input />
+                }
+            ],
+            createData: (values) => ({
+                name: values.name,
+            })
+        },
+    };
+
     const fetchData = async () => {
         try {
-            let response;
-            switch (attributeType) {
-                case 'category':
-                    response = await ProductAttributeService.getCategories();
-                    // console.log('Categories Response:', response);
-                    setData(response);
-                    break;
-                case 'brand':
-                    response = await ProductAttributeService.getBrands();
-                    setData(Array.isArray(response) ? response : [response]);
-                    break;
-                case 'skinType':
-                    response = await ProductAttributeService.getSkinType();
-                    setData(Array.isArray(response) ? response : [response]);
-                    break;
-                case 'texture':
-                    response = await ProductAttributeService.getTextures();
-                    setData(response.data);
-                    break;
-            }
+            const config = attributeConfig[attributeType];
+            const response = await config.fetchMethod();
+            setData(Array.isArray(response) ? response : [response]);
         } catch (error) {
             console.error('API Call Error:', error);
             message.error(`Failed to fetch ${attributeType} data: ${error.message}`);
@@ -72,20 +210,8 @@ const ProductAttributeManagement = () => {
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    switch (attributeType) {
-                        case 'category':
-                            await ProductAttributeService.deleteCategory(id);
-                            break;
-                        case 'brand':
-                            await ProductAttributeService.deleteBrand(id);
-                            break;
-                        case 'skinType':
-                            await ProductAttributeService.deleteSkinType(id);
-                            break;
-                        case 'texture':
-                            await ProductAttributeService.deleteTexture(id);
-                            break;
-                    }
+                    const config = attributeConfig[attributeType];
+                    await config.deleteMethod(id);
                     message.success('Đã xóa thành công');
                     fetchData();
                 } catch (error) {
@@ -93,7 +219,6 @@ const ProductAttributeManagement = () => {
                 }
             }
         });
-
     };
 
     const handleSubmit = async (values) => {
@@ -113,62 +238,15 @@ const ProductAttributeManagement = () => {
                 }
             }
 
-            // Create appropriate data object based on attribute type
-            let submitData;
-
-            switch (attributeType) {
-                case 'category':
-                case 'texture':
-                    submitData = values;
-                    break;
-                case 'brand':
-                    submitData = {
-                        name: values.name,
-                        description: values.description || '',
-                        imageUrl: imageUrl || ''
-                    };
-                    break;
-                case 'skinType':
-                    submitData = {
-                        name: values.name,
-                        description: values.description || '',
-                    };
-                    break;
-            }
+            const config = attributeConfig[attributeType];
+            const submitData = config.createData(values, imageUrl);
 
             if (editingRecord) {
-                // Update logic
-                switch (attributeType) {
-                    case 'category':
-                        await ProductAttributeService.updateCategory(editingRecord.id, submitData);
-                        break;
-                    case 'brand':
-                        await ProductAttributeService.updateBrand(editingRecord.id, submitData);
-                        break;
-                    case 'skinType':
-                        await ProductAttributeService.updateSkinType(editingRecord.id, submitData);
-                        break;
-                    case 'texture':
-                        await ProductAttributeService.updateTexture(editingRecord.id, submitData);
-                        break;
-                }
+                await config.updateMethod(editingRecord.id, submitData);
             } else {
-                // Create logic
-                switch (attributeType) {
-                    case 'category':
-                        await ProductAttributeService.createCategory(submitData);
-                        break;
-                    case 'brand':
-                        await ProductAttributeService.createBrand(submitData);
-                        break;
-                    case 'skinType':
-                        await ProductAttributeService.createSkinType(submitData);
-                        break;
-                    case 'texture':
-                        await ProductAttributeService.createTexture(submitData);
-                        break;
-                }
+                await config.createMethod(submitData);
             }
+
             message.success(`${editingRecord ? 'Cập nhật' : 'Tạo mới'} thành công`);
             setModalVisible(false);
             fetchData();
@@ -190,265 +268,49 @@ const ProductAttributeManagement = () => {
             }
         ];
 
-        switch (attributeType) {
-            case 'category':
-                return [
-                    ...baseColumns,
-                    {
-                        title: 'Tên danh mục',
-                        dataIndex: 'name',
-                        key: 'name'
-                    },
-                    {
-                        title: 'Hành động',
-                        key: 'actions',
-                        width: 150,
-                        render: (_, record) => (
-                            <Space>
-                                <Button
-                                    icon={<EditOutlined className="text-blue-500 w-5 h-5" />}
-                                    type="text"
-                                    onClick={() => {
-                                        setEditingRecord(record);
-                                        form.setFieldsValue(record);
-                                        setModalVisible(true);
-                                    }}
-                                />
-                                <Button
-                                    icon={<DeleteOutlined />}
-                                    type="text"
-                                    danger
-                                    onClick={() => handleDelete(record.id)}
-                                />
-                            </Space>
-                        ),
-                    },
-                ];
-            case 'brand':
-                return [
-                    ...baseColumns,
-                    {
-                        title: 'Tên thương hiệu',
-                        dataIndex: 'name',
-                        key: 'name'
-                    },
-                    {
-                        title: 'Thông tin mô tả',
-                        dataIndex: 'description',
-                        key: 'description'
-                    },
-                    {
-                        title: 'Logo',
-                        dataIndex: 'imageUrl',
-                        key: 'imageUrl',
-                        render: (imageUrl) => (
-                            <Image
-                                src={imageUrl}
-                                alt="Brand"
-                                style={{
-                                    maxWidth: 50,
-                                    maxHeight: 50,
-                                    objectFit: 'contain'
-                                }}
-                            />
-                        )
-                    },
-                    {
-                        title: 'Hành động',
-                        key: 'actions',
-                        width: 150,
-                        render: (_, record) => (
-                            <Space>
-                                <Button
-                                    icon={<EditOutlined className="text-blue-500 w-5 h-5" />}
-                                    type="text"
-                                    onClick={() => {
-                                        setEditingRecord(record);
-                                        form.setFieldsValue(record);
-                                        setModalVisible(true);
-                                    }}
-                                />
-                                <Button
-                                    icon={<DeleteOutlined />}
-                                    type="text"
-                                    danger
-                                    onClick={() => handleDelete(record.id)}
-                                />
-                            </Space>
-                        ),
-                    },
-                ];
-            case 'skinType':
-                return [
-                    ...baseColumns,
-                    {
-                        title: 'Loại da',
-                        dataIndex: 'typeName',
-                        key: 'typeName'
-                    },
-                    {
-                        title: 'Mô tả',
-                        dataIndex: 'description',
-                        key: 'description',
-                    },
-                    {
-                        title: 'Hành động',
-                        key: 'actions',
-                        width: 150,
-                        render: (_, record) => (
-                            <Space>
-                                <Button
-                                    icon={<EditOutlined className="text-blue-500 w-5 h-5" />}
-                                    type="text"
-                                    onClick={() => {
-                                        setEditingRecord(record);
-                                        form.setFieldsValue({
-                                            typeName: record.name,
-                                            description: record.description
-                                        });
-                                        setModalVisible(true);
-                                    }}
-                                />
-                                <Button
-                                    icon={<DeleteOutlined />}
-                                    type="text"
-                                    danger
-                                    onClick={() => handleDelete(record.id)}
-                                />
-                            </Space>
-                        ),
-                    },
-                ];
-            case 'texture':
-                return [
-                    ...baseColumns,
-                    {
-                        title: 'Texture Name',
-                        dataIndex: 'name',
-                        key: 'name'
-                    },
-                    {
-                        title: 'Action',
-                        key: 'action',
-                        render: (text, record) => (
-                            <div>
-                                <Button
-                                    icon={<EditOutlined />}
-                                    onClick={() => {
-                                        setEditingRecord(record);
-                                        form.setFieldsValue(record);
-                                        setModalVisible(true);
-                                    }}
-                                />
-                                <Button
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => handleDelete(record.id)}
-                                />
-                            </div>
-                        )
-                    }
-                ];
-        }
+        const actionColumn = {
+            title: 'Hành động',
+            key: 'actions',
+            width: 150,
+            render: (_, record) => (
+                <Space>
+                    <Button
+                        icon={<EditOutlined className="text-blue-500 w-5 h-5" />}
+                        type="text"
+                        onClick={() => {
+                            setEditingRecord(record);
+                            form.setFieldsValue(record);
+                            setModalVisible(true);
+                        }}
+                    />
+                    <Button
+                        icon={<DeleteOutlined />}
+                        type="text"
+                        danger
+                        onClick={() => handleDelete(record.id)}
+                    />
+                </Space>
+            ),
+        };
+
+        return [
+            ...baseColumns,
+            ...attributeConfig[attributeType].columns,
+            actionColumn
+        ];
     };
 
-    const renderModalContent = () => {
-        switch (attributeType) {
-            case 'category':
-                return (
-                    <Form.Item
-                        name="name"
-                        label="Category Name"
-                        rules={[
-                            { required: true, message: 'Category name is required' },
-                            { max: 100, message: 'Maximum 100 characters allowed' }
-                        ]}
-                    >
-                        <Input />
-                    </Form.Item>
-                );
-            case 'brand':
-                return (
-                    <>
-                        <Form.Item
-                            name="name"
-                            label="Brand Name"
-                            rules={[
-                                { required: true, message: 'Brand name is required' },
-                                { max: 100, message: 'Maximum 100 characters allowed' }
-                            ]}
-                        >
-                            <Input />
-                        </Form.Item>
-                        <Form.Item
-                            name="description"
-                            label="Description"
-                            rules={[
-                                { max: 500, message: 'Maximum 500 characters allowed' }
-                            ]}
-                        >
-                            <Input.TextArea />
-                        </Form.Item>
-                        <Form.Item
-                            name="image"
-                            label="Upload Image"
-
-                        >
-                            <Upload
-                                listType="picture-card"
-                                fileList={form.getFieldValue('image')?.fileList}
-                                beforeUpload={() => false}
-                                onChange={({ fileList }) => {
-                                    form.setFieldsValue({
-                                        image: {
-                                            fileList: fileList,
-                                            file: fileList.length > 0 ? fileList[0].originFileObj : null,
-                                        },
-                                    });
-                                }}
-                            >
-                                {form.getFieldValue('image')?.fileList?.length >= 1 ? null : <PlusOutlined />}
-                            </Upload>
-                        </Form.Item>
-                    </>
-                );
-            case 'skinType':
-                return (
-                    <>
-                        <Form.Item
-                            name="name"
-                            label="Tên loại da"
-                            rules={[
-                                { required: true, message: 'Vui lòng nhập tên loại da' },
-                                { max: 100, message: 'Tối đa 100 kí tự' }
-                            ]}
-                        >
-                            <Input />
-                        </Form.Item>
-                        <Form.Item
-                            name="description"
-                            label="Mô tả"
-                            rules={[
-                                { max: 500, message: 'Tối đa 500 kí tự' }
-                            ]}
-                        >
-                            <Input.TextArea />
-                        </Form.Item>
-                    </>
-                );
-            case 'texture':
-                return (
-                    <Form.Item
-                        name="name"
-                        label="Texture Name"
-                        rules={[
-                            { required: true, message: 'Texture name is required' },
-                            { max: 100, message: 'Maximum 100 characters allowed' }
-                        ]}
-                    >
-                        <Input />
-                    </Form.Item>
-                );
-        }
+    const renderFormItems = () => {
+        return attributeConfig[attributeType].formItems.map((item, index) => (
+            <Form.Item
+                key={index}
+                name={item.name}
+                label={item.label}
+                rules={item.rules}
+            >
+                {typeof item.component === 'function' ? item.component(form) : item.component}
+            </Form.Item>
+        ));
     };
 
     return (
@@ -460,10 +322,9 @@ const ProductAttributeManagement = () => {
                     value={attributeType}
                     onChange={(value) => setAttributeType(value)}
                 >
-                    <Option value="category">Category</Option>
-                    <Option value="brand">Brand</Option>
-                    <Option value="skinType">Loại da</Option>
-                    <Option value="texture">Texture</Option>
+                    {Object.entries(attributeConfig).map(([key, config]) => (
+                        <Option key={key} value={key}>{config.title}</Option>
+                    ))}
                 </Select>
 
                 <Button
@@ -486,7 +347,7 @@ const ProductAttributeManagement = () => {
                 />
 
                 <Modal
-                    title={`${editingRecord ? 'Chỉnh sửa' : 'Thêm mới'} ${attributeType}`}
+                    title={`${editingRecord ? 'Chỉnh sửa' : 'Thêm mới'} ${attributeConfig[attributeType].title}`}
                     visible={modalVisible}
                     onCancel={() => setModalVisible(false)}
                     onOk={() => form.submit()}
@@ -496,7 +357,7 @@ const ProductAttributeManagement = () => {
                         layout="vertical"
                         onFinish={handleSubmit}
                     >
-                        {renderModalContent()}
+                        {renderFormItems()}
                     </Form>
                 </Modal>
             </Content>

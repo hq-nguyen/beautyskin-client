@@ -33,10 +33,7 @@ const ManageQuiz = () => {
         question: '',
         description: '',
         answers: [
-            { answer: '', points: '1' },
-            { answer: '', points: '2' },
-            { answer: '', points: '3' },
-            { answer: '', points: '4' }
+            { answer: '', points: '1' }
         ]
     });
 
@@ -82,10 +79,7 @@ const ManageQuiz = () => {
             question: '',
             description: '',
             answers: [
-                { answer: '', points: '1' },
-                { answer: '', points: '2' },
-                { answer: '', points: '3' },
-                { answer: '', points: '4' }
+                { answer: '', points: '1' }
             ]
         });
         setFormVisible(true);
@@ -102,7 +96,7 @@ const ManageQuiz = () => {
                 ...values,
                 answers: values.answers.map(ans => ({
                     ...ans,
-                    point: parseInt(ans.point, 10) 
+                    point: parseInt(ans.points, 10) 
                 }))
             };
 
@@ -164,20 +158,21 @@ const ManageQuiz = () => {
     // Show information about skin type scoring
     const showSkinTypeInfo = () => {
         Modal.info({
-            title: 'Hướng dẫn đánh giá loại da',
+            title: 'Hướng dẫn đánh giá xác định loại da',
             content: (
                 <div>
                     <Paragraph>
                         Bài kiểm tra này giúp xác định loại da dựa trên tổng số điểm đạt được:
                     </Paragraph>
                     <ul>
-                        <li><Text strong>Từ 0-10:</Text> Da khô</li>
-                        <li><Text strong>Từ 11-20:</Text> Da thường</li>
-                        <li><Text strong>Từ 21-30:</Text> Da tổng hợp</li>
-                        <li><Text strong>Từ 31-40:</Text> Da dầu</li>
+                        <li><Text strong>Từ 0 - 11:</Text> Da dầu</li>
+                        <li><Text strong>Từ 11 - 20:</Text> Da hỗn hợp / tổng hợp</li>
+                        <li><Text strong>Từ 21 - 26:</Text> Da thường</li>
+                        <li><Text strong>Từ 27 - 35:</Text> Da nhạy cảm</li>
+                        <li><Text strong>Từ 36 - :</Text> Da khô</li>
                     </ul>
                     <Paragraph>
-                        Mỗi phương án trả lời sẽ được chấm điểm từ 1-4, số càng cao thường biểu thị xu hướng da dầu.
+                        Mỗi phương án trả lời sẽ được chấm điểm từ 1-5, số càng cao thường biểu thị xu hướng <strong>da khô</strong>.
                     </Paragraph>
                 </div>
             ),
@@ -200,10 +195,10 @@ const ManageQuiz = () => {
             width: '30%',
             render: (points) => (
                 <Tag color={
-                    points === 1 ? 'cyan' :
-                        points === 2 ? 'blue' :
-                            points === 3 ? 'purple' :
-                                'magenta'
+                    points == 1 ? 'cyan' :
+                        points == 2 ? 'blue' :
+                            points == 3 ? 'purple' :
+                                points == 4 ? 'magenta' : 'red'
                 }>
                     {points} điểm 
                 </Tag>
@@ -286,7 +281,7 @@ const ManageQuiz = () => {
                 <Card>
                     <Paragraph>
                         Bài kiểm tra này giúp người dùng xác định loại da của họ dựa trên phản hồi của họ.
-                        Mỗi câu trả lời được chấm từ 1-4 điểm, với tổng điểm cho biết loại da của người dùng.
+                        Mỗi câu trả lời được chấm từ 1-5 điểm, với tổng điểm cho biết loại da của người dùng.
                     </Paragraph>
                     <Table
                         columns={columns}

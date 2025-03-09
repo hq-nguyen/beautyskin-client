@@ -36,9 +36,11 @@ import TermsOfUsePage from "../components/Support/Term";
 import PrivacyPolicyPage from "../components/Support/Privacy";
 import PaymentPage from "../components/Support/Payment";
 import RefundPage from "../components/Support/Refund";
-import ProductDetailModel from "../components/ProductDetailModel/ProductDetailModel";
 import ProductAttributeManagement from "../pages/Admin/ManageAttribute/ManageAttribute";
 import CheckoutLayout from "../layout/CheckoutLayout";
+import ProtectedRoute from "./ProtectedRoute";
+import Unauthorized from "../pages/Unauthorized/Unauthorized";
+import ProductDetail from "../components/ProductDetail/ProductDetail";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -60,7 +62,7 @@ const Routers = () => {
         },
         {
           path: '/product/:id',
-          element: <ProductDetailModel />,
+          element: <ProductDetail />,
         },
         {
           path: '/blog',
@@ -99,7 +101,11 @@ const Routers = () => {
     },
     {
       path: "/user",
-      element: <UserLayout />,
+      element: (
+        <ProtectedRoute allowedRoles={["USER", "MANAGER", "STAFF"]}>
+          <UserLayout />
+        </ProtectedRoute>
+      ),
       children: [
         {
           index: true,
@@ -148,7 +154,11 @@ const Routers = () => {
     },
     {
       path: "/admin",
-      element: <AdminLayout />,
+      element: (
+        <ProtectedRoute allowedRoles={["MANAGER"]}>
+          <AdminLayout />
+        </ProtectedRoute>
+      ),
       children: [
         {
           index: true,
@@ -211,10 +221,14 @@ const Routers = () => {
         },
         {
           path: "refund",
-          element: <RefundPage/>,
+          element: <RefundPage />,
         },
       ],
-    }
+    },
+    {
+      path: "/unauthorized",
+      element: <Unauthorized />,
+    },
   ]);
 
   return routing;
