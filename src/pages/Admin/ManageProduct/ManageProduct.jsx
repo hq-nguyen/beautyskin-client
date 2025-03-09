@@ -3,6 +3,7 @@ import { Table, Tag, Space, Modal, Button, Image, Badge } from 'antd';
 import { CiEdit } from "react-icons/ci";
 import { MdOutlineDeleteOutline, MdOutlineRemoveRedEye } from "react-icons/md";
 import { fetchProducts, deleteProduct } from '../../../apis/product';
+import { ProductAttributeService } from '../../../apis/productAttribute';
 import ProductModel from './ProductModel';
 import QuickViewModal from './QuickViewProduct';
 import { Link } from 'react-router-dom';
@@ -13,6 +14,38 @@ const ManageProduct = () => {
     const [currentProduct, setCurrentProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+    // Add these state variables to store the attributes
+    const [categories, setCategories] = useState([]);
+    const [textures, setTextures] = useState([]);
+    const [skinTypes, setSkinTypes] = useState([]);
+    const [skinConcerns, setSkinConcerns] = useState([]);
+    const [tags, setTags] = useState([]);
+
+    // Fetch product attributes
+    useEffect(() => {
+        const fetchAttributes = async () => {
+            try {
+                const [cate, text, skinType, concerns, tagList] = await Promise.all([
+                    ProductAttributeService.getCategories(),
+                    ProductAttributeService.getTextures(),
+                    ProductAttributeService.getSkinType(),
+                    ProductAttributeService.getConcern(),
+                    ProductAttributeService.getTags()
+                ]);
+
+                setCategories(cate);
+                setTextures(text);
+                setSkinTypes(skinType);
+                setSkinConcerns(concerns);
+                setTags(tagList);
+            } catch (error) {
+                console.error("Error fetching product attributes:", error);
+            }
+        };
+
+        fetchAttributes();
+    }, []);
 
     useEffect(() => {
         const getProducts = async () => {
@@ -49,12 +82,41 @@ const ManageProduct = () => {
     };
 
     const handleSaveProduct = (updatedProduct) => {
-        const updatedProducts = products.map(product =>
-            product.id === updatedProduct.id ? updatedProduct : product
-        );
-        setProducts(updatedProducts);
-        setIsModalVisible(false);
-        setCurrentProduct(null);
+        try {
+            // Reconstruct the complete product object with all relational data
+            const updatedProductWithRelations = {
+                ...updatedProduct,
+                // Reconstruct the category object
+                category: updatedProduct.categoryId
+                    ? categories.find(c => c.id === updatedProduct.categoryId)
+                    : null,
+                // Reconstruct the skinTypes array
+                skinTypes: updatedProduct.skinTypeId
+                    ? updatedProduct.skinTypeId.map(id => skinTypes.find(type => type.id === id)).filter(Boolean)
+                    : [],
+                // Reconstruct the skinConcerns array
+                skinConcerns: updatedProduct.skinConcernId
+                    ? updatedProduct.skinConcernId.map(id => skinConcerns.find(concern => concern.id === id)).filter(Boolean)
+                    : [],
+                // Reconstruct the textures array
+                textures: updatedProduct.forms && updatedProduct.forms.length > 0
+                    ? [textures.find(texture => texture.id === updatedProduct.forms[0])].filter(Boolean)
+                    : [],
+                // Reconstruct the tags array
+                tags: updatedProduct.tagId
+                    ? updatedProduct.tagId.map(id => tags.find(tag => tag.id === id)).filter(Boolean)
+                    : []
+            };
+
+            const updatedProducts = products.map(product =>
+                product.id === updatedProductWithRelations.id ? updatedProductWithRelations : product
+            );
+            setProducts(updatedProducts);
+            setIsModalVisible(false);
+            setCurrentProduct(null);
+        } catch (error) {
+            console.error("Error updating product in state:", error);
+        }
     };
 
     const handleDelete = (product) => {
@@ -87,7 +149,7 @@ const ManageProduct = () => {
                 return 'success';
             case 'OUT_OF_STOCK':
                 return 'error';
-            case 'LOW_STOCK':
+            case 'INSUFFICIENT_STOCK':
                 return 'warning';
             default:
                 return 'default';
@@ -100,8 +162,8 @@ const ManageProduct = () => {
                 return 'Có sẵn';
             case 'OUT_OF_STOCK':
                 return 'Hết hàng';
-            case 'LOW_STOCK':
-                return 'Sắp hết';
+            case 'INSUFFICIENT_STOCK':
+                return 'Ngừng kinh doanh';
             default:
                 return status;
         }
@@ -170,9 +232,9 @@ const ManageProduct = () => {
             dataIndex: 'status',
             key: 'status',
             render: (status) => (
-                <Badge 
-                    status={getStatusColor(status)} 
-                    text={getStatusText(status)} 
+                <Badge
+                    status={getStatusColor(status)}
+                    text={getStatusText(status)}
                 />
             )
         },
@@ -225,6 +287,11 @@ const ManageProduct = () => {
                     onSave={handleSaveProduct}
                     onCancel={handleCloseModal}
                     visible={isModalVisible}
+                    categories={categories}
+                    textures={textures}
+                    skinTypes={skinTypes}
+                    skinConcerns={skinConcerns}
+                    tags={tags}
                 />
             )}
 

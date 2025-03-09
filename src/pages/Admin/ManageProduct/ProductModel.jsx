@@ -29,22 +29,22 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
     const cate = await ProductAttributeService.getCategories();
     setCategories(cate);
   };
-  
+
   const fetchTextures = async () => {
     const text = await ProductAttributeService.getTextures();
     setTextures(text);
   };
-  
+
   const fetchSkinTypes = async () => {
     const skinTypes = await ProductAttributeService.getSkinType();
     setSkinTypes(skinTypes);
   };
-  
+
   const fetchSkinConcerns = async () => {
     const skinConcerns = await ProductAttributeService.getConcern();
     setSkinConcerns(skinConcerns);
   };
-  
+
   const fetchTags = async () => {
     const tags = await ProductAttributeService.getTags();
     setTags(tags);
@@ -75,7 +75,11 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
         skinTypeId: product.skinTypes?.map(type => type.id) || [],
         skinConcernId: product.skinConcerns?.map(concern => concern.id) || [],
         tagId: product.tags?.map(tag => tag.id) || [],
-        forms: product.forms && product.forms.length > 0 ? product.forms[0] : null,
+        // forms: product.textures?.map(texture => texture.id) || [],
+        forms: product.textures && product.textures.length > 0
+          ? product.textures[0].id
+          : (product.forms && product.forms.length > 0 ? product.forms[0] : null),
+        // forms: product.forms && product.forms.length > 0 ? product.forms[0] : null,
       });
 
       // Initialize file list with existing images
@@ -102,23 +106,28 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
         try {
           // Handle existing and new images
           let imageIds = [];
-          
           // Keep existing images that weren't removed
           if (product.images) {
             const existingImageUrls = fileList
               .filter(file => file.url)
               .map(file => file.url);
-              
+
             const keptImages = product.images
-              .filter(image => existingImageUrls.includes(image.url))
+              .filter(image => {
+                return existingImageUrls.some(url =>
+                  url.includes(image.id) || url === image.url
+                );
+              })
               .map(image => image.id);
-              
+            // .filter(image => existingImageUrls.includes(image.url))
+            // .map(image => image.id);
+
             imageIds = [...keptImages];
           }
 
           // Upload new images
           const newFiles = fileList.filter(file => file.originFileObj);
-          
+
           if (newFiles.length > 0) {
             // Upload new files to Firebase
             const newImageUrls = await Promise.all(
@@ -135,16 +144,11 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 return res.id;
               })
             );
-            
+
             imageIds = [...imageIds, ...newImageIds];
           }
 
-          // Extract IDs for routineSteps and promotions
-          const routineStepIds = product.routineSteps ? product.routineSteps.map(step => 
-            typeof step === 'object' ? step.id : step
-          ) : [];
-          
-          const promotionIds = product.promotions ? product.promotions.map(promo => 
+          const promotionIds = product.promotions ? product.promotions.map(promo =>
             typeof promo === 'object' ? promo.id : promo
           ) : [];
 
@@ -165,7 +169,6 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
             skinTypeId: values.skinTypeId || [],
             skinConcernId: values.skinConcernId || [],
             tagId: values.tagId || [],
-            routineSteps: routineStepIds,
             forms: values.forms ? [values.forms] : [],
             images: imageIds,
             promotions: promotionIds,
@@ -175,7 +178,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
           // Call the updateProduct API
           await updateProduct(product.id, updatedProductData);
           message.success('Đã cập nhật thành công sản phẩm!');
-          
+
           // Notify parent component
           if (onSave) {
             onSave(updatedProductData);
@@ -238,7 +241,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
       ['clean']
     ],
   };
-  
+
   const formats = [
     'header',
     'bold', 'italic', 'underline', 'strike',
@@ -281,17 +284,17 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
         <Row gutter={[16, 16]}>
           {/* Basic Info */}
           <Col xs={24} md={12}>
-            <Form.Item 
-              label="Tên sản phẩm" 
-              name="name" 
+            <Form.Item
+              label="Tên sản phẩm"
+              name="name"
               rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm!' }]}
             >
               <Input />
             </Form.Item>
-            
-            <Form.Item 
-              label="Mô tả sản phẩm" 
-              name="description" 
+
+            <Form.Item
+              label="Mô tả sản phẩm"
+              name="description"
               rules={[{ required: true, message: 'Vui lòng nhập mô tả sản phẩm!' }]}
             >
               <ReactQuill
@@ -307,9 +310,9 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
           <Col xs={24} md={12}>
             <Row gutter={[16, 0]}>
               <Col xs={24} md={12}>
-                <Form.Item 
-                  label="Danh mục" 
-                  name="categoryId" 
+                <Form.Item
+                  label="Danh mục"
+                  name="categoryId"
                   rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
                 >
                   <Select>
@@ -319,11 +322,11 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                   </Select>
                 </Form.Item>
               </Col>
-              
+
               <Col xs={24} md={12}>
-                <Form.Item 
-                  label="Giá tiền" 
-                  name="price" 
+                <Form.Item
+                  label="Giá tiền"
+                  name="price"
                   rules={[{ required: true, message: 'Vui lòng nhập giá tiền!' }]}
                 >
                   <InputNumber
@@ -334,18 +337,18 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Row gutter={[16, 0]}>
               <Col xs={24} md={12}>
-                <Form.Item 
-                  label="Số lượng sản phẩm" 
-                  name="stock" 
+                <Form.Item
+                  label="Số lượng sản phẩm"
+                  name="stock"
                   rules={[{ required: true, message: 'Vui lòng nhập tồn kho!' }]}
                 >
                   <InputNumber style={{ width: '100%' }} min={0} />
                 </Form.Item>
               </Col>
-              
+
               <Col xs={24} md={12}>
                 <Form.Item
                   name="expiredDateTime"
@@ -360,7 +363,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Form.Item
               name="status"
               label="Trạng thái"
@@ -369,7 +372,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
               <Select>
                 <Option value="AVAILABLE">Có sẵn</Option>
                 <Option value="OUT_OF_STOCK">Hết hàng</Option>
-                <Option value="DISCONTINUED">Ngừng kinh doanh</Option>
+                <Option value="INSUFFICIENT_STOCK">Ngừng kinh doanh</Option>
               </Select>
             </Form.Item>
           </Col>
@@ -383,7 +386,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 ))}
               </Select>
             </Form.Item>
-            
+
             <Form.Item label="Loại da" name="skinTypeId">
               <Select mode="multiple">
                 {skinTypes.map((skinType) => (
@@ -391,7 +394,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 ))}
               </Select>
             </Form.Item>
-            
+
             <Form.Item name="skinConcernId" label="Vấn đề da">
               <Select mode="multiple">
                 {skinConcerns.map((skinConcern) => (
@@ -399,7 +402,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 ))}
               </Select>
             </Form.Item>
-            
+
             <Form.Item label="Tags" name="tagId">
               <Select mode="multiple">
                 {tags.map((tag) => (
@@ -414,7 +417,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
             <Form.Item label="Thành phần" name="ingredient">
               <TextArea rows={4} />
             </Form.Item>
-            
+
             <Form.Item label="Hướng dẫn sử dụng" name="instruction">
               <ReactQuill
                 theme="snow"
@@ -437,7 +440,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
               >
                 {fileList.length >= 8 ? null : uploadButton}
               </Upload>
-              
+
               <Image
                 style={{ display: 'none' }}
                 preview={{
