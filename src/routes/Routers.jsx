@@ -37,10 +37,10 @@ import PrivacyPolicyPage from "../components/Support/Privacy";
 import PaymentPage from "../components/Support/Payment";
 import RefundPage from "../components/Support/Refund";
 import ProductAttributeManagement from "../pages/Admin/ManageAttribute/ManageAttribute";
+import CheckoutLayout from "../layout/CheckoutLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import Unauthorized from "../pages/Unauthorized/Unauthorized";
 import ProductDetail from "../components/ProductDetail/ProductDetail";
-
 
 const Routers = () => {
   const routing = useRoutes([
@@ -80,10 +80,7 @@ const Routers = () => {
           path: '/test-skin',
           element: <TestSkinType />,
         },
-        {
-          path: '/shopping-cart',
-          element: <ShoppingCart />,
-        },
+        
         {
           path: '/login',
           element: <Login />,
@@ -95,11 +92,7 @@ const Routers = () => {
         {
           path: '/register',
           element: <Register />,
-        },
-        {
-          path: "checkout",
-          element: <CheckoutPage />,
-        },
+        },    
         {
           path: '*',
           element: <NotFoundPage />,
@@ -143,6 +136,20 @@ const Routers = () => {
           element: <Promotion />,
         }
 
+      ],
+    },
+    {
+      path: "/checkout",
+      element: <CheckoutLayout />,
+      children: [
+        {
+          path: "cart",   
+          element: <ShoppingCart />,
+        },
+        {
+          index: true,   
+          element: <CheckoutPage />,
+        },
       ],
     },
     {
