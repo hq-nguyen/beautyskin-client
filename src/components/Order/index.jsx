@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, message } from 'antd';
+import api from '../../config/axios';
 
 const OrderManagement = () => {
   const [data, setData] = useState([]);
@@ -52,7 +53,7 @@ const OrderManagement = () => {
   const fetchOrders = async (params = pagination) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://67825c10c51d092c3dcf2d8d.mockapi.io/Order`);
+      const response = await api.get(`getByUser`);
       
       if (!response.ok) {
         throw new Error('Lỗi khi tải dữ liệu');
