@@ -262,7 +262,7 @@ const AddressManagement = () => {
         zIndex: 9999,
     };
 
-        const addressFields = (address, setAddress) => (
+   const addressFields = (address, setAddress) => (
             <>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tên người nhận</label>
