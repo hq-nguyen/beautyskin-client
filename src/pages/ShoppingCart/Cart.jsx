@@ -71,10 +71,10 @@ const ShoppingCart = () => {
     const product = cart.find(item => item.id === id);
     if (product) {
       const newQuantity = Math.max(1, product.quantity + (increment ? 1 : -1));
-      dispatch(removeFromCart(id));
+      
       dispatch({
-        type: 'cart/addToCart',
-        payload: { ...product, quantity: newQuantity }
+        type: 'cart/updateCartQuantity',
+        payload: { id, quantity: newQuantity }
       });
     }
   };

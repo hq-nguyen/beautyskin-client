@@ -10,23 +10,30 @@ export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    // them product vao cart
     addToCart: (state, action) => {
-      // state.cart = state.cart || []; // Đảm bảo cart không bị null
-
       const product = action.payload;
-      const existingProduct = state.listItem.find(
+      const existingProductIndex = state.listItem.findIndex(
         (item) => item.id === product.id
       );
 
-      if (existingProduct) {
-        existingProduct.quantity += 1;
-      } else {
-        state.listItem.push({ ...product, quantity: 1 });
-      }
+      const quantity = product.quantity || 1;
 
-      state.totalQuantity += 1;
-      state.totalPrice += product.price;
+      if (existingProductIndex !== -1) {
+        // Sản phẩm đã tồn tại thì add thêm
+
+        const oldQuantity = state.listItem[existingProductIndex].quantity;
+        state.totalQuantity = state.totalQuantity - oldQuantity + quantity;
+        state.totalPrice = state.totalPrice - 
+          (state.listItem[existingProductIndex].price * oldQuantity) + 
+          (product.price * quantity);
+        
+        state.listItem[existingProductIndex] = {...product};
+      } else {
+        // Add new product
+        state.listItem.push({...product});
+        state.totalQuantity += quantity;
+        state.totalPrice += product.price * quantity;
+      }
     },
 
     removeFromCart: (state, action) => {
@@ -40,8 +47,24 @@ export const cartSlice = createSlice({
         state.totalQuantity -= product.quantity;
         state.totalPrice -= product.price * product.quantity;
 
-        // xoa product splice(index, so luong xoa)
         state.listItem.splice(productIndex, 1);
+      }
+    },
+
+    updateCartQuantity: (state, action) => {
+      const { id, quantity } = action.payload;
+      const productIndex = state.listItem.findIndex(item => item.id === id);
+      
+      if (productIndex !== -1) {
+        const product = state.listItem[productIndex];
+        const quantityDiff = quantity - product.quantity;
+        
+        // Update quantity
+        state.listItem[productIndex].quantity = quantity;
+        
+        // Update totals
+        state.totalQuantity += quantityDiff;
+        state.totalPrice += product.price * quantityDiff;
       }
     },
 
@@ -53,7 +76,6 @@ export const cartSlice = createSlice({
   },
 });
 
-// Action creators are generated for each case reducer function
-export const { addToCart, removeFromCart, clearCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, updateCartQuantity, clearCart } = cartSlice.actions;
 
-export default cartSlice.reducer
+export default cartSlice.reducer;
