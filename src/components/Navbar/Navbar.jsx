@@ -17,7 +17,7 @@ const Navbar = () => {
       dispatch(logout())
       localStorage.removeItem('token')
       localStorage.removeItem('id')
-      toast.success('Đăng xuất thành công')
+      message.success("Đã đăng xuất")
       navigate('/')
   }
 

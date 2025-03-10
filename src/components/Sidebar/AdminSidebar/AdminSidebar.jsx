@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
+import { IoDiscOutline } from "react-icons/io5";
 import { MdOutlineDashboard, MdOutlineCategory, MdOutlineQuiz } from "react-icons/md";
 import { BiUser, BiPackage, BiCart } from "react-icons/bi"; // More comprehensive icon set
 import { assets } from '../../../assets/frontend_assets/assets';
@@ -106,6 +107,13 @@ function AdminSidebar({
       icon: <MdOutlineCategory size={20} />,
       path: '/admin/category',
       mark: 'category',
+    },
+    {
+      id: 'promotion',
+      label: 'Khuyến mãi',
+      icon: <IoDiscOutline size={20} />,
+      path: '/admin/promotion',
+      mark: 'promotion',
     },
     {
       id: 'blog',

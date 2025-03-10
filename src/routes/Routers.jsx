@@ -41,6 +41,7 @@ import CheckoutLayout from "../layout/CheckoutLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import Unauthorized from "../pages/Unauthorized/Unauthorized";
 import ProductDetail from "../components/ProductDetail/ProductDetail";
+import ManagePromotion from "../pages/Admin/ManagePromotion/ManagePromotion";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -191,6 +192,10 @@ const Routers = () => {
         {
           path: "category",
           element: <ProductAttributeManagement />,
+        },
+        {
+          path: "promotion",
+          element: <ManagePromotion />,
         },
         {
           path: "blog",

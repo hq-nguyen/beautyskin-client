@@ -117,7 +117,7 @@ const ProductDetail = () => {
             <div className="flex items-center space-x-2 text-sm mb-8">
                 <a href="/" className="text-gray-500 hover:text-primary">Trang chủ</a>
                 <span className="text-gray-400">/</span>
-                <a href="/category" className="text-gray-500 hover:text-primary">
+                <a href="/shop" className="text-gray-500 hover:text-primary">
                     {product.category?.name || 'Danh mục'}
                 </a>
                 {/* <span className="text-gray-400">/</span>
