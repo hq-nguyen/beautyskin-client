@@ -42,6 +42,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import Unauthorized from "../pages/Unauthorized/Unauthorized";
 import ProductDetail from "../components/ProductDetail/ProductDetail";
 import ManagePromotion from "../pages/Admin/ManagePromotion/ManagePromotion";
+import CODPage from "../pages/CheckoutConfirm";
+import Transfer from "../components/Payment/Transfer/Tranfer";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -150,6 +152,10 @@ const Routers = () => {
         {
           index: true,   
           element: <CheckoutPage />,
+        },
+        {
+          path: "confirmCOD",   
+          element: <CODPage />,
         },
       ],
     },
