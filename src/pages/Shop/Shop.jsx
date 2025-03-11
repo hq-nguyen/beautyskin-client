@@ -23,24 +23,38 @@ const Shop = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState(""); // Added sortBy state
 
-  // Fetch products
   useEffect(() => {
     const getProducts = async () => {
       try {
-        const data = await fetchProducts();
-        setProducts(data);
+        const storedQuery = localStorage.getItem('searchQuery');
+        const storedFilteredProducts = localStorage.getItem('filteredProducts');
+        
+        if (storedQuery) {
+          setSearchQuery(storedQuery);
+        }
+        
+        if (storedFilteredProducts) {
+          setProducts(JSON.parse(storedFilteredProducts));
+        } else {
+          const data = await fetchProducts();
+          setProducts(data);
+        }
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
     getProducts();
+    
+    
+    return () => {
+      // Don't remove search data here, as it might be needed when returning to the shop page
+    };
   }, []);
 
-  // Fetch product attributes
   useEffect(() => {
     const fetchAttributes = async () => {
       try {
-        const [cate, text, skinType, concerns, tagList] = await Promise.all([
+        const [cate, text, skinType, concerns] = await Promise.all([
           ProductAttributeService.getCategories(),
           ProductAttributeService.getTextures(),
           ProductAttributeService.getSkinType(),
@@ -59,7 +73,6 @@ const Shop = () => {
     fetchAttributes();
   }, []);
 
-  // Function to count products for each filter option
   const getFilterCounts = (filterType, options) => {
     const counts = {};
     
@@ -87,7 +100,6 @@ const Shop = () => {
     return counts;
   };
 
-  // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
     // First filter the products
     let filtered = products.filter(product => {
@@ -139,14 +151,12 @@ const Shop = () => {
     }
 
     return filtered;
-  }, [filters, products, searchQuery, sortBy]); // Added sortBy to dependencies
+  }, [filters, products, searchQuery, sortBy]);
 
-  // Handle sorting
   const handleSort = (sortType) => {
     setSortBy(sortType);
   };
 
-  // Handle filter changes
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => {
       if (filterType === "priceRange") {
@@ -162,7 +172,18 @@ const Shop = () => {
     setCurrentPage(1);
   };
 
-  // Clear all filters
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    
+    if (query.trim()) {
+      localStorage.setItem('searchQuery', query);
+    } else {
+      localStorage.removeItem('searchQuery');
+      localStorage.removeItem('filteredProducts');
+    }
+  };
+
   const clearFilters = () => {
     setFilters({
       category: [],
@@ -172,10 +193,14 @@ const Shop = () => {
       texture: []
     });
     setSearchQuery("");
-    setSortBy(""); // Reset sorting as well
+    setSortBy("");  
+    
+    localStorage.removeItem('searchQuery');
+    localStorage.removeItem('filteredProducts');
+    
+    fetchProducts().then(data => setProducts(data));
   };
 
-  // Updated Filter section component with counts
   const FilterSection = ({ title, options, filterType }) => {
     const counts = getFilterCounts(filterType, options);
     
@@ -202,23 +227,20 @@ const Shop = () => {
     );
   };
 
-  // Function to get promotional discount percentage
   const getPromotionPercentage = (product) => {
     if (product.promotions && product.promotions.length > 0) {
-      return 20; // Default 20% discount
+      return 20; 
     }
     return 20;
   };
 
-  // Function to calculate discounted price
   const getDiscountedPrice = (product) => {
     if (product.promotions && product.promotions.length > 0) {
-      return product.price - (product.price * 0.2); // 20% discount
+      return product.price - (product.price * 0.2); 
     }
     return product.price;
   };
 
-  // Function to get the first image from product images array
   const getProductImage = (product) => {
     if (product.images && product.images.length > 0) {
       return product.images[0].url;
@@ -251,7 +273,7 @@ const Shop = () => {
                   placeholder="Tìm kiếm sản phẩm..."
                   className="w-full p-2 pr-8 border rounded-lg"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleSearchChange}
                 />
                 <svg
                   className="absolute right-3 top-3 h-4 w-4 text-gray-400"
@@ -335,6 +357,15 @@ const Shop = () => {
                 </button>
               </div>
             </div>
+
+            {/* Search result information */}
+            {searchQuery && (
+              <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm">
+                  Kết quả tìm kiếm cho: <span className="font-semibold">"{searchQuery}"</span>
+                </p>
+              </div>
+            )}
 
             {/* Products grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">

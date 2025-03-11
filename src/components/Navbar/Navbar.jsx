@@ -1,28 +1,55 @@
-import { useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify';
-import { assets } from '../../assets/frontend_assets/assets'
-import { logout } from '../../redux/features/useSlice'
+import { assets } from '../../assets/frontend_assets/assets';
+import { logout } from '../../redux/features/useSlice';
 import { IoIosLogIn } from "react-icons/io";
-import './Navbar.css'
+import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
+import { fetchProducts } from '../../apis/product'; // Import fetchProducts API
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
 
   const handleLogout = () => {
-      dispatch(logout())
-      localStorage.removeItem('token')
-      localStorage.removeItem('id')
-      message.success("Đã đăng xuất")
-      navigate('/')
-  }
+    dispatch(logout());
+    localStorage.removeItem('token');
+    localStorage.removeItem('id');
+    toast.success('Đăng xuất thành công');
+    navigate('/');
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return; 
+    try {
+      //Lấy các sản phẩm
+      const allProducts = await fetchProducts();
+      //Lọc sản phẩm
+      const filteredProducts = allProducts.filter((product) =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      localStorage.setItem('searchQuery', searchQuery);
+      localStorage.setItem('filteredProducts', JSON.stringify(filteredProducts));
+
+      navigate('/shop');
+    } catch (error) {
+      console.error("Error fetching products for search:", error);
+      toast.error('Không thể tìm kiếm sản phẩm. Vui lòng thử lại.');
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+  };
 
   return (
-    <div className='navbar sticky top-0 z-50'>
+    <div className='navbar sticky top-0 z-50 bg-white shadow-md'>
       <div className='navbar sticky top-0 flex items-center justify-between py-5 font-medium px-4 lg:px-[9vw]'>
         <Link to='/'>
           <img src={assets.logo} className='w-36' alt="" />
@@ -49,12 +76,38 @@ const Navbar = () => {
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
           </NavLink>
         </ul>
+        <div className="hidden md:block max-w-xs w-full px-4">
+          <form onSubmit={handleSearch} className="relative">
+            <div className="flex items-center rounded-full border border-gray-300 bg-gray-100 overflow-hidden pl-4 pr-2 py-2">
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm"
+                className="bg-transparent outline-none flex-grow text-gray-600"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button 
+                  type="button" 
+                  onClick={clearSearch}
+                  className="text-gray-400 hover:text-gray-600 mr-1"
+                >
+                  <IoCloseOutline size={20} />
+                </button>
+              )}
+              <div className="h-6 w-px bg-gray-300 mx-2"></div>
+              <button 
+                type="submit" 
+                className="rounded-full p-1"
+              >
+                <IoSearchOutline size={20} className="text-gray-500" />
+              </button>
+            </div>
+          </form>
+        </div>
 
         <div className='flex items-center gap-6'>
           <img src={assets.wishlist_icon} className='w-5 cursor-pointer' alt="" />
-          <img src={assets.search_icon} className='w-5 cursor-pointer' alt="" />
-
-          {/* Nếu là user thì hiển thị thông tin tài khoản */}
           {user ? (
             <div className='group relative'>
               <img className='w-5 cursor-pointer' src={assets.profile_icon} alt="" />
@@ -65,7 +118,6 @@ const Navbar = () => {
                       Thông tin tài khoản
                     </Link>
                   </div>  
-                  
                   <div>
                     <button 
                       onClick={handleLogout} 
@@ -88,12 +140,14 @@ const Navbar = () => {
               </div>
             </div>
           )}
-          
           <Link to='/checkout/cart' className='relative'>
-            <img src={assets.cart_icon} className='w-5 min-w-5' alt="" />
+            <img 
+              src={assets.cart_icon} 
+              className='w-5 min-w-5' 
+              alt="" 
+            />
             <p className='absolute right-[-8px] top-[-5px] w-4 text-center leading-4 bg-red-600 text-white aspect-square rounded-full text-[8px]'>10</p>
           </Link>
-
           <img onClick={() => setVisible(true)} src={assets.menu_icon} className='w-5 cursor-pointer sm:hidden' alt="" />
         </div>
       </div>
@@ -110,7 +164,6 @@ const Navbar = () => {
             <img className='h-4 rotate-180' src={assets.dropdown_icon} alt="" />
             <p>Đóng</p>
           </div>
-
           <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/'>Trang chủ</NavLink>
           <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/shop'>Mua hàng</NavLink>
           <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/about'>Về chúng tôi</NavLink>
@@ -118,7 +171,7 @@ const Navbar = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
