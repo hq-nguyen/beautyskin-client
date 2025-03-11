@@ -43,7 +43,12 @@ import Unauthorized from "../pages/Unauthorized/Unauthorized";
 import ProductDetail from "../components/ProductDetail/ProductDetail";
 import ManagePromotion from "../pages/Admin/ManagePromotion/ManagePromotion";
 import CODPage from "../pages/CheckoutConfirm";
-import Transfer from "../components/Payment/Transfer/Tranfer";
+// import Transfer from "../components/Payment/Transfer/Tranfer";
+import Oily from "../pages/Landing/Oily";
+import Normal from "../pages/Landing/Normal";
+import Dry from "../pages/Landing/Dry";
+import Combination from "../pages/Landing/Combination";
+import Sensitive from "../pages/Landing/Sensitive";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -83,7 +88,26 @@ const Routers = () => {
           path: '/test-skin',
           element: <TestSkinType />,
         },
-        
+        {
+          path: '/test-skin/oily',
+          element: <Oily />
+        },
+        {
+          path: '/test-skin/normal',
+          element: <Normal />
+        },
+        {
+          path: '/test-skin/dry',
+          element: <Dry />
+        },
+        {
+          path: '/test-skin/sensitive',
+          element: <Sensitive />
+        },
+        {
+          path: '/test-skin/combination',
+          element: <Combination />
+        },
         {
           path: '/login',
           element: <Login />,
