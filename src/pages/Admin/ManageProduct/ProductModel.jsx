@@ -18,7 +18,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
   const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [textures, setTextures] = useState([]);
+  const [forms, setForms] = useState([]);
   const [skinTypes, setSkinTypes] = useState([]);
   const [skinConcerns, setSkinConcerns] = useState([]);
   const [tags, setTags] = useState([]);
@@ -30,9 +30,9 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
     setCategories(cate);
   };
 
-  const fetchTextures = async () => {
-    const text = await ProductAttributeService.getTextures();
-    setTextures(text);
+  const fetchForms = async () => {
+    const form = await ProductAttributeService.getTextures();
+    setForms(form);
   };
 
   const fetchSkinTypes = async () => {
@@ -52,7 +52,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
 
   useEffect(() => {
     fetchCategories();
-    fetchTextures();
+    fetchForms();
     fetchSkinTypes();
     fetchSkinConcerns();
     fetchTags();
@@ -75,11 +75,9 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
         skinTypeId: product.skinTypes?.map(type => type.id) || [],
         skinConcernId: product.skinConcerns?.map(concern => concern.id) || [],
         tagId: product.tags?.map(tag => tag.id) || [],
-        // forms: product.textures?.map(texture => texture.id) || [],
-        forms: product.textures && product.textures.length > 0
-          ? product.textures[0].id
-          : (product.forms && product.forms.length > 0 ? product.forms[0] : null),
-        // forms: product.forms && product.forms.length > 0 ? product.forms[0] : null,
+        // formId: product.formIds && product.formIds.length > 0 ? product.formIds[0] : null,
+        formIds: product.forms?.map(f => f.id) || null,
+        stepId: product.stepId?.map(step => step.id) || [],
       });
 
       // Initialize file list with existing images
@@ -169,7 +167,8 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
             skinTypeId: values.skinTypeId || [],
             skinConcernId: values.skinConcernId || [],
             tagId: values.tagId || [],
-            forms: values.forms ? [values.forms] : [],
+            formIds: values.formIds ? [values.formIds] : [],
+            routineSteps: values.routineSteps || [],
             images: imageIds,
             promotions: promotionIds,
             deleted: false
@@ -379,10 +378,10 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
 
           {/* Product Attributes */}
           <Col xs={24} md={12}>
-            <Form.Item label="Dạng sản phẩm" name="forms">
+            <Form.Item label="Cấu trúc sản phẩm" name="formIds">
               <Select>
-                {textures.map((texture) => (
-                  <Option key={texture.id} value={texture.id}>{texture.name}</Option>
+                {forms.map((form) => (
+                  <Option key={form.id} value={form.id}>{form.name}</Option>
                 ))}
               </Select>
             </Form.Item>

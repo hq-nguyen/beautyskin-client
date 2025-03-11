@@ -34,10 +34,16 @@ const Shop = () => {
         }
         
         if (storedFilteredProducts) {
-          setProducts(JSON.parse(storedFilteredProducts));
+          const filteredProducts = JSON.parse(storedFilteredProducts).filter(
+            product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
+          );
+          setProducts(filteredProducts);
         } else {
           const data = await fetchProducts();
-          setProducts(data);
+          const availableProducts = data.filter(
+            product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
+          );
+          setProducts(availableProducts);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -198,7 +204,12 @@ const Shop = () => {
     localStorage.removeItem('searchQuery');
     localStorage.removeItem('filteredProducts');
     
-    fetchProducts().then(data => setProducts(data));
+    fetchProducts().then(data => {
+      const availableProducts = data.filter(
+        product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
+      );
+      setProducts(availableProducts);
+    });
   };
 
   const FilterSection = ({ title, options, filterType }) => {

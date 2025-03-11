@@ -21,7 +21,7 @@ const AddProductPage = () => {
   const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [textures, setTextures] = useState([]);
+  const [forms, setForms] = useState([]);
   const [skinTypes, setSkinTypes] = useState([]);
   const [skinConcerns, setSkinConcerns] = useState([]);
   const [tags, setTags] = useState([]);
@@ -31,9 +31,9 @@ const AddProductPage = () => {
     const cate = await ProductAttributeService.getCategories();
     setCategories(cate);
   };
-  const fetchTextures = async () => {
+  const fetchForms = async () => {
     const text = await ProductAttributeService.getTextures();
-    setTextures(text);
+    setForms(text);
   };
   const fetchSkinTypes = async () => {
     const skinTypes = await ProductAttributeService.getSkinType();
@@ -50,7 +50,7 @@ const AddProductPage = () => {
 
   useEffect(() => {
     fetchCategories();
-    fetchTextures();
+    fetchForms();
     fetchSkinTypes();
     fetchSkinConcerns();
     fetchTags();
@@ -88,22 +88,21 @@ const AddProductPage = () => {
             createDateTime: currentDate,
             lastUpdateDateTime: currentDate,
             expiredDateTime: values.expiredDateTime ? values.expiredDateTime.toISOString() : null,
-            status: "AVAILABLE", // Default value
+            status: "AVAILABLE",
             instruction: values.instruction || "",
-            categoryId: values.categoryId || 0,
+            categoryId: values.categoryId || [],
             price: parseFloat(values.price) || 0,
-            ingredient: values.ingredient || "", // Changed from ingredients to ingredient
+            ingredient: values.ingredient || "",
             skinTypeId: values.skinTypeId || [],
             skinConcernId: values.skinConcernId || [],
             tagId: values.tagId || [],
             routineSteps: values.routineSteps || [],
-            forms: values.forms ? [values.forms] : [], // Ensure forms is an array
-            images: imageIds, // Changed from image to images
-            promotions: [], // Empty array for promotions
+            formIds: values.formIds ? [values.formIds] : [],
+            images: imageIds, 
+            promotions: [],
             deleted: false
           };
 
-          // Call the addProduct API with the complete product data
           await addProduct(productData);
 
           message.success('Đã thêm thành công sản phẩm!');
@@ -240,6 +239,16 @@ const AddProductPage = () => {
                   </Form.Item>
                 </Col>
 
+                {/* <Col xs={24} md={12}>
+                  <Form.Item label="Loại da" name="skinTypeId">
+                    <Select mode="multiple">
+                      {skinTypes.map((skinType) => (
+                        <Select.Option key={skinType.id} value={skinType.id}>{skinType.name}</Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col> */}
+
                 <Col xs={24} md={8}>
                   <Form.Item label="Giá tiền" name="price" rules={[{ required: true, message: 'Vui lòng nhập giá tiền!' }]}>
                     <InputNumber
@@ -299,10 +308,10 @@ const AddProductPage = () => {
               </Form.Item>
               <Row gutter={[24, 0]}>
                 <Col xs={24} md={12}>
-                  <Form.Item label="Dạng sản phẩm" name="forms">
-                    <Select mode="single">
-                      {textures.map((texture) => (
-                        <Select.Option key={texture.id} value={texture.id}>{texture.name}</Select.Option>
+                  <Form.Item label="Cấu trúc sản phẩm" name="formIds">
+                    <Select>
+                      {forms.map((form) => (
+                        <Select.Option key={form.id} value={form.id}>{form.name}</Select.Option>
                       ))}
                     </Select>
                   </Form.Item>

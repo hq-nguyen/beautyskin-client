@@ -6,6 +6,7 @@ import { assets } from '../../assets/frontend_assets/assets';
 import { logout } from '../../redux/features/useSlice';
 import { IoIosLogIn } from "react-icons/io";
 import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
+import { CiUser } from "react-icons/ci";
 import { fetchProducts } from '../../apis/product'; // Import fetchProducts API
 
 const Navbar = () => {
@@ -110,7 +111,7 @@ const Navbar = () => {
           <img src={assets.wishlist_icon} className='w-5 cursor-pointer' alt="" />
           {user ? (
             <div className='group relative'>
-              <img className='w-5 cursor-pointer' src={assets.profile_icon} alt="" />
+              <CiUser className='w-[1.6rem] h-[2rem] cursor-pointer' />
               <div className='absolute z-100 hidden right-0 pt-4 group-hover:block'>
                 <div className='dropdown-menu-box flex flex-col gap-1 w-48 py-2 px-5 bg-white text-gray-500 rounded shadow-lg'>
                   <div>
@@ -133,9 +134,9 @@ const Navbar = () => {
             <div className='group relative'>
               <IoIosLogIn className='w-[1.6rem] h-[2rem] cursor-pointer' />
               <div className='absolute z-100 hidden right-0 pt-4 group-hover:block'>
-                <div className='dropdown-menu-box flex flex-col gap-2 w-36 py-3 px-5 bg-white text-gray-500 rounded'>
-                  <Link to='/login' className='login-section cursor-pointer hover:text-white hover:bg-rose-500 duration-150'>Đăng nhập</Link>
-                  <Link to='/register' className='register-section cursor-pointer hover:text-white hover:bg-rose-500 duration-150'>Đăng ký</Link>
+                <div className='dropdown-menu-box flex flex-col gap-2 w-36 py-1 px-2 bg-white text-gray-500 rounded'>
+                  <Link to='/login' className='login-section cursor-pointer hover:text-white hover:bg-rose-500 px-2 py-1 duration-150'>Đăng nhập</Link>
+                  <Link to='/register' className='register-section cursor-pointer hover:text-white hover:bg-rose-500 px-2 py-1 duration-150'>Đăng ký</Link>
                 </div>
               </div>
             </div>

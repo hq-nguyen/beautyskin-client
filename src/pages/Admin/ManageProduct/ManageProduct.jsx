@@ -98,9 +98,9 @@ const ManageProduct = () => {
                 skinConcerns: updatedProduct.skinConcernId
                     ? updatedProduct.skinConcernId.map(id => skinConcerns.find(concern => concern.id === id)).filter(Boolean)
                     : [],
-                // Reconstruct the textures array
-                textures: updatedProduct.forms && updatedProduct.forms.length > 0
-                    ? [textures.find(texture => texture.id === updatedProduct.forms[0])].filter(Boolean)
+                // Reconstruct the forms array
+                forms: updatedProduct.formIds && updatedProduct.formIds.length > 0
+                    ? updatedProduct.formIds.map(id => textures.find(texture => texture.id === id)).filter(Boolean)
                     : [],
                 // Reconstruct the tags array
                 tags: updatedProduct.tagId
@@ -108,9 +108,11 @@ const ManageProduct = () => {
                     : []
             };
 
+            // Update the products state with the new data
             const updatedProducts = products.map(product =>
                 product.id === updatedProductWithRelations.id ? updatedProductWithRelations : product
             );
+            
             setProducts(updatedProducts);
             setIsModalVisible(false);
             setCurrentProduct(null);
