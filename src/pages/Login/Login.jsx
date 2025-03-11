@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { login } from '../../redux/features/useSlice';
 
+
 const Login = () => {
   const [formData, setFormData] = useState({
     emailOrUsername: "",
@@ -60,7 +61,7 @@ const Login = () => {
       // console.log(response.data);
       localStorage.setItem('token', token);
       localStorage.setItem('id', id);
-      toast.success("Đăng nhập thành công!");
+      // message.success("Đăng nhập thành công")
       dispatch(login(response.data))
 
       console.log(roleEnum);
@@ -73,7 +74,7 @@ const Login = () => {
 
 
     } catch (error) {
-      toast.error(error?.response.data);
+      message.error(error?.response.data);
     } finally {
       setIsLoading(false)
     }
