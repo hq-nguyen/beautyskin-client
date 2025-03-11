@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Table, Button, Space, Modal, Form, Input, DatePicker, 
-  Select, InputNumber, Switch, message, Popconfirm, Typography, Row, Col
+  Select, InputNumber, Switch, message, Popconfirm, Typography, Row, Col, Upload
 } from 'antd';
 import { 
   PlusOutlined, EditOutlined, DeleteOutlined, 
@@ -14,8 +14,9 @@ import {
   updatePromotion, 
   deletePromotion 
 } from '../../../apis/promotion';
+import uploadFile from '../../../utils/upload';
+import { ProductAttributeService } from '../../../apis/productAttribute';
 
-const { Title } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -30,6 +31,9 @@ const ManagePromotion = () => {
   const [modalType, setModalType] = useState('create'); 
   const [currentPromotion, setCurrentPromotion] = useState(null);
   const [form] = Form.useForm();
+  const [fileList, setFileList] = useState([]);
+  const [previewImage, setPreviewImage] = useState('');
+  const [previewVisible, setPreviewVisible] = useState(false);
 
   useEffect(() => {
     fetchPromotions();
@@ -78,11 +82,46 @@ const ManagePromotion = () => {
     setIsModalVisible(false);
   };
 
+  const getBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
+  const handlePreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewVisible(true);
+  };
+
+  const handleChange = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+  };
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      setLoading(true);
       
-      // Ensure dates are properly formatted when submitting
+      let imageUrl = null;
+      let imageId = null;
+      
+      if (fileList.length > 0 && fileList[0].originFileObj) {
+        try {
+          imageUrl = await uploadFile(fileList[0].originFileObj);
+          
+          const imageResponse = await ProductAttributeService.uploadImage({ url: imageUrl });
+          imageId = imageResponse.id;
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          message.error('Lỗi khi tải ảnh lên: ' + (error.message || 'Lỗi không xác định'));
+        }
+      }
+      
       const promotionData = {
         name: values.name,
         description: values.description,
@@ -91,6 +130,7 @@ const ManagePromotion = () => {
         type: values.type,
         promoAmount: Math.min(Math.max(values.promoAmount, 0), 100),
         deleted: values.deleted || false,
+        imageId: imageId,
       };
 
       if (modalType === 'create') {
@@ -105,6 +145,8 @@ const ManagePromotion = () => {
       fetchPromotions();
     } catch (error) {
       message.error(`Failed to ${modalType} promotion: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -122,7 +164,7 @@ const ManagePromotion = () => {
     {
       title: 'STT',
       dataIndex: 'id',
-      key: 'id', 
+      key: 'id',
       width: 80,
       render: (text, record, index) => index + 1,
       align: 'center',
@@ -379,6 +421,15 @@ const ManagePromotion = () => {
             </Form.Item>
           )}
         </Form>
+      </Modal>
+
+      <Modal
+        visible={previewVisible}
+        title="Xem trước hình ảnh"
+        footer={null}
+        onCancel={() => setPreviewVisible(false)}
+      >
+        <img alt="preview" style={{ width: '100%' }} src={previewImage} />
       </Modal>
     </div>
   );

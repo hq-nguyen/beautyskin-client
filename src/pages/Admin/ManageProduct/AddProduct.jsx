@@ -327,18 +327,6 @@ const AddProductPage = () => {
                     </Select>
                   </Form.Item>
                 </Col>
-                {/* <Col xs={24} md={12}>
-                  <Form.Item name="routineSteps" label="Sử dụng trong quy trình">
-                    <Select mode="multiple">
-                      <Option value={1}>Làm sạch</Option>
-                      <Option value={2}>Tẩy trang</Option>
-                      <Option value={3}>Toner</Option>
-                      <Option value={4}>Serum</Option>
-                      <Option value={5}>Kem dưỡng</Option>
-                      <Option value={6}>Chống nắng</Option>
-                    </Select>
-                  </Form.Item>
-                </Col> */}
                 <Col xs={24} md={12}>
                   <Form.Item label="Tags" name="tagId">
                     <Select mode="multiple">
