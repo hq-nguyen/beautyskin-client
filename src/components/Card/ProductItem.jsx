@@ -47,12 +47,12 @@ const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice })
                     <span className="ml-2 text-base font-semibold text-primary">{formattedNewPrice} đ</span>
                 </div>
                 <div className="flex space-x-2 mt-2">
-                    <button
+                    <Link to={`/product/${id}`}
                         className="flex-1 bg-primary text-white py-2 rounded-md transition-colors duration-300 hover:opacity-80 flex items-center justify-center space-x-1"
                     >
                         <FaEye className="w-4 h-4" />
                         <span>Xem nhanh</span>
-                    </button>
+                    </Link>
                     <button
                         className="bg-gray-100 p-2 rounded-md transition-colors duration-300 hover:opacity-90"
                     >
