@@ -1,120 +1,140 @@
-import { assets } from "../../assets/frontend_assets/assets";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import api from '../../config/axios'; // Giả định đã cấu hình Axios
 
-const News = () => {
-    const lastNews = [
-        {
+const NewsPage = () => {
+  const [articles, setArticles] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredArticles, setFilteredArticles] = useState([]);
+
+  // Giả định dữ liệu mẫu hoặc fetch từ API
+  useEffect(() => {
+    const fetchNewsArticles = async () => {
+      try {
+        // Gọi API giả định để lấy tin tức (thay bằng endpoint thực tế)
+        const response = await api.get('/news/skin-care-products');
+        const newsData = response.data.map(article => ({
+          id: article.id,
+          title: article.title,
+          summary: article.summary,
+          image: article.image || 'https://via.placeholder.com/300x200', // Hình ảnh mặc định
+          date: article.date || '2025-03-12',
+          category: article.category || 'Chăm Sóc Da',
+        }));
+        setArticles(newsData);
+        setFilteredArticles(newsData);
+      } catch (error) {
+        console.error('Lỗi khi tải bài viết tin tức:', error);
+        // Dữ liệu mẫu nếu API thất bại
+        const dummyArticles = [
+          {
             id: 1,
-            tag: "Tin Tức - Deal Hot",
-            title: "HappySkin BST Hộp Mặt Nạ, sale cực sốc ! vào Tết này",
-            image: assets.news_1,
-            date: "16/12/2024",
-            nthNews: 9,
-        },
-        {
+            title: 'Top 10 Sản Phẩm Chăm Sóc Da Năm 2025',
+            summary: 'Khám phá các sản phẩm chăm sóc da mới nhất đang thịnh hành trong năm nay, tập trung vào dưỡng ẩm và chống lão hóa.',
+            image: 'https://via.placeholder.com/300x200',
+            date: '2025-03-11',
+            category: 'Chăm Sóc Da',
+          },
+          {
             id: 2,
-            tag: "Tin Tức - Deal Hot",
-            title: "Lương Ý Như Và Emmié by happySkin: Sự Kết Hợp Đầy Hứa Hẹn Trong Hành Trình Chăm Sóc Sắc Đẹp”",
-            image: assets.news_2,
-            date: "20/12/2024",
-            nthNews: 12,
-        },
-        {
+            title: 'Xu Hướng Làm Đẹp Hàn Quốc Mới Đáng Chú Ý',
+            summary: 'Khám phá các sản phẩm K-beauty sáng tạo đang xuất hiện trên thị trường, bao gồm serum cho làn da kính.',
+            image: 'https://via.placeholder.com/300x200',
+            date: '2025-03-10',
+            category: 'K-Beauty',
+          },
+          {
             id: 3,
-            tag: "Tin Tức - Deal Hot",
-            title: "CEO Emmi Hoàng tham gia Workshop “UPSKILL, UPSCALE - Bứt phá doanh thu mùa mega live cùng TikTokShop”",
-            image: assets.news_3,
-            date: "08/11/2024",
-            nthNews: 10,
-        },
-        {
-            id: 4,
-            tag: "Tin Tức - Deal Hot",
-            title: "Chính Thức Ra Mắt - Bộ 4 Máy Làm Đẹp Da Đa Năng Emmié by Happyskin Beauty Machine",
-            image: assets.news_4,
-            date: "16/11/2024",
-            nthNews: 11,
-        },
-    ];
+            title: 'Cách Chọn Kem Dưỡng Ẩm Phù Hợp',
+            summary: 'Mẹo từ chuyên gia về cách chọn kem dưỡng ẩm cho da trưởng thành dựa trên các thành phần như ceramides.',
+            image: 'https://via.placeholder.com/300x200',
+            date: '2025-03-09',
+            category: 'Mẹo Chăm Sóc Da',
+          },
+        ];
+        setArticles(dummyArticles);
+        setFilteredArticles(dummyArticles);
+      }
+    };
 
-    const NewsCard = ({ item }) => (
-        <div className="flex flex-col sm:flex-row p-4 border-2 border-solid shadow-md hover:shadow-lg transition-shadow duration-300 rounded-md bg-white overflow-hidden">
-            {/* Image Section */}
-            <div className="w-full sm:w-1/2 overflow-hidden rounded-lg">
-                <Link>
-                    <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                            e.target.src =
-                                "https://images.unsplash.com/photo-1556228578-0d85b1a4d571";
-                        }}
-                    />
-                </Link>
-            </div>
+    fetchNewsArticles();
+  }, []);
 
-            {/* Content Section */}
-            <div className="w-full sm:w-3/5 px-3 py-2 flex flex-col justify-between">
-                {/* Tag */}
-                <div className="mb-1">
-                    <Link>
-                        <span className="text-secondary hover:text-rose-600 hover:bg-gray-100 text-[10px] font-bold bg-mark px-2 py-1 rounded-md">
-                            {item.tag}
-                        </span>
-                    </Link>
-                </div>
-
-                {/* Title */}
-                <div className="mb-1">
-                    <Link>
-                        <h3
-                            className="text-md font-semibold hover:text-rose-600 leading-snug line-clamp-3"
-                            title={item.title}
-                        >
-                            {item.title}
-                        </h3>
-                    </Link>
-                </div>
-
-                {/* Date and nthNews */}
-                <div className="text-gray-500 text-[12px] flex items-center mt-1">
-                    <span>{item.date}</span>
-                    <span className="mx-1">●</span>
-                    <span>{item.nthNews}</span>
-                </div>
-            </div>
-        </div>
+  // Xử lý tìm kiếm
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+    setFilteredArticles(
+      articles.filter(article =>
+        article.title.toLowerCase().includes(query) ||
+        article.summary.toLowerCase().includes(query) ||
+        article.category.toLowerCase().includes(query)
+      )
     );
+  };
 
-    return (
-        <div className="container mx-auto mb-8 px-4 py-8 sm:py-12 bg-white rounded-lg shadow-lg mt-24 relative pb-20 sm:pb-8">
-            {/* Header Section */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-                <div>
-                    <h4 className="text-primary text-xs font-semibold mb-2">
-                        CẬP NHẬT THÔNG TIN
-                    </h4>
-                    <h4 className="text-primary text-lg sm:text-xl font-semibold">
-                        Tin tức mới nhất
-                    </h4>
-                </div>
-                {/* Button */}
-                <Link to="/news">
-                    <button className="text-sm px-4 py-2 bg-gray-50 rounded-full border border-rose-600 hover:text-white hover:bg-rose-600 transition-colors duration-150 sm:static absolute bottom-6 left-1/2 transform -translate-x-1/2 sm:translate-x-0 sm:bottom-auto sm:mt-0">
-                        Khám phá thêm
-                    </button>
-                </Link>
-            </div>
-
-            {/* News Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 sm:px-12">
-                {lastNews.map((item) => (
-                    <NewsCard key={item.id} item={item} />
-                ))}
-            </div>
+  return (
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <header className="text-center py-10 bg-white rounded-lg shadow-md mb-6">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
+          Tin Tức Sản Phẩm Chăm Sóc Da
+        </h1>
+        <p className="text-lg text-gray-600 mb-6">
+          Cập nhật xu hướng mới nhất, đánh giá và mẹo về các sản phẩm chăm sóc da.
+        </p>
+        <div className="flex justify-center gap-4">
+          <input
+            type="text"
+            placeholder="Tìm kiếm tin tức (ví dụ: kem dưỡng ẩm, K-beauty)..."
+            value={searchQuery}
+            onChange={handleSearch}
+            className="w-full max-w-xs p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-700"
+          />
+          <button className="px-4 py-3 bg-[#EE1F5B] text-white rounded-lg hover:bg-red-600 transition duration-300">
+            Tìm kiếm
+          </button>
         </div>
-    );
+      </header>
+
+      {/* News Articles Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        {filteredArticles.length > 0 ? (
+          filteredArticles.map((article) => (
+            <Link
+              to={`/news/${article.id}`}
+              key={article.id}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transform hover:-translate-y-1 transition duration-300"
+            >
+              <div className="w-full h-48">
+                <img
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h2 className="text-xl font-semibold text-gray-800 mb-2 line-clamp-2">
+                  {article.title}
+                </h2>
+                <p className="text-gray-600 text-sm mb-3 line-clamp-3">
+                  {article.summary}
+                </p>
+                <div className="flex justify-between items-center text-xs text-gray-500">
+                  <span>{new Date(article.date).toLocaleDateString('vi-VN')}</span>
+                  <span>{article.category}</span>
+                </div>
+              </div>
+            </Link>
+          ))
+        ) : (
+          <p className="col-span-full text-center text-lg text-red-500 py-10">
+            Không tìm thấy bài viết tin tức nào phù hợp với tìm kiếm của bạn.
+          </p>
+        )}
+      </div>
+    </div>
+  );
 };
 
-export default News;
+export default NewsPage;
