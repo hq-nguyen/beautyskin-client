@@ -49,6 +49,7 @@ import Normal from "../pages/Landing/Normal";
 import Dry from "../pages/Landing/Dry";
 import Combination from "../pages/Landing/Combination";
 import Sensitive from "../pages/Landing/Sensitive";
+import ChangePasswordForm from "../components/Password";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -157,6 +158,10 @@ const Routers = () => {
         {
           path: "manage-order",
           element: <Order />,
+        },
+        {
+          path: "change-password",
+          element: <ChangePasswordForm />,
         },
         {
           path: "promotion",
