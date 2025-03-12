@@ -35,13 +35,13 @@ const Shop = () => {
         
         if (storedFilteredProducts) {
           const filteredProducts = JSON.parse(storedFilteredProducts).filter(
-            product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
+            product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK' && product.stock > 0
           );
           setProducts(filteredProducts);
         } else {
           const data = await fetchProducts();
           const availableProducts = data.filter(
-            product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
+            product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK' && product.stock > 0
           );
           setProducts(availableProducts);
         }

@@ -8,7 +8,7 @@ import { MdCompare } from 'react-icons/md';
 import StarRating from '../utils/StarRating';
 import { assets } from '../../assets/frontend_assets/assets';
 import { fetchProductById } from '../../apis/product';
-import { addToCart } from '../../redux/features/cartSlice';
+import { addToCartWithQuantity } from '../../redux/features/cartSlice';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -19,10 +19,7 @@ const ProductDetail = () => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [selectedTab, setSelectedTab] = useState('description');
     const [quantity, setQuantity] = useState(1);
-
-    // Define capacities based on available forms if any
-    const capacities = product?.forms?.map(form => form.name) || [];
-    const [selectedCapacity, setSelectedCapacity] = useState(capacities[0] || '');
+    const [showPopup, setShowPopup] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -41,7 +38,7 @@ const ProductDetail = () => {
     }, [id]);
 
     const handleQuantityChange = (type) => {
-        if (type === 'increment') {
+        if (type === 'increment' && quantity < product.stock && quantity < 4) {
             setQuantity((prevQuantity) => prevQuantity + 1);
         } else if (type === 'decrement' && quantity > 1) {
             setQuantity(prev => prev - 1);
@@ -63,12 +60,16 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = () => {
-        if (product) {
-            dispatch(addToCart({
+        if (quantity > 3) {
+            setShowPopup(true);
+            setTimeout(() => setShowPopup(false), 1500);
+            return;
+        } else if (product) {
+            dispatch(addToCartWithQuantity({
                 id: product.id,
                 name: product.name,
                 price: product.price,
-                quantity,
+                quantity: quantity,
                 image: product.images?.[0]?.url || 'https://via.placeholder.com/80x80',
                 description: product.description,
                 originalPrice: product.price, // Assuming no discount for simplicity
@@ -262,10 +263,10 @@ const ProductDetail = () => {
                         <div className="flex items-center space-x-2">
                             <span
                                 className={`px-3 py-1 rounded-full text-sm ${product.stock > 10
-                                        ? "bg-green-100 text-green-800"
-                                        : product.stock > 0
-                                            ? "bg-yellow-100 text-yellow-800"
-                                            : "bg-red-100 text-red-800"
+                                    ? "bg-green-100 text-green-800"
+                                    : product.stock > 0
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-red-100 text-red-800"
                                     }`}
                             >
                                 {product.stock > 0 ? `${product.stock} sản phẩm có sẵn` : 'Hết hàng'}
@@ -287,7 +288,7 @@ const ProductDetail = () => {
                                     value={quantity}
                                     onChange={(e) => {
                                         const value = parseInt(e.target.value);
-                                        if (!isNaN(value) && value > 0 && value <= product.stock) {
+                                        if (!isNaN(value) && value > 0 && value <= Math.min(product.stock, 4)) {
                                             setQuantity(value);
                                         }
                                     }}
@@ -297,32 +298,12 @@ const ProductDetail = () => {
                                 <button
                                     onClick={() => handleQuantityChange("increment")}
                                     className="p-2 hover:bg-gray-100"
-                                    disabled={product.stock <= 0 || quantity >= product.stock}
+                                    disabled={product.stock <= 0 || quantity >= Math.min(product.stock, 4)}
                                 >
                                     <FiPlus />
                                 </button>
                             </div>
                         </div>
-
-                        {capacities.length > 0 && (
-                            <div>
-                                <p className="text-gray-600 mb-2">Kết cấu:</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {capacities.map((cap) => (
-                                        <button
-                                            key={cap}
-                                            onClick={() => setSelectedCapacity(cap)}
-                                            className={`px-4 py-2 rounded-md ${selectedCapacity === cap
-                                                    ? "bg-primary text-white"
-                                                    : "bg-gray-100 hover:bg-gray-200"
-                                                }`}
-                                        >
-                                            {cap}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
                         <div className="flex flex-wrap gap-3 mt-6">
                             <button
@@ -342,6 +323,14 @@ const ProductDetail = () => {
                     </div>
                 </div>
             </div>
+            {/* Popup notification */}
+            {showPopup && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="bg-white p-4 rounded-md shadow-lg border border-red-300">
+                        <p className="text-red-500 font-medium">Sản phẩm chỉ có thể thêm tối đa là 3</p>
+                    </div>
+                </div>
+            )}
 
             {/* Tabs Section */}
             <div className="mt-12 border-t pt-8">
@@ -352,8 +341,8 @@ const ProductDetail = () => {
                                 key={tab}
                                 onClick={() => setSelectedTab(tab)}
                                 className={`pb-4 px-2 ${selectedTab === tab
-                                        ? "border-b-2 border-primary text-primary font-medium"
-                                        : "text-gray-500"
+                                    ? "border-b-2 border-primary text-primary font-medium"
+                                    : "text-gray-500"
                                     }`}
                             >
                                 {tab === "description" ? "Mô tả" :

@@ -13,7 +13,7 @@ export const formatCurrency = (amount, symbol = true) => {
         return symbol ? 'đ0' : '0';
     };
 
-    const formattedAmount = amount.toLocaleString('vi-VN');
+    const formattedAmount = Number(amount).toLocaleString('vi-VN', { minimumFractionDigits: 2 });
 
     return symbol ? `${formattedAmount} đ` : formattedAmount;
 }
