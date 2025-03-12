@@ -3,6 +3,9 @@ import { faUser, faIdCard, faLocationDot, faBox, faStar, faLock, faSignOutAlt } 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from 'react';
 import api from '../../config/axios';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../redux/features/useSlice';
+import { toast } from 'react-toastify';
 
 function AccountSidebar() {
     const location = useLocation();
@@ -10,6 +13,7 @@ function AccountSidebar() {
     const [error, setError] = useState('');
     const [tempName, setTempName] = useState('');
     const [loading, setLoading] = useState(true)
+    const dispatch = useDispatch()
     const [username, setUsername] = useState({
         fullName: ' ',
     })
@@ -59,8 +63,10 @@ function AccountSidebar() {
         }, []);
 
     const handleLogout = () => {
+        dispatch(logout())
+        localStorage.removeItem('id')
         localStorage.removeItem('token'); {
-        sessionStorage.removeItem('token')
+        toast.success('Đăng xuất thành công')
         navigate('/')
     }
 }
