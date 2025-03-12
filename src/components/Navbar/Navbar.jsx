@@ -8,6 +8,7 @@ import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
 import { CiUser } from "react-icons/ci";
 import { fetchProducts } from '../../apis/product'; // Import fetchProducts API
 import { logout } from '../../redux/features/useSlice';
+import { clearCart } from '../../redux/features/cartSlice';
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
@@ -19,6 +20,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(clearCart());
     localStorage.removeItem('token');
     localStorage.removeItem('id');
     toast.success('Đăng xuất thành công');
