@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Slider } from "antd";
 import { assets } from "../../assets/frontend_assets/assets";
-import { fetchProducts } from '../../apis/product';
+import api from "../../config/axios"; // Import axios instance
 import { ProductAttributeService } from "../../apis/productAttribute";
 import ProductItem from "../../components/Card/ProductItem";
 
@@ -17,31 +17,48 @@ const Shop = () => {
     priceRange: [0, 10000000], // Default price range in VND
     skinType: [],
     skinConcern: [],
-    texture: []
+    texture: [],
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState(""); // Added sortBy state
 
+  // Fetch products based on search query or all products if no query
   useEffect(() => {
-    const getProducts = async () => {
+    const fetchProductsData = async () => {
       try {
-        const storedQuery = localStorage.getItem('searchQuery');
-        const storedFilteredProducts = localStorage.getItem('filteredProducts');
-        
-        if (storedQuery) {
-          setSearchQuery(storedQuery);
+        const storedQuery = localStorage.getItem("searchQuery");
+        const storedFilteredProducts = localStorage.getItem("filteredProducts");
+
+        if (storedQuery && !searchQuery) {
+          setSearchQuery(storedQuery); // Sync searchQuery from localStorage
         }
-        
-        if (storedFilteredProducts) {
+
+        if (searchQuery && searchQuery.trim()) {
+          // Fetch products based on search query via API
+          const response = await api.get(`/product/getByName?name=${searchQuery}`);
+          const availableProducts = response.data.filter(
+            (product) =>
+              product.status !== "OUT_OF_STOCK" &&
+              product.status !== "INSUFFICIENT_STOCK"
+          );
+          setProducts(availableProducts);
+          localStorage.setItem("filteredProducts", JSON.stringify(availableProducts)); // Update localStorage
+        } else if (storedFilteredProducts) {
+          // Use stored filtered products if available
           const filteredProducts = JSON.parse(storedFilteredProducts).filter(
-            product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
+            (product) =>
+              product.status !== "OUT_OF_STOCK" &&
+              product.status !== "INSUFFICIENT_STOCK"
           );
           setProducts(filteredProducts);
         } else {
-          const data = await fetchProducts();
-          const availableProducts = data.filter(
-            product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
+          // Fetch all products if no search query or stored data
+          const data = await api.get("/product"); // Adjust endpoint if needed
+          const availableProducts = data.data.filter(
+            (product) =>
+              product.status !== "OUT_OF_STOCK" &&
+              product.status !== "INSUFFICIENT_STOCK"
           );
           setProducts(availableProducts);
         }
@@ -49,13 +66,9 @@ const Shop = () => {
         console.error("Error fetching products:", error);
       }
     };
-    getProducts();
-    
-    
-    return () => {
-      // Don't remove search data here, as it might be needed when returning to the shop page
-    };
-  }, []);
+
+    fetchProductsData();
+  }, [searchQuery]);
 
   useEffect(() => {
     const fetchAttributes = async () => {
@@ -81,59 +94,84 @@ const Shop = () => {
 
   const getFilterCounts = (filterType, options) => {
     const counts = {};
-    
-    options.forEach(option => {
+
+    options.forEach((option) => {
       let count = 0;
-      
-      products.forEach(product => {
-        if (filterType === 'category') {
+
+      products.forEach((product) => {
+        if (filterType === "category") {
           if (product.category && product.category.id === option.id) count++;
-        } 
-        else if (filterType === 'skinType') {
-          if (product.skinTypes && product.skinTypes.some(type => type.id === option.id)) count++;
-        }
-        else if (filterType === 'skinConcern') {
-          if (product.skinConcerns && product.skinConcerns.some(concern => concern.id === option.id)) count++;
-        }
-        else if (filterType === 'texture') {
-          if (product.forms && product.forms.some(form => form.id === option.id)) count++;
+        } else if (filterType === "skinType") {
+          if (
+            product.skinTypes &&
+            product.skinTypes.some((type) => type.id === option.id)
+          )
+            count++;
+        } else if (filterType === "skinConcern") {
+          if (
+            product.skinConcerns &&
+            product.skinConcerns.some((concern) => concern.id === option.id)
+          )
+            count++;
+        } else if (filterType === "texture") {
+          if (product.forms && product.forms.some((form) => form.id === option.id))
+            count++;
         }
       });
-      
+
       counts[option.id] = count;
     });
-    
+
     return counts;
   };
 
   const filteredAndSortedProducts = useMemo(() => {
     // First filter the products
-    let filtered = products.filter(product => {
+    let filtered = products.filter((product) => {
       // Price range filter
-      const priceInRange = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
+      const priceInRange =
+        product.price >= filters.priceRange[0] &&
+        product.price <= filters.priceRange[1];
 
       // Category filter
-      const matchesCategory = filters.category.length === 0 || 
-        filters.category.some(catId => product.category && product.category.id === catId);
-      
-      // Skin type filter
-      const matchesSkinType = filters.skinType.length === 0 || 
-        (product.skinTypes && product.skinTypes.some(type => filters.skinType.includes(type.id)));
-      
-      // Skin concern filter
-      const matchesSkinConcern = filters.skinConcern.length === 0 || 
-        (product.skinConcerns && product.skinConcerns.some(concern => filters.skinConcern.includes(concern.id)));
-      
-      // Texture filter
-      const matchesTexture = filters.texture.length === 0 || 
-        (product.forms && product.forms.some(form => filters.texture.includes(form.id)));
-      
-      // Search query filter
-      const matchesSearch = !searchQuery || 
-        (product.name && product.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesCategory =
+        filters.category.length === 0 ||
+        (product.category && filters.category.includes(product.category.id));
 
-      return priceInRange && matchesCategory && matchesSkinType && 
-             matchesSkinConcern && matchesTexture && matchesSearch;
+      // Skin type filter
+      const matchesSkinType =
+        filters.skinType.length === 0 ||
+        (product.skinTypes &&
+          product.skinTypes.some((type) => filters.skinType.includes(type.id)));
+
+      // Skin concern filter
+      const matchesSkinConcern =
+        filters.skinConcern.length === 0 ||
+        (product.skinConcerns &&
+          product.skinConcerns.some((concern) =>
+            filters.skinConcern.includes(concern.id)
+          ));
+
+      // Texture filter
+      const matchesTexture =
+        filters.texture.length === 0 ||
+        (product.forms &&
+          product.forms.some((form) => filters.texture.includes(form.id)));
+
+      // Search query filter (already handled by API, but kept for manual input)
+      const matchesSearch =
+        !searchQuery ||
+        (product.name &&
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      return (
+        priceInRange &&
+        matchesCategory &&
+        matchesSkinType &&
+        matchesSkinConcern &&
+        matchesTexture &&
+        matchesSearch
+      );
     });
 
     // Then apply sorting
@@ -148,8 +186,7 @@ const Shop = () => {
         filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case "newest":
-        // API now returns products in the order of newest already
-        // If you have a createdAt field, you could uncomment this:
+        // If you have a createdAt field, uncomment this:
         // filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         break;
       default:
@@ -164,15 +201,15 @@ const Shop = () => {
   };
 
   const handleFilterChange = (filterType, value) => {
-    setFilters(prev => {
+    setFilters((prev) => {
       if (filterType === "priceRange") {
         return { ...prev, priceRange: value };
       }
-      
+
       const updatedValues = prev[filterType].includes(value)
-        ? prev[filterType].filter(item => item !== value)
+        ? prev[filterType].filter((item) => item !== value)
         : [...prev[filterType], value];
-      
+
       return { ...prev, [filterType]: updatedValues };
     });
     setCurrentPage(1);
@@ -181,12 +218,12 @@ const Shop = () => {
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    
+
     if (query.trim()) {
-      localStorage.setItem('searchQuery', query);
+      localStorage.setItem("searchQuery", query);
     } else {
-      localStorage.removeItem('searchQuery');
-      localStorage.removeItem('filteredProducts');
+      localStorage.removeItem("searchQuery");
+      localStorage.removeItem("filteredProducts");
     }
   };
 
@@ -196,17 +233,20 @@ const Shop = () => {
       priceRange: [0, 10000000],
       skinType: [],
       skinConcern: [],
-      texture: []
+      texture: [],
     });
     setSearchQuery("");
-    setSortBy("");  
-    
-    localStorage.removeItem('searchQuery');
-    localStorage.removeItem('filteredProducts');
-    
-    fetchProducts().then(data => {
-      const availableProducts = data.filter(
-        product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
+    setSortBy("");
+
+    localStorage.removeItem("searchQuery");
+    localStorage.removeItem("filteredProducts");
+
+    // Fetch all products again
+    api.get("/product").then((response) => {
+      const availableProducts = response.data.filter(
+        (product) =>
+          product.status !== "OUT_OF_STOCK" &&
+          product.status !== "INSUFFICIENT_STOCK"
       );
       setProducts(availableProducts);
     });
@@ -214,13 +254,16 @@ const Shop = () => {
 
   const FilterSection = ({ title, options, filterType }) => {
     const counts = getFilterCounts(filterType, options);
-    
+
     return (
       <div className="mb-6">
         <h3 className="text-md font-semibold mb-2">{title}</h3>
         <div className="space-y-2">
-          {options.map(option => (
-            <label key={option.id} className="flex items-center justify-between cursor-pointer">
+          {options.map((option) => (
+            <label
+              key={option.id}
+              className="flex items-center justify-between cursor-pointer"
+            >
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -240,14 +283,15 @@ const Shop = () => {
 
   const getPromotionPercentage = (product) => {
     if (product.promotions && product.promotions.length > 0) {
-      return 20; 
+      return 20;
     }
-    return 20;
+    return 0;
   };
 
   const getDiscountedPrice = (product) => {
-    if (product.promotions && product.promotions.length > 0) {
-      return product.price - (product.price * 0.2); 
+    const promotionPercentage = getPromotionPercentage(product);
+    if (promotionPercentage > 0) {
+      return product.price - product.price * (promotionPercentage / 100);
     }
     return product.price;
   };
@@ -325,7 +369,11 @@ const Shop = () => {
             </div>
 
             <FilterSection title="Loại da" options={skinTypes} filterType="skinType" />
-            <FilterSection title="Mối quan tâm về da" options={skinConcerns} filterType="skinConcern" />
+            <FilterSection
+              title="Mối quan tâm về da"
+              options={skinConcerns}
+              filterType="skinConcern"
+            />
             <FilterSection title="Kết cấu sản phẩm" options={textures} filterType="texture" />
           </div>
 
@@ -343,25 +391,33 @@ const Shop = () => {
               <div className="flex space-x-2 text-sm">
                 <span className="mr-2">Sắp xếp</span>
                 <button
-                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${sortBy === "hot" ? "bg-primary text-white" : "bg-white border"}`}
+                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${
+                    sortBy === "hot" ? "bg-primary text-white" : "bg-white border"
+                  }`}
                   onClick={() => handleSort("hot")}
                 >
                   Bán chạy
                 </button>
                 <button
-                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${sortBy === "newest" ? "bg-primary text-white" : "bg-white border"}`}
+                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${
+                    sortBy === "newest" ? "bg-primary text-white" : "bg-white border"
+                  }`}
                   onClick={() => handleSort("newest")}
                 >
                   Mới nhất
                 </button>
                 <button
-                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${sortBy === "low-high" ? "bg-primary text-white" : "bg-white border"}`}
+                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${
+                    sortBy === "low-high" ? "bg-primary text-white" : "bg-white border"
+                  }`}
                   onClick={() => handleSort("low-high")}
                 >
                   Giá thấp đến cao
                 </button>
                 <button
-                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${sortBy === "high-low" ? "bg-primary text-white" : "bg-white border"}`}
+                  className={`text-xs px-2 py-1 rounded text-black hover:border-rose-500 hover:border ${
+                    sortBy === "high-low" ? "bg-primary text-white" : "bg-white border"
+                  }`}
                   onClick={() => handleSort("high-low")}
                 >
                   Giá cao đến thấp
@@ -373,7 +429,8 @@ const Shop = () => {
             {searchQuery && (
               <div className="mb-4 p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm">
-                  Kết quả tìm kiếm cho: <span className="font-semibold">"{searchQuery}"</span>
+                  Kết quả tìm kiếm cho:{" "}
+                  <span className="font-semibold">"{searchQuery}"</span>
                 </p>
               </div>
             )}
@@ -399,7 +456,9 @@ const Shop = () => {
             {/* Empty state */}
             {filteredAndSortedProducts.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-lg text-gray-600">Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</p>
+                <p className="text-lg text-gray-600">
+                  Không tìm thấy sản phẩm nào phù hợp với bộ lọc.
+                </p>
                 <button
                   onClick={clearFilters}
                   className="mt-4 px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/80"
