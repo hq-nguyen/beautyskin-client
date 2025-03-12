@@ -24,7 +24,7 @@ import ManageOrder from "../pages/Admin/ManageOrder/ManageOrder";
 import Promotion from "../pages/PromotionManagement/promotion";
 import ShoppingCart from "../pages/ShoppingCart/Cart";
 import BlogDetail from "../pages/Blog/BlogDetail";
-import CheckoutPage from "../pages/Checkout/checkout";
+import CheckoutPage from "../pages/Checkout/Checkout";
 import Address from "../pages/Address/ShippingAddress/Address";
 import AddAddress from "../pages/Address/AddressForm/AddressForm";
 import AddressDefault from "../pages/Address/AddressManagement";
@@ -42,15 +42,15 @@ import ProtectedRoute from "./ProtectedRoute";
 import Unauthorized from "../pages/Unauthorized/Unauthorized";
 import ProductDetail from "../components/ProductDetail/ProductDetail";
 import ManagePromotion from "../pages/Admin/ManagePromotion/ManagePromotion";
-import CODPage from "../pages/CheckoutConfirm";
+
 // import Transfer from "../components/Payment/Transfer/Tranfer";
 import Oily from "../pages/Landing/Oily";
 import Normal from "../pages/Landing/Normal";
 import Dry from "../pages/Landing/Dry";
 import Combination from "../pages/Landing/Combination";
 import Sensitive from "../pages/Landing/Sensitive";
-import ChangePasswordForm from "../components/Password";
-import NewsPage from "../components/News/News";
+import CODPage from "../pages/CheckoutConfirm/CODConfirm";
+import PaymentResult from "../pages/CheckoutConfirm/PaymentResult";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -84,7 +84,7 @@ const Routers = () => {
         },
         {
           path: '/news',
-          element: <NewsPage />,
+          element: <News />,
         },
         {
           path: '/test-skin',
@@ -161,10 +161,6 @@ const Routers = () => {
           element: <Order />,
         },
         {
-          path: "change-password",
-          element: <ChangePasswordForm />,
-        },
-        {
           path: "promotion",
           element: <Promotion />,
         }
@@ -173,7 +169,11 @@ const Routers = () => {
     },
     {
       path: "/checkout",
-      element: <CheckoutLayout />,
+      element: (
+        <ProtectedRoute allowedRoles={["USER", "MANAGER", "STAFF"]}>
+          <CheckoutLayout />
+        </ProtectedRoute>
+      ),
       children: [
         {
           path: "cart",   
@@ -187,6 +187,10 @@ const Routers = () => {
           path: "confirmCOD",   
           element: <CODPage />,
         },
+        {
+          path: 'payment-result',
+          element: <PaymentResult />,
+        }
       ],
     },
     {

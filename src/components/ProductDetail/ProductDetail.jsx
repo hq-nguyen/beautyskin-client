@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { FiMinus, FiPlus } from 'react-icons/fi';
 import { AiOutlineHeart } from 'react-icons/ai';
@@ -7,9 +8,11 @@ import { MdCompare } from 'react-icons/md';
 import StarRating from '../utils/StarRating';
 import { assets } from '../../assets/frontend_assets/assets';
 import { fetchProductById } from '../../apis/product';
+import { addToCart } from '../../redux/features/cartSlice';
 
 const ProductDetail = () => {
     const { id } = useParams();
+    const dispatch = useDispatch();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -56,6 +59,21 @@ const ProductDetail = () => {
             setCurrentImageIndex(
                 prev => prev === 0 ? product.images.length - 1 : prev - 1
             );
+        }
+    };
+
+    const handleAddToCart = () => {
+        if (product) {
+            dispatch(addToCart({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity,
+                image: product.images?.[0]?.url || 'https://via.placeholder.com/80x80',
+                description: product.description,
+                originalPrice: product.price, // Assuming no discount for simplicity
+                promo: product.promotions?.[0]?.value || 0
+            }));
         }
     };
 
@@ -308,6 +326,7 @@ const ProductDetail = () => {
 
                         <div className="flex flex-wrap gap-3 mt-6">
                             <button
+                                onClick={handleAddToCart}
                                 className="w-48 bg-primary text-white py-3 rounded-md hover:opacity-90 transition-all"
                                 disabled={product.stock <= 0}
                             >

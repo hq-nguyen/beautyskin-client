@@ -1,21 +1,21 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify';
 import { assets } from '../../assets/frontend_assets/assets';
-import { logout } from '../../redux/features/useSlice';
-import api from '../../config/axios';
 import { IoIosLogIn } from "react-icons/io";
 import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
 import { CiUser } from "react-icons/ci";
+import { fetchProducts } from '../../apis/product'; // Import fetchProducts API
+import { logout } from '../../redux/features/useSlice';
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+  const totalQuantity = useSelector((state) => state.cart?.totalQuantity || 0);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -25,49 +25,29 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const handleSearchInputChange = async (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-
-    if (query.trim()) {
-      try {
-        const response = await api.get(`/product/getByName?name=${query}`);
-        // Lọc sản phẩm có id hợp lệ
-        const validResults = response.data.filter(product => product.id && !isNaN(product.id));
-        setSearchResults(validResults);
-      } catch (error) {
-        console.error("Error fetching search results:", error);
-        setSearchResults([]);
-        toast.error('Không thể lấy kết quả tìm kiếm. Vui lòng thử lại.');
-      }
-    } else {
-      setSearchResults([]);
-    }
-  };
-
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
-
+    if (!searchQuery.trim()) return; 
     try {
-      const response = await api.get(`/product/getByName?name=${searchQuery}`);
-      // Lọc sản phẩm có id hợp lệ
-      const filteredProducts = response.data.filter(product => product.id && !isNaN(product.id));
-      
+      //Lấy các sản phẩm
+      const allProducts = await fetchProducts();
+      //Lọc sản phẩm
+      const filteredProducts = allProducts.filter((product) =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
       localStorage.setItem('searchQuery', searchQuery);
       localStorage.setItem('filteredProducts', JSON.stringify(filteredProducts));
 
       navigate('/shop');
-      setSearchResults([]);
     } catch (error) {
-      console.error("Error searching products:", error);
+      console.error("Error fetching products for search:", error);
       toast.error('Không thể tìm kiếm sản phẩm. Vui lòng thử lại.');
     }
   };
 
   const clearSearch = () => {
     setSearchQuery("");
-    setSearchResults([]);
   };
 
   return (
@@ -98,7 +78,7 @@ const Navbar = () => {
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
           </NavLink>
         </ul>
-        <div className="hidden md:block max-w-xs w-full px-4 relative">
+        <div className="hidden md:block max-w-xs w-full px-4">
           <form onSubmit={handleSearch} className="relative">
             <div className="flex items-center rounded-full border border-gray-300 bg-gray-100 overflow-hidden pl-4 pr-2 py-2">
               <input
@@ -106,7 +86,7 @@ const Navbar = () => {
                 placeholder="Tìm kiếm sản phẩm"
                 className="bg-transparent outline-none flex-grow text-gray-600"
                 value={searchQuery}
-                onChange={handleSearchInputChange}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               {searchQuery && (
                 <button 
@@ -126,30 +106,6 @@ const Navbar = () => {
               </button>
             </div>
           </form>
-          {searchResults.length > 0 && (
-            <div className="absolute z-10 bg-white border border-gray-300 rounded-lg mt-2 w-full max-h-96 overflow-y-auto shadow-lg">
-              {searchResults.map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/product/${product.id}`} // Đảm bảo id là số
-                  className="flex items-center p-3 hover:bg-gray-100"
-                  onClick={() => setSearchResults([])}
-                >
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-12 h-12 object-cover rounded mr-3"
-                  />
-                  <div>
-                    <p className="text-gray-700">{product.name}</p>
-                    <p className="text-orange-500 font-bold">
-                      {product.price.toLocaleString('vi-VN')} đ
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
 
         <div className='flex items-center gap-6'>
@@ -192,16 +148,20 @@ const Navbar = () => {
               className='w-5 min-w-5' 
               alt="" 
             />
-            <p className='absolute right-[-8px] top-[-5px] w-4 text-center leading-4 bg-red-600 text-white aspect-square rounded-full text-[8px]'>10</p>
+            <p className='absolute right-[-8px] top-[-5px] w-4 text-center leading-4 bg-red-600 text-white aspect-square rounded-full text-[8px]'>
+              {totalQuantity}
+            </p>
           </Link>
           <img onClick={() => setVisible(true)} src={assets.menu_icon} className='w-5 cursor-pointer sm:hidden' alt="" />
         </div>
       </div>
 
+      {/* Overlay for small screens */}
       {visible && (
         <div className="overlay" onClick={() => setVisible(false)} />
       )}
 
+      {/* Sidebar menu for small screens */}
       <div className={`sidebar ${visible ? 'visible' : 'hidden'}`}>
         <div className='flex flex-col text-gray-600'>
           <div onClick={() => setVisible(false)} className='flex items-center gap-4 p-3 text-primary cursor-pointer'>

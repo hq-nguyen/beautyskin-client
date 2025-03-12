@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Space, Table, Tag } from 'antd';
-import { fetchOrder } from '../../../apis/order';
+import { fetchOrder } from '../../../apis/orderMock';
 import dayjs from 'dayjs';
 import { MdOutlineDeleteOutline, MdOutlineRemoveRedEye } from 'react-icons/md';
 
