@@ -5,7 +5,7 @@ import useGetParams from "../../hooks/useGetParams";
 import { updateStatusOrder } from "../../apis/order";
 import { clearCart } from "../../redux/features/cartSlice";
 import { FaCheckCircle, FaHistory, FaHome, FaTimesCircle } from "react-icons/fa";
-
+import { formatCurrency } from "../../utils/format";
 const PaymentResult = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -29,7 +29,7 @@ const PaymentResult = () => {
         return () => clearTimeout(timer);
     }, []);
 
-    const changeStatus = async() => {
+    const changeStatus = async () => {
         let statusEnum;
         if (status === "00") {
             setPaymentStatus(true);
@@ -39,8 +39,8 @@ const PaymentResult = () => {
             statusEnum = "CANCELLED";
         }
         const response = await updateStatusOrder(orderId, statusEnum);
-        if (response?.status == "PAID") {
-            dispatch(clearCart);
+        if (response?.orderStatus == "PAID") {
+            dispatch(clearCart());
         }
         setOrder(response);
         console.log(response);
@@ -76,28 +76,28 @@ const PaymentResult = () => {
                         <div className="text-center">
                             <FaCheckCircle className="mx-auto h-16 w-16 text-green-500 animate-bounce" />
                             <h2 className="mt-4 text-3xl font-bold text-green-800">
-                                Payment Successful!
+                                Thanh toán thành công!
                             </h2>
                             <div className="mt-6 space-y-4 text-left">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Order Number:</span>
+                                    <span className="text-gray-600">Mã đơn hàng:</span>
                                     <span className="font-semibold">{order?.id}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Amount:</span>
+                                    <span className="text-gray-600">Tổng tiền:</span>
                                     <span className="font-semibold">
-                                        ${order?.total.toFixed(2)}
+                                        {formatCurrency(order?.totalPrice.toFixed(2))}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Payment Method:</span>
+                                    <span className="text-gray-600">Phương thức thanh toán:</span>
                                     <span className="font-semibold">
                                         {orderDetails.paymentMethod}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Date & Time:</span>
-                                    <span className="font-semibold">{order?.createAt}</span>
+                                    <span className="text-gray-600">Thời gian thanh toán:</span>
+                                    <span className="font-semibold">{order?.orderDate}</span>
                                 </div>
                             </div>
                         </div>
@@ -120,7 +120,7 @@ const PaymentResult = () => {
                                     ))}
                                 </ul>
                                 <p className="mt-6 text-gray-600">
-                                Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ nếu sự cố vẫn tiếp diễn.
+                                    Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ nếu sự cố vẫn tiếp diễn.
                                 </p>
                             </div>
                         </div>

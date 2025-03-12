@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { toast } from "react-toastify";
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
-import { removeFromCart } from "../../redux/features/cartSlice";
+import { clearCart, removeFromCart } from "../../redux/features/cartSlice";
 import api from '../../config/axios';
 import { createOrder } from '../../apis/order';
 
@@ -135,6 +135,7 @@ const CheckoutPage = () => {
     // In a real application, you would make an API call to create the order
     // For now, we'll just navigate to a confirmation page
     if (paymentMethod === 'cod') {
+      dispatch(clearCart());
       navigate('/checkout/confirmCOD');
     } else {
       const orderData = {
