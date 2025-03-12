@@ -81,7 +81,7 @@ const ManageProduct = () => {
         setCurrentProduct(null);
     };
 
-    const handleSaveProduct = (updatedProduct) => {
+    const handleSaveProduct = async (updatedProduct) => {
         try {
             // Reconstruct the complete product object with all relational data
             const updatedProductWithRelations = {
@@ -105,15 +105,26 @@ const ManageProduct = () => {
                 // Reconstruct the tags array
                 tags: updatedProduct.tagId
                     ? updatedProduct.tagId.map(id => tags.find(tag => tag.id === id)).filter(Boolean)
-                    : []
+                    : [],
+                // image
+                images: updatedProduct.images || []
             };
+            setLoading(true);
+            try {
+                const refreshedProduct = await fetchProducts(updatedProduct.id);
+                setProducts(refreshedProduct);
+            } catch (error) {
+                console.log("Error:", error);
+
+                const updatedProducts = products.map(product =>
+                    product.id === updatedProductWithRelations.id ? updatedProductWithRelations : product
+                );
+                setProducts(updatedProducts);
+            } finally {
+                setLoading(false);
+            }
 
             // Update the products state with the new data
-            const updatedProducts = products.map(product =>
-                product.id === updatedProductWithRelations.id ? updatedProductWithRelations : product
-            );
-            
-            setProducts(updatedProducts);
             setIsModalVisible(false);
             setCurrentProduct(null);
         } catch (error) {
@@ -274,7 +285,7 @@ const ManageProduct = () => {
                 <Table
                     columns={columns}
                     dataSource={products}
-                    rowKey="id"
+                    rowKey={(record) => record.id}
                     pagination={{ position: ['bottomRight'] }}
                     rowClassName={(_, index) => (index % 2 === 0 ? "bg-gray-100" : "bg-white")}
                     className="w-full border rounded-lg shadow-md"

@@ -76,7 +76,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
         skinConcernId: product.skinConcerns?.map(concern => concern.id) || [],
         tagId: product.tags?.map(tag => tag.id) || [],
         // formId: product.formIds && product.formIds.length > 0 ? product.formIds[0] : null,
-        formIds: product.forms?.map(f => f.id) || null,
+        formIds: product.forms?.map(f => f.id) || [],
         stepId: product.stepId?.map(step => step.id) || [],
       });
 
@@ -167,7 +167,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
             skinTypeId: values.skinTypeId || [],
             skinConcernId: values.skinConcernId || [],
             tagId: values.tagId || [],
-            formIds: values.formIds ? [values.formIds] : [],
+            formIds: values.formIds ? [values.formIds].flat() : [],
             routineSteps: values.routineSteps || [],
             images: imageIds,
             promotions: promotionIds,
@@ -381,7 +381,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
             <Form.Item label="Cấu trúc sản phẩm" name="formIds">
               <Select>
                 {forms.map((form) => (
-                  <Option key={form.id} value={form.id}>{form.name}</Option>
+                  <Select.Option key={form.id} value={form.id}>{form.name}</Select.Option>
                 ))}
               </Select>
             </Form.Item>
