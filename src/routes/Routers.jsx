@@ -50,6 +50,7 @@ import Dry from "../pages/Landing/Dry";
 import Combination from "../pages/Landing/Combination";
 import Sensitive from "../pages/Landing/Sensitive";
 import ChangePasswordForm from "../components/Password";
+import NewsPage from "../components/News/News";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -83,7 +84,7 @@ const Routers = () => {
         },
         {
           path: '/news',
-          element: <News />,
+          element: <NewsPage />,
         },
         {
           path: '/test-skin',
