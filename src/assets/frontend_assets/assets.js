@@ -63,6 +63,7 @@ import certified_icon from './certified-icon.png'
 import ship_icon from './ship-icon.png'
 import support_icon from './support-icon.png'
 import skintest_banner from './SkinType.jpg'
+import empty_cart from './empty-cart.png'
 
 
 export const assets = {
@@ -130,5 +131,6 @@ export const assets = {
     ship_icon,
     support_icon,
     thumbnail,
-    skintest_banner
+    skintest_banner,
+    empty_cart
 }

@@ -3,11 +3,11 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify';
 import { assets } from '../../assets/frontend_assets/assets';
-import { logout } from '../../redux/features/useSlice';
 import { IoIosLogIn } from "react-icons/io";
 import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
 import { CiUser } from "react-icons/ci";
 import { fetchProducts } from '../../apis/product'; // Import fetchProducts API
+import { logout } from '../../redux/features/useSlice';
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
@@ -15,6 +15,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+  const totalQuantity = useSelector((state) => state.cart?.totalQuantity || 0);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -147,7 +148,9 @@ const Navbar = () => {
               className='w-5 min-w-5' 
               alt="" 
             />
-            <p className='absolute right-[-8px] top-[-5px] w-4 text-center leading-4 bg-red-600 text-white aspect-square rounded-full text-[8px]'>10</p>
+            <p className='absolute right-[-8px] top-[-5px] w-4 text-center leading-4 bg-red-600 text-white aspect-square rounded-full text-[8px]'>
+              {totalQuantity}
+            </p>
           </Link>
           <img onClick={() => setVisible(true)} src={assets.menu_icon} className='w-5 cursor-pointer sm:hidden' alt="" />
         </div>

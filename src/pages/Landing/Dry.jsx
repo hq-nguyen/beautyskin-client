@@ -219,6 +219,3 @@ const Dry = () => {
 };
 
 export default Dry;
-
-
-
