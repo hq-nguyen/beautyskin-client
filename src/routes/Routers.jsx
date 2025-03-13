@@ -9,7 +9,7 @@ import Register from '../pages/Register/Register';
 import Login from '../pages/Login/Login';
 import AccountManagement from '../pages/ManageAccount/AccountManagement';
 import InfoUser from '../pages/InfoUser/InfoUser';
-import Order from '../pages/ManageOrder';
+
 import UserLayout from '../layout/UserLayout';
 import MainLayout from '../layout/MainLayout'; // Assuming you have this
 import ForgotPassword from "../pages/ForgotPassword";
@@ -20,6 +20,7 @@ import ManageProduct from "../pages/Admin/ManageProduct/ManageProduct";
 import ManageStaff from "../pages/Admin/ManageStaff/ManageStaff";
 import AddStaff from "../pages/Admin/ManageStaff/AddStaff";
 import ManageCustomer from "../pages/Admin/ManageCustomer/ManageCustomer";
+import OrderHistory from "../components/Order/OrderHistory";
 import ManageOrder from "../pages/Admin/ManageOrder/ManageOrder";
 import Promotion from "../pages/PromotionManagement/promotion";
 import ShoppingCart from "../pages/ShoppingCart/Cart";
@@ -158,7 +159,7 @@ const Routers = () => {
         },
         {
           path: "manage-order",
-          element: <Order />,
+          element: <OrderHistory />,
         },
         {
           path: "promotion",

@@ -157,7 +157,7 @@ function AdminSidebar({
         {/* Header with toggle button and logo */}
         <div className="flex items-center shrink-0 justify-between mb-4">
           {sidebarOpen && (
-            <Link to={'/admin'} className="ml-2 transition-opacity duration-200">
+            <Link to={'/'} className="ml-2 transition-opacity duration-200">
               <img className='w-12' src={assets.icon} alt="Logo" />
             </Link>
           )}

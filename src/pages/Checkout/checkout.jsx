@@ -135,6 +135,14 @@ const CheckoutPage = () => {
     // In a real application, you would make an API call to create the order
     // For now, we'll just navigate to a confirmation page
     if (paymentMethod === 'cod') {
+      const orderData = {
+        details: cart.map((product) => ({
+          productId: product.id,
+          quantity: product.quantity,
+        })),
+      };
+      const payload = await createOrder(orderData);
+      console.log(payload);
       dispatch(clearCart());
       navigate('/checkout/confirmCOD');
     } else {
