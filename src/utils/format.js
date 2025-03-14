@@ -10,10 +10,15 @@ export const formatDate = (dateString) => {
 
 export const formatCurrency = (amount, symbol = true) => {
     if (amount === null || amount === undefined) {
-        return symbol ? 'đ0' : '0';
-    };
+        return symbol ? '0 đ' : '0';
+    }
 
-    const formattedAmount = Number(amount).toLocaleString('vi-VN', { minimumFractionDigits: 2 });
+    // Format with commas as thousand separators and periods for decimals
+    const formattedAmount = Number(amount).toLocaleString('en-US', { 
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 
+    // Return with currency symbol if requested
     return symbol ? `${formattedAmount} đ` : formattedAmount;
 }
