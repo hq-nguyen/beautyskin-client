@@ -12,12 +12,23 @@ export const createOrder = async (data) => {
 
 export const updateStatusOrder = async (id, status) => {
     try {
-        const payload = await api.patch(`order/updateStatus/${id}?status=${status}&`);
+        const payload = await api.patch(`order/updateStatusOrder/${id}?status=${status}&`);
         return payload.data;
     } catch (error) {
         message.error(error.response.data);
     }
 }
+
+export const updateStatusPayment = async (id, status) => {
+    try {
+        
+        const payload = await api.patch(`order/updateStatusPayment/${id}?status=${status}&`);
+        return payload.data;
+    } catch (error) {
+        message.error(error.response.data);
+    }
+}
+
 
 export const fetchOrderHistory = async () => {
     try {

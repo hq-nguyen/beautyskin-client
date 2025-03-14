@@ -14,6 +14,7 @@ const Register = () => {
         username: "",
         email: "",
         password: "",
+        confirmPassword: "",
         terms: false
     });
 
@@ -60,6 +61,22 @@ const Register = () => {
             ...prev,
             [name]: type === "checkbox" ? checked : value
         }));
+
+        // Check for password match in real-time when confirmPassword is changed
+        if (name === "confirmPassword") {
+            setErrors(prev => ({
+                ...prev,
+                confirmPassword: value !== formData.password ? "Mật khẩu không khớp" : ""
+            }));
+        }
+
+        // Also check when password is changed and confirmPassword already has a value
+        if (name === "password" && formData.confirmPassword) {
+            setErrors(prev => ({
+                ...prev,
+                confirmPassword: value !== formData.confirmPassword ? "Mật khẩu không khớp" : ""
+            }));
+        }
     };
 
     useEffect(() => {
@@ -85,6 +102,12 @@ const Register = () => {
         if (!validatePassword(formData.password)) {
             newErrors.password =
                 "Mật khẩu phải có ít nhất 8 ký tự và chứa chữ hoa, chữ thường, số và ký tự đặc biệt";
+        }
+
+        if (!formData.confirmPassword) {
+            newErrors.confirmPassword = "Vui lòng nhập lại mật khẩu";
+        } else if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = "Mật khẩu không khớp";
         }
 
         if (!formData.terms) {
@@ -242,7 +265,37 @@ const Register = () => {
                             />
                         </div>
                     </div>
-
+                    <div>
+                        <label htmlFor="confirmPassword" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
+                            Nhập lại mật khẩu
+                        </label>
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-2 rounded-md border ${errors.confirmPassword ? "border-destructive" : "border-input"} focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring pr-10`}
+                                placeholder="Nhập lại mật khẩu"
+                                aria-invalid={errors.confirmPassword ? "true" : "false"}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                            >
+                                {showPassword ? (
+                                    <AiOutlineEyeInvisible className="w-5 h-5 text-gray-500" />
+                                ) : (
+                                    <AiOutlineEye className="w-5 h-5 text-gray-500" />
+                                )}
+                            </button>
+                        </div>
+                        {errors.confirmPassword && (
+                            <p className="mt-1 text-sm text-destructive text-red-600">{errors.confirmPassword}</p>
+                        )}
+                    </div>
                     <div className="flex items-start">
                         <input
                             type="checkbox"
@@ -280,8 +333,7 @@ const Register = () => {
                                     cy="12"
                                     r="10"
                                     stroke="currentColor"
-                                    strokeWidth="4"
-                                    fill="none"
+                                    strokeWidth="4" fill="none"
                                 />
                                 <path
                                     className="opacity-75"

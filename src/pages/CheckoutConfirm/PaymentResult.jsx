@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import useGetParams from "../../hooks/useGetParams";
-import { updateStatusOrder } from "../../apis/order";
+import { updateStatusPayment } from "../../apis/order";
 import { clearCart } from "../../redux/features/cartSlice";
 import { FaCheckCircle, FaHistory, FaHome, FaTimesCircle } from "react-icons/fa";
 import { formatCurrency } from "../../utils/format";
+
 const PaymentResult = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -30,25 +31,47 @@ const PaymentResult = () => {
     }, []);
 
     const changeStatus = async () => {
-        let statusEnum;
-        if (status === "00") {
-            setPaymentStatus(true);
-            statusEnum = "PAID";
-        } else {
+        try {
+            let statusEnum;
+            if (status === "00") {
+                setPaymentStatus(true);
+                statusEnum = "PAID";
+                
+                // Only update payment status when payment is successful
+                const response = await updateStatusPayment(orderId, statusEnum);
+                
+                if (response?.paymentStatus === "PAID") {
+                    dispatch(clearCart());
+                    setOrder(response);
+                }
+                console.log("Payment successful:", response);
+            } else {
+                setPaymentStatus(false);
+                statusEnum = "CANCELLED";
+                
+                // For failed payments, we still need to fetch order details to display
+                // but we won't update its status to maintain data integrity
+                console.log("Payment failed with status:", status);
+                
+                // Instead of updating the order, we might want to cancel it or mark it as failed
+                // This depends on your business logic
+                const response = await updateStatusPayment(orderId, statusEnum);
+                setOrder(response);
+            }
+            
+            // Clear the pending order ID from localStorage
+            localStorage.removeItem('pendingOrderId');
+        } catch (error) {
+            console.error("Error processing payment result:", error);
             setPaymentStatus(false);
-            statusEnum = "CANCELLED";
         }
-        const response = await updateStatusOrder(orderId, statusEnum);
-        if (response?.orderStatus == "PAID") {
-            dispatch(clearCart());
-        }
-        setOrder(response);
-        console.log(response);
     }
 
     useEffect(() => {
-        changeStatus();
-    }, []);
+        if (orderId) {
+            changeStatus();
+        }
+    }, [orderId]);
 
     const failedMessage = [
         "Không đủ tiền trong tài khoản",
@@ -69,8 +92,7 @@ const PaymentResult = () => {
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
                 <div
-                    className={`p-8 ${paymentStatus ? "bg-green-50" : "bg-red-50"
-                        }`}
+                    className={`p-8 ${paymentStatus ? "bg-green-50" : "bg-red-50"}`}
                 >
                     {paymentStatus ? (
                         <div className="text-center">
@@ -86,7 +108,7 @@ const PaymentResult = () => {
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-600">Tổng tiền:</span>
                                     <span className="font-semibold">
-                                        {formatCurrency(order?.totalPrice.toFixed(2))}
+                                        {order?.totalPrice ? formatCurrency(order.totalPrice.toFixed(2)) : "N/A"}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
@@ -136,7 +158,7 @@ const PaymentResult = () => {
                     </button>
                     <button
                         className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                        onClick={() => (navigate("/user/order-history"))}
+                        onClick={() => (navigate("/user/manage-order"))}
                     >
                         <FaHistory className="mr-2" /> Xem lịch sử đơn hàng
                     </button>
