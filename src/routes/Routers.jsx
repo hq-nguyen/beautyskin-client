@@ -52,6 +52,7 @@ import Combination from "../pages/Landing/Combination";
 import Sensitive from "../pages/Landing/Sensitive";
 import CODPage from "../pages/CheckoutConfirm/CODConfirm";
 import PaymentResult from "../pages/CheckoutConfirm/PaymentResult";
+import ChangePassword from "../pages/ChangePassword";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -164,6 +165,10 @@ const Routers = () => {
         {
           path: "promotion",
           element: <Promotion />,
+        }, 
+        {
+          path: "change-password",
+          element: <ChangePassword />,
         }
 
       ],

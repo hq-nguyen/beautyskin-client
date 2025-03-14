@@ -22,31 +22,35 @@ const ChangePasswordForm = () => {
   });
 
   const [status, setStatus] = useState({
-    loading: false, 
+    loading: false,
     error: '',
-    success:''
+    success: ''
   });
 
-  const validatePasswords = () => {
-    let isValid = true;
-    const newErrors = {
-      newPassword: '',
-      confirmPassword: ''
-    };
+  const validatePassword = (password) => {
+    return (
+      password.length >= 8 &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /[0-9]/.test(password) &&
+      /[^A-Za-z0-9]/.test(password)
+    );
+  };
 
-    if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp với mật khẩu mới';
-      isValid = false;
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!validatePassword(formData.newPassword)) {
+      newErrors.newPassword =
+        "Mật khẩu phải có ít nhất 8 ký tự và chứa chữ hoa, chữ thường, số và ký tự đặc biệt";
     }
 
-    // Kiểm tra mật khẩu mới không được trùng với mật khẩu cũ
-    if (formData.newPassword === formData.oldPassword && formData.newPassword !== '') {
-      newErrors.newPassword = 'Mật khẩu mới không được trùng với mật khẩu cũ';
-      isValid = false;
+    if (formData.newPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
     }
 
     setErrors(newErrors);
-    return isValid;
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
@@ -67,7 +71,9 @@ const ChangePasswordForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (validatePasswords()) {
+    const isValid = validateForm();
+    
+    if (isValid) {
       setStatus({
         loading: true,
         error: '',
@@ -82,8 +88,6 @@ const ChangePasswordForm = () => {
           confirmPassword: formData.confirmPassword
         });
 
-        const data = response.data;
-        
         setStatus({
           loading: false,
           error: '',
