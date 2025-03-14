@@ -1,164 +1,213 @@
-import { useState } from 'react';
-import { Link, useNavigate } from "react-router-dom";
+/* eslint-disable no-unused-vars */
+import React, { useState } from 'react';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import api from '../../config/axios';
-import { toast } from 'react-toastify';
 
-const ForgotPassword = () => {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [emailSent, setEmailSent] = useState(false);
-  const navigate = useNavigate();
+const ChangePasswordForm = () => {
+  const [formData, setFormData] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
 
-  const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
+  const [showPassword, setShowPassword] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false
+  });
 
-  const handleSendResetLink = async (e) => {
-    e && e.preventDefault();
-    setError("");
+  const [errors, setErrors] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
 
-    if (!email || !validateEmail(email)) {
-      setError("Vui lòng nhập email hợp lệ");
-      return;
+  const [status, setStatus] = useState({
+    loading: false,
+    error: '',
+    success: ''
+  });
+
+  const validatePasswords = () => {
+    let isValid = true;
+    const newErrors = {
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    };
+
+    // Check if old password is empty
+    if (!formData.oldPassword.trim()) {
+      newErrors.oldPassword = 'Vui lòng nhập mật khẩu cũ';
+      isValid = false;
     }
 
-    setLoading(true);
+    // Password requirements
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    
+    if (!formData.newPassword) {
+      newErrors.newPassword = 'Vui lòng nhập mật khẩu mới';
+      isValid = false;
+    } else if (!passwordRegex.test(formData.newPassword)) {
+      newErrors.newPassword = 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ cái in hoa, chữ cái thường, số và ký tự đặc biệt';
+      isValid = false;
+    } else if (formData.newPassword === formData.oldPassword) {
+      newErrors.newPassword = 'Mật khẩu mới không được trùng với mật khẩu cũ';
+      isValid = false;
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Vui lòng nhập lại mật khẩu mới';
+      isValid = false;
+    } else if (formData.newPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp với mật khẩu mới';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // Real-time validation
+    const newErrors = { ...errors };
+    if (name === 'oldPassword' && value && errors.oldPassword) {
+      newErrors.oldPassword = '';
+    }
+    if (name === 'newPassword' && value && errors.newPassword) {
+      newErrors.newPassword = '';
+    }
+    if (name === 'confirmPassword' && value && errors.confirmPassword) {
+      newErrors.confirmPassword = '';
+    }
+    setErrors(newErrors);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const isValid = validatePasswords();
+    if (!isValid) return;
+
+    setStatus({
+      loading: true,
+      error: '',
+      success: ''
+    });
+
     try {
-      const response = await api.post(`user/forgot-password?email=${encodeURIComponent(email)}`);
-      setEmailSent(true);
-      toast.success("Link đặt lại mật khẩu đã được gửi đến email của bạn");
+      const userId = localStorage.getItem('id');
+      const response = await api.put(`user/changePassword/${userId}`, {
+        oldPassword: formData.oldPassword,
+        newPassword: formData.newPassword,
+        confirmPassword: formData.confirmPassword
+      });
+
+      setStatus({
+        loading: false,
+        error: '',
+        success: 'Thay đổi mật khẩu thành công'
+      });
+
+      setFormData({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setErrors({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
     } catch (error) {
-      console.error("Lỗi khi gửi yêu cầu đặt lại mật khẩu:", error);
-      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại sau.";
-      toast.error(errorMessage);
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+      setStatus({
+        loading: false,
+        error: error.response?.data?.message || 'Có lỗi xảy ra khi đổi mật khẩu',
+        success: ''
+      });
     }
   };
 
-  const handleResendEmail = async () => {
-    await handleSendResetLink();
-  };
-
-  const handleTryAnotherMethod = () => {
-    setEmailSent(false);
-    setEmail("");
-    setError("");
+  const togglePasswordVisibility = (field) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-8">
-      <div className="max-w-xl w-full bg-card rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl text-primary font-bold text-foreground text-center mb-4">Quên mật khẩu</h2>
-        
-        {!emailSent ? (
-          <>
-            <p className="text-sm text-gray-600 text-center mb-5">
-              Vui lòng nhập email để nhận link đặt lại mật khẩu
-            </p>
+    <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px]">
+      <h1 className="text-2xl font-medium mb-6">Đổi mật khẩu</h1>
+      
+      {status.success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {status.success}
+        </div>
+      )}
+      
+      {status.error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {status.error}
+        </div>
+      )}
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Mật khẩu cũ
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword.oldPassword ? "text" : "password"}
+              name="oldPassword"
+              value={formData.oldPassword}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                errors.oldPassword ? 'border-red-500' : 'border-gray-300'
+              }`}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => togglePasswordVisibility('oldPassword')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+            >
+              {showPassword.oldPassword ? (
+                <EyeOffIcon className="h-4 w-4 text-gray-500" />
+              ) : (
+                <EyeIcon className="h-4 w-4 text-gray-500" />
+              )}
+            </button>
+          </div>
+          {errors.oldPassword && (
+            <p className="text-red-500 text-sm">{errors.oldPassword}</p>
+          )}
+        </div>
 
-            <form onSubmit={handleSendResetLink} className="space-y-6">
-              <div>
-                <label htmlFor="email" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full px-4 py-2 rounded-md border ${error ? "border-destructive" : "border-input"} focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring`}
-                  placeholder="Nhập địa chỉ email"
-                  aria-invalid={error ? "true" : "false"}
-                />
-                {error && (
-                  <p className="mt-1 text-sm text-destructive">{error}</p>
-                )}
-              </div>
+        {/* Rest of your form remains the same, just add error styling for oldPassword */}
+        {/* ... newPassword field ... */}
+        {/* ... confirmPassword field ... */}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-primary text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {loading ? (
-                  <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                ) : (
-                  "Gửi link đặt lại mật khẩu"
-                )}
-              </button>
-            </form>
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-gray-600 text-center mb-5">
-              Link đặt lại mật khẩu đã được gửi đến {email}. Vui lòng kiểm tra hộp thư của bạn (bao gồm cả thư mục spam).
-            </p>
-            <div className="space-y-4">
-              <button
-                type="button"
-                onClick={handleResendEmail}
-                disabled={loading}
-                className="w-full bg-primary text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {loading ? (
-                  <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                ) : (
-                  "Gửi lại email"
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={handleTryAnotherMethod}
-                className="w-full border border-gray-300 bg-gray-100 text-gray-800 py-2 px-4 rounded-md transition-colors hover:bg-gray-200"
-              >
-                Thử cách khác
-              </button>
-            </div>
-          </>
-        )}
-
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          Quay lại trang{" "}
-          <Link to="/login" className="text-primary hover:underline">
-            Đăng nhập
-          </Link>
-        </p>
-      </div>
+        <button
+          type="submit"
+          disabled={status.loading}
+          className={`w-full bg-[#d90429] text-white py-2 px-4 rounded-md transition-colors duration-200 ${
+            status.loading 
+              ? 'opacity-50 cursor-not-allowed' 
+              : 'hover:bg-opacity-80'
+          }`}
+        >
+          {status.loading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
+        </button>
+      </form>
     </div>
   );
 };
 
-export default ForgotPassword;
+export default ChangePasswordForm;
