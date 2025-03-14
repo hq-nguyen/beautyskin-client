@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify';
+import { message } from 'antd';
 import { assets } from '../../assets/frontend_assets/assets';
 import { IoIosLogIn } from "react-icons/io";
 import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
@@ -23,7 +24,8 @@ const Navbar = () => {
     dispatch(clearCart());
     localStorage.removeItem('token');
     localStorage.removeItem('id');
-    toast.success('Đăng xuất thành công');
+    message.success("Đã đăng xuất");
+    // toast.success('Đăng xuất thành công');
     navigate('/');
   };
 
@@ -141,6 +143,11 @@ const Navbar = () => {
                       <div>
                         <Link to='/user' className='block cursor-pointer hover:text-white hover:bg-rose-600 px-2 py-1 rounded-sm duration-300'>
                           Thông tin tài khoản
+                        </Link>
+                      </div>
+                      <div>
+                        <Link to='/user/manage-order' className='block cursor-pointer hover:text-white hover:bg-rose-600 px-2 py-1 rounded-sm duration-300'>
+                          Xem đơn hàng
                         </Link>
                       </div>
                       <div>
