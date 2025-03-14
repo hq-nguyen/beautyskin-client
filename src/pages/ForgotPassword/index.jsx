@@ -7,79 +7,45 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleSendOTP = async (e) => {
-    e.preventDefault();
+  const handleSendResetLink = async (e) => {
+    e && e.preventDefault();
     setError("");
 
-    if (!validateEmail(email)) {
-      setError("Vui lòng nhập địa chỉ email hợp lệ");
+    if (!email || !validateEmail(email)) {
+      setError("Vui lòng nhập email hợp lệ");
       return;
     }
 
     setLoading(true);
     try {
-      const response = await api.post('user/forgetPassword', { email });
-      console.log(response);
-      toast.success("Mã OTP đã được gửi đến email của bạn");
-      setOtpSent(true);
+      const response = await api.post(`user/forgot-password?email=${encodeURIComponent(email)}`);
+      setEmailSent(true);
+      toast.success("Link đặt lại mật khẩu đã được gửi đến email của bạn");
     } catch (error) {
+      console.error("Lỗi khi gửi yêu cầu đặt lại mật khẩu:", error);
       const errorMessage = error.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại sau.";
       toast.error(errorMessage);
-      if (error.response?.status === 404) {
-        setError("Email không tồn tại trong hệ thống");
-      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResetPassword = async (e) => {
-    e.preventDefault();
+  const handleResendEmail = async () => {
+    await handleSendResetLink();
+  };
+
+  const handleTryAnotherMethod = () => {
+    setEmailSent(false);
+    setEmail("");
     setError("");
-
-    if (!otp || otp.length < 4) {
-      setError("Vui lòng nhập mã OTP hợp lệ");
-      return;
-    }
-
-    if (!newPassword || newPassword.length < 6) {
-      setError("Mật khẩu mới phải có ít nhất 6 ký tự");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setError("Xác nhận mật khẩu không khớp");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await api.post('forgot-password/reset', { 
-        email, 
-        otp, 
-        newPassword 
-      });
-      toast.success("Mật khẩu đã được đặt lại thành công");
-      navigate('/login');
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại sau.";
-      toast.error(errorMessage);
-      if (error.response?.status === 400) {
-        setError("Mã OTP không hợp lệ hoặc đã hết hạn");
-      }
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
@@ -87,13 +53,13 @@ const ForgotPassword = () => {
       <div className="max-w-xl w-full bg-card rounded-lg shadow-lg p-8">
         <h2 className="text-2xl text-primary font-bold text-foreground text-center mb-4">Quên mật khẩu</h2>
         
-        {!otpSent ? (
+        {!emailSent ? (
           <>
             <p className="text-sm text-gray-600 text-center mb-5">
-              Vui lòng nhập email để nhận mã OTP đặt lại mật khẩu
+              Vui lòng nhập email để nhận link đặt lại mật khẩu
             </p>
 
-            <form onSubmit={handleSendOTP} className="space-y-6">
+            <form onSubmit={handleSendResetLink} className="space-y-6">
               <div>
                 <label htmlFor="email" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
                   Email
@@ -135,7 +101,7 @@ const ForgotPassword = () => {
                     />
                   </svg>
                 ) : (
-                  "Gửi mã OTP"
+                  "Gửi link đặt lại mật khẩu"
                 )}
               </button>
             </form>
@@ -143,92 +109,44 @@ const ForgotPassword = () => {
         ) : (
           <>
             <p className="text-sm text-gray-600 text-center mb-5">
-              Mã OTP đã được gửi đến {email}. Vui lòng kiểm tra hộp thư của bạn.
+              Link đặt lại mật khẩu đã được gửi đến {email}. Vui lòng kiểm tra hộp thư của bạn (bao gồm cả thư mục spam).
             </p>
-
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <div>
-                <label htmlFor="otp" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
-                  Mã OTP
-                </label>
-                <input
-                  type="text"
-                  id="otp"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  className="w-full px-4 py-2 rounded-md border border-input focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring"
-                  placeholder="Nhập mã OTP"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="newPassword" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
-                  Mật khẩu mới
-                </label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-2 rounded-md border border-input focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring"
-                  placeholder="Nhập mật khẩu mới"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="confirmPassword" className="block text-gray-600 text-sm font-medium text-foreground mb-1">
-                  Xác nhận mật khẩu
-                </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2 rounded-md border border-input focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-ring"
-                  placeholder="Xác nhận mật khẩu mới"
-                />
-              </div>
-
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
-              )}
-
-              <div className="flex space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setOtpSent(false)}
-                  className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-md transition-colors"
-                >
-                  Quay lại
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-primary text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  {loading ? (
-                    <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                        fill="none"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                  ) : (
-                    "Đặt lại mật khẩu"
-                  )}
-                </button>
-              </div>
-            </form>
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={handleResendEmail}
+                disabled={loading}
+                className="w-full bg-primary text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {loading ? (
+                  <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                ) : (
+                  "Gửi lại email"
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={handleTryAnotherMethod}
+                className="w-full border border-gray-300 bg-gray-100 text-gray-800 py-2 px-4 rounded-md transition-colors hover:bg-gray-200"
+              >
+                Thử cách khác
+              </button>
+            </div>
           </>
         )}
 
