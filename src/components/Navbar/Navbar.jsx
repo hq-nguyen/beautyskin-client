@@ -10,6 +10,7 @@ import { CiUser } from "react-icons/ci";
 import api from '../../apis/product';
 import { logout } from '../../redux/features/useSlice';
 import { clearCart } from '../../redux/features/cartSlice';
+import { formatCurrency } from '../../utils/format';
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
@@ -48,7 +49,7 @@ const Navbar = () => {
     } else {
       setSearchResult([])
     }
-  } 
+  }
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -58,7 +59,7 @@ const Navbar = () => {
       const response = await api.get(`/product/getByName?name=${searchQuery}`);
       // Lọc sản phẩm có id hợp lệ
       const filteredProducts = response.data.filter(product => product.id && !isNaN(product.id));
-      
+
       localStorage.setItem('searchQuery', searchQuery);
       localStorage.setItem('filteredProducts', JSON.stringify(filteredProducts));
 
@@ -141,34 +142,34 @@ const Navbar = () => {
             </div>
           </form>
           {searchResult.length > 0 && (
-  <div className="absolute left-1/2 transform -translate-x-1/2 z-10 bg-white border border-gray-300 rounded-lg mt-2 max-h-108 overflow-y-auto shadow-lg">
-    {searchResult.map((product) => (
-      <Link
-        key={product.id}
-        to={`/product/${product.id}`}
-        className="flex items-center p-3 hover:bg-gray-100"
-        onClick={() => setSearchResult([])}
-      >
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-16 h-16 object-cover rounded mr-3"
-        />
-        <div>
-          <p className="text-gray-700">{product.name}</p>
-          <p className="text-orange-500 font-bold">
-            {product.price.toLocaleString('vi-VN')} đ
-          </p>
-        </div>
-      </Link>
-    ))}
-  </div>
-)}
+            <div className="absolute left-1/2 transform -translate-x-1/2 z-10 bg-white border border-gray-300 rounded-lg mt-2 max-h-108 overflow-y-auto shadow-lg">
+              {searchResult.map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/product/${product.id}`}
+                  className="flex items-center p-3 hover:bg-gray-100"
+                  onClick={() => setSearchResult([])}
+                >
+                  <img
+                    src={product?.images[0]?.url || assets.da_dau}
+                    alt={product.name}
+                    className="w-12 h-12 object-cover rounded mr-3"
+                  />
+                  <div>
+                    <p className="text-gray-700 text-sm">{product.name}</p>
+                    <p className="text-orange-500 font-bold text-sm">
+                      {formatCurrency(product.price)}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className='flex items-center gap-6'>
-          <div 
-            onClick={handleWishlistClick} 
+          <div
+            onClick={handleWishlistClick}
             className='cursor-pointer relative group'
           >
             <img src={assets.wishlist_icon} className='w-5' alt="Danh sách yêu thích" />
