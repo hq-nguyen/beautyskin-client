@@ -83,9 +83,9 @@ const ManageCustomer = () => {
             title: 'Trạng thái',
             dataIndex: 'enabled',
             key: 'enabled',
-            render: (accountNonLocked) => (
-                <Tag color={accountNonLocked === true ? 'green' : 'red'}>
-                    {accountNonLocked ? 'ACTIVE' : 'INACTIVE'}
+            render: (active) => (
+                <Tag color={active === true ? 'green' : 'red'}>
+                    {active ? 'ACTIVE' : 'INACTIVE'}
                 </Tag>
             ),
         },
