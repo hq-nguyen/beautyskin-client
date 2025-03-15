@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Heart, HeartOff, Trash2, Star, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { HeartOff, Trash2, X, CheckCircle } from 'lucide-react';
 import api from '../../config/axios';
+import { assets } from '../../assets/frontend_assets/assets';
+import { addToCart } from '../../redux/features/cartSlice';
+import { useDispatch } from 'react-redux';
+
 
 const FavoriteProducts = () => {
   const [favoriteProducts, setFavoriteProducts] = useState([]);
@@ -8,6 +12,8 @@ const FavoriteProducts = () => {
   const [error, setError] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const dispatch = useDispatch();
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     fetchFavoriteProducts();
@@ -22,8 +28,8 @@ const FavoriteProducts = () => {
       if (response.status !== 200) {
         throw new Error('Không thể lấy danh sách sản phẩm yêu thích');
       }
-        const sortedProducts = response.data.sort((a, b) => {
-        return b.id - a.id;
+      const sortedProducts = response.data.sort((a, b) => {
+        return new Date(b.addedDate || Date.now()) - new Date(a.addedDate || Date.now());
       });
 
       setFavoriteProducts(sortedProducts);
@@ -36,6 +42,12 @@ const FavoriteProducts = () => {
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  };
+
+  const handleAddToCart = () => {
+    if (favoriteProducts) {
+      dispatch(addToCart({ ...favoriteProducts, quantity }));
+    }
   };
 
   const confirmDelete = (product) => {
@@ -67,58 +79,6 @@ const FavoriteProducts = () => {
     setProductToDelete(null);
   };
 
-  const toggleFavorite = async (id) => {
-    try {
-      const product = favoriteProducts.find(p => p.id === id);
-      const newFavoriteStatus = !product.isFavorite;
-
-      const response = await fetch(`/api/favorites/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ isFavorite: newFavoriteStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Không thể cập nhật trạng thái yêu thích');
-      }
-
-      // If toggling to favorite (newFavoriteStatus is true), move it to the top
-      if (newFavoriteStatus) {
-        const updatedProducts = [
-          { ...product, isFavorite: newFavoriteStatus },
-          ...favoriteProducts.filter(p => p.id !== id),
-        ];
-        setFavoriteProducts(updatedProducts);
-      } else {
-        // If removing from favorites, just update the status
-        setFavoriteProducts(favoriteProducts.map(product =>
-          product.id === id ? { ...product, isFavorite: newFavoriteStatus } : product
-        ));
-      }
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating || 0);
-    const hasHalfStar = rating % 1 >= 0.5;
-
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push(<Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />);
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push(<Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />);
-      } else {
-        stars.push(<Star key={i} className="w-4 h-4 text-gray-300" />);
-      }
-    }
-    return stars;
-  };
-
   const ConfirmModal = () => {
     if (!showConfirmModal || !productToDelete) return null;
 
@@ -136,7 +96,7 @@ const FavoriteProducts = () => {
             <div className="flex items-start space-x-4">
               <div className="w-16 h-16 flex-shrink-0">
                 <img
-                  src={productToDelete.image}
+                  src={productToDelete.images[0].url || assets.da_kho}
                   alt={productToDelete.name}
                   className="w-full h-full object-cover rounded"
                 />
@@ -199,63 +159,82 @@ const FavoriteProducts = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold text-center text-primary mb-8">Danh Sách Sản Phẩm Yêu Thích</h1>
-        {favoriteProducts.length === 0 ? (
-          <div className="text-center py-16">
-            <HeartOff className="w-16 h-16 mx-auto text-gray-400" />
-            <p className="text-xl text-gray-500 mt-4">Bạn chưa có sản phẩm yêu thích nào</p>
-            <button className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-              Khám phá sản phẩm
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {favoriteProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-              >
-                <div className="relative">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-48 object-cover hover:text-rose-600"
-                  />
-                  <button
-                    onClick={() => toggleFavorite(product.id)}
-                    className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
-                  >
-                    {product.isFavorite ? (
-                      <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-                    ) : (
-                      <Heart className="w-5 h-5 text-gray-400" />
-                    )}
-                  </button>
-                </div>
+    <div className="rounded-lg p-4">
+      <h1 className="text-xl font-bold p-4 border-b">Danh sách yêu thích <span className='font-normal'>({favoriteProducts.length} sản phẩm)</span></h1>
 
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold mb-2 hover:text-rose-600">{product.name}</h3>
-                  <div className="flex items-center mb-2">
-                    {renderStars(product.rating)}
-                    <span className="ml-2 text-sm text-gray-600">{product.rating?.toFixed(1)}</span>
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <span className="text-lg font-bold hover:text-rose-600">{formatPrice(product.price)}</span>
-                    <button
-                      onClick={() => confirmDelete(product)}
-                      className="p-2 text-gray-500 hover:text-red-500 transition-colors duration-200"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {favoriteProducts.length === 0 ? (
+        <div className="text-center py-16">
+          <HeartOff className="w-16 h-16 mx-auto text-gray-400" />
+          <p className="text-xl text-gray-500 mt-4">Bạn chưa có sản phẩm yêu thích nào</p>
+          <button className="mt-4 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+            Khám phá sản phẩm
+          </button>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="py-3 px-2 text-left text-sm font-medium text-gray-600">Sản phẩm</th>
+                <th className="py-3 px-4 text-left text-sm font-medium text-gray-600">Trạng thái</th>
+                <th className="py-3 px-4 text-right text-sm font-medium text-gray-600">Đơn giá</th>
+                <th className="py-3 px-4 text-center text-sm font-medium text-gray-600">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {favoriteProducts.map((product) => (
+                <tr key={product.id} className="hover:bg-gray-50">
+                  <td className="py-4 px-2 w-5/12">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0 w-12 h-12">
+                        <img
+                          src={product.images[0].url || assets.da_kho}
+                          alt={product.name}
+                          className="w-full h-full object-cover rounded"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-700 line-clamp-2">{product.name}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center">
+                      <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
+                      <span className="text-sm text-green-600">Còn hàng</span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-right">
+                    <div>
+                      <p className="text-sm font-bold text-orange-600">{formatPrice(product.salePrice || product.price)}</p>
+                      {product.salePrice && (
+                        <p className="text-sm text-gray-500 line-through">{formatPrice(product.price)}</p>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <div className="flex flex-col space-y-1">
+                      <button
+                        onClick={() => confirmDelete(product)}
+                        className="text-gray-500 hover:text-red-500 transition-colors"
+                      >
+                        xóa
+                      </button>
+                      <button
+                        className="py-2 bg-rose-500 text-white text-sm rounded-md hover:bg-rose-600 transition-colors"
+                        onClick={handleAddToCart}
+                      >
+                        Thêm giỏ hàng
+                      </button>
+
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <ConfirmModal />
     </div>

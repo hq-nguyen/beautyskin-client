@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { faUser, faIdCard, faLocationDot, faBox, faStar, faLock, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faIdCard, faLocationDot, faBox, faStar, faLock, faSignOutAlt, faHeart } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from 'react';
 import api from '../../config/axios';
@@ -19,8 +19,10 @@ function AccountSidebar() {
         { icon: faUser, text: 'Thông tin cá nhân', route: '/user/info' },
         { icon: faLocationDot, text: 'Địa chỉ nhận hàng', route: '/user/address' },
         { icon: faBox, text: 'Quản lý đơn hàng', route: '/user/manage-order' },
+        { icon: faHeart, text: 'Sản phẩm yêu thích', route: '/user/wishlist' },
         { icon: faStar, text: 'Tích điểm', route: '/user/promotion' },
         { icon: faLock, text: 'Đổi mật khẩu', route: '/user/change-password' }
+        
     ];
 
     const currentItem = menuItems.find(item => location.pathname === item.route) || menuItems[0];

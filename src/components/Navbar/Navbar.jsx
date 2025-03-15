@@ -6,7 +6,7 @@ import { message } from 'antd';
 import { assets } from '../../assets/frontend_assets/assets';
 import { IoIosLogIn } from "react-icons/io";
 import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
-import { CiUser } from "react-icons/ci";
+import { CiUser, CiHeart } from "react-icons/ci";
 import api from '../../apis/product';
 import { logout } from '../../redux/features/useSlice';
 import { clearCart } from '../../redux/features/cartSlice';
@@ -20,6 +20,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const totalQuantity = useSelector((state) => state.cart?.totalQuantity || 0);
+  
 
   const handleLogout = () => {
     dispatch(logout());
@@ -167,12 +168,12 @@ const Navbar = () => {
           )}
         </div>
 
-        <div className='flex items-center gap-6'>
+        <div className='flex items-center gap-4'>
           <div
             onClick={handleWishlistClick}
             className='cursor-pointer relative group'
           >
-            <img src={assets.wishlist_icon} className='w-5' alt="Danh sách yêu thích" />
+            <CiHeart className='w-[1.6rem] h-[2rem]' />
             <div className="absolute opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded py-1 px-2 -left-8 -bottom-8 transition-opacity duration-300 whitespace-nowrap">
               Danh sách yêu thích
             </div>
