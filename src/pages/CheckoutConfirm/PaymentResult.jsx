@@ -36,8 +36,6 @@ const PaymentResult = () => {
             if (status === "00") {
                 setPaymentStatus(true);
                 statusEnum = "PAID";
-                
-                // Only update payment status when payment is successful
                 const response = await updateStatusPayment(orderId, statusEnum);
                 
                 if (response?.paymentStatus === "PAID") {
@@ -48,19 +46,10 @@ const PaymentResult = () => {
             } else {
                 setPaymentStatus(false);
                 statusEnum = "CANCELLED";
-                
-                // For failed payments, we still need to fetch order details to display
-                // but we won't update its status to maintain data integrity
                 console.log("Payment failed with status:", status);
-                
-                // Instead of updating the order, we might want to cancel it or mark it as failed
-                // This depends on your business logic
                 const response = await updateStatusPayment(orderId, statusEnum);
                 setOrder(response);
             }
-            
-            // Clear the pending order ID from localStorage
-            localStorage.removeItem('pendingOrderId');
         } catch (error) {
             console.error("Error processing payment result:", error);
             setPaymentStatus(false);

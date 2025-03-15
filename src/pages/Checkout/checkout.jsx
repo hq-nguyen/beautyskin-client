@@ -142,23 +142,20 @@ const CheckoutPage = () => {
 
     try {
       if (paymentMethod === 'cod') {
-        // For COD, create the order immediately and clear the cart
         const payload = await createOrder(orderData);
         console.log("COD order created:", payload);
         dispatch(clearCart());
         navigate('/checkout/confirmCOD');
       } else {
-        // For direct payment (card), redirect to payment gateway
-        // The order will be created in PaymentResult component only if payment is successful
         const payload = await createOrder(orderData);
 
-        // Store order ID in localStorage to retrieve it later in PaymentResult
-        if (payload && typeof payload === 'string') {
-          localStorage.setItem('pendingOrderId', payload.split('orderId=')[1]?.split('&')[0] || '');
-        }
+        // if (payload && typeof payload === 'string') {
+        //   localStorage.setItem('pendingOrderId', payload.split('orderId=')[1]?.split('&')[0] || '');
+        // }
 
         console.log("Payment redirect URL:", payload);
         window.location.href = payload;
+        dispatch(clearCart());
       }
     } catch (error) {
       console.error("Error creating order:", error);

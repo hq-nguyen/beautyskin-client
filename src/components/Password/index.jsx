@@ -117,8 +117,8 @@ const ChangePasswordForm = () => {
   };
 
   return (
-    <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px]">
-      <h1 className="text-2xl font-medium mb-6">Đổi mật khẩu</h1>
+    <div className="flex-1 p-5">
+      <h1 className="text-xl font-bold mb-6">Đổi mật khẩu</h1>
       
       {status.success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
