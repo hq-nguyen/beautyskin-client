@@ -7,8 +7,7 @@ import { AiOutlineHeart } from 'react-icons/ai';
 import { MdCompare } from 'react-icons/md';
 import StarRating from '../utils/StarRating';
 import { assets } from '../../assets/frontend_assets/assets';
-import api, { fetchProductById } from '../../apis/product';
-import { toast } from 'react-toastify';
+import { fetchProductById } from '../../apis/product';
 import { addToCartWithQuantity } from '../../redux/features/cartSlice';
 
 const ProductDetail = () => {
@@ -21,9 +20,6 @@ const ProductDetail = () => {
     const [selectedTab, setSelectedTab] = useState('description');
     const [quantity, setQuantity] = useState(1);
     const [showPopup, setShowPopup] = useState(false);
-    const [isFavoriting, setIsFavoriting] = useState(false);
-    const [isInFavorites, setIsInFavorites] = useState(false);
-    const [favoriteMessage, setFavoriteMessage] = useState(null);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -60,34 +56,6 @@ const ProductDetail = () => {
             setCurrentImageIndex(
                 prev => prev === 0 ? product.images.length - 1 : prev - 1
             );
-        }
-    };
-
-    const handleAddFavorites = async () => {
-        try {
-            setIsFavoriting(true);
-            setError(null);
-            setFavoriteMessage(null);
-            
-            const response = await api.post(`favorites/addToFavorites/${id}`);
-            
-            if (response.status !== 200 && response.status !== 201) {
-                throw new Error('Không thể thêm vào danh sách yêu thích');
-            }
-
-            setIsInFavorites(true);
-            setFavoriteMessage('Đã thêm vào danh sách yêu thích thành công!');
-            setTimeout(() => setFavoriteMessage(null), 2000);
-            
-            console.log('Đã thêm vào danh sách yêu thích:', response.data);
-            
-        } catch (error) {   
-            // setFavoriteMessage('Lỗi khi thêm vào sản phẩm yêu thích');
-            toast.error('Sản phẩm đã tồn tại trong danh sách yêu thích')
-            setTimeout(() => setFavoriteMessage(null), 2000);
-            console.error('Lỗi khi thêm vào sản phẩm yêu thích', error);
-        } finally {
-            setIsFavoriting(false);
         }
     };
 
@@ -320,15 +288,7 @@ const ProductDetail = () => {
                             >
                                 Thêm vào giỏ hàng
                             </button>
-                            <button
-                                onClick={handleAddFavorites}
-                                disabled={isFavoriting}
-                                className={`p-3 border rounded-md transition-all ${isInFavorites
-                                    ? 'bg-rose-500 text-white'
-                                    : 'hover:bg-rose-500 hover:text-white'
-                                } ${isFavoriting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                title={isInFavorites ? "Đã trong danh sách yêu thích" : "Thêm vào yêu thích"}
-                            >
+                            <button className="p-3 border rounded-md hover:bg-gray-50 hover:text-white hover:bg-rose-500 transition-all">
                                 <AiOutlineHeart size={24} />
                             </button>
                             <button
