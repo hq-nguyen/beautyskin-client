@@ -93,10 +93,6 @@ const Routers = () => {
           element: <TestSkinType />,
         },
         {
-          path: '/wishlist',
-          element: <FavoriteProducts />,
-        },
-        {
           path: '/test-skin/oily',
           element: <Oily />
         },
@@ -169,6 +165,10 @@ const Routers = () => {
         {
           path: "manage-order",
           element: <OrderHistory />,
+        },
+        {
+          path: "wishlist",
+          element: <FavoriteProducts />,
         },
         {
           path: "promotion",
