@@ -5,6 +5,7 @@ import { fetchOrderHistory } from '../../apis/order';
 import { FaSearch, FaSpinner } from 'react-icons/fa';
 import { assets } from '../../assets/frontend_assets/assets';
 import { Link } from 'react-router-dom';
+import FeedbackModal from './FeedbackModel';
 
 const OrderHistory = () => {
   const [loading, setLoading] = useState(true);
@@ -15,6 +16,11 @@ const OrderHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [total, setTotal] = useState(0);
+
+  // Feedback modal state
+  const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [reviewedProducts, setReviewedProducts] = useState(new Set());
 
   const statusTabs = [
     { key: 'all', label: 'Tất cả' },
@@ -75,7 +81,7 @@ const OrderHistory = () => {
       case "SHIPPED":
         return "Đang giao hàng";
       case "DELIVERED":
-        return "Đã giao hàng";
+        return "Hoàn thành";
       case "CANCELLED":
         return "Đã hủy";
       case "RETURNED":
@@ -88,12 +94,12 @@ const OrderHistory = () => {
   const filterOrdersByTab = (orders, tab) => {
     switch (tab) {
       case 'wait-payment':
-        return orders.filter(order => 
-          (order.paymentStatus == 'PENDING' || order.paymentStatus === null || order.paymentStatus == "CANCELLED") && 
+        return orders.filter(order =>
+          (order.paymentStatus == 'PENDING' || order.paymentStatus === null || order.paymentStatus == "CANCELLED") &&
           order.status === 'PENDING'
         );
       case 'wait-product':
-        return orders.filter(order => order.status === 'IN_PROGRESS');
+        return orders.filter(order => (order.status === 'IN_PROGRESS' || order.status === 'PENDING'));
       case 'shipping':
         return orders.filter(order => order.status === 'SHIPPED');
       case 'delivered':
@@ -173,6 +179,24 @@ const OrderHistory = () => {
     setCurrentPage(1); // Reset to first page when changing tabs
   };
 
+  const openFeedbackModal = (product) => {
+    setSelectedProduct(product);
+    setFeedbackModalVisible(true);
+  };
+
+  const handleFeedbackClose = (submitted) => {
+    if (submitted && selectedProduct) {
+      // Mark this product as reviewed
+      setReviewedProducts(prev => {
+        const newSet = new Set(prev);
+        newSet.add(selectedProduct.id);
+        return newSet;
+      });
+    }
+    setFeedbackModalVisible(false);
+    setSelectedProduct(null);
+  };
+
   if (loading && displayedOrders.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -213,11 +237,10 @@ const OrderHistory = () => {
             {statusTabs.map((tab) => (
               <button
                 key={tab.key}
-                className={`px-3 py-2 text-sm font-medium mr-2 transition-colors duration-200 ${
-                  activeTab === tab.key
-                    ? 'text-rose-600 border-b-2 border-rose-600'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={`px-3 py-2 text-sm font-medium mr-2 transition-colors duration-200 ${activeTab === tab.key
+                  ? 'text-rose-600 border-b-2 border-rose-600'
+                  : 'text-gray-500 hover:text-gray-700'
+                  }`}
                 onClick={() => handleTabChange(tab.key)}
               >
                 {tab.label}
@@ -241,7 +264,7 @@ const OrderHistory = () => {
             {displayedOrders.map((order) => (
               <div
                 key={order.orderId}
-                className="border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200 overflow-hidden"
+                className="border border-gray-200 rounded-lg duration-200 overflow-hidden"
               >
                 <div className="p-4">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
@@ -277,7 +300,7 @@ const OrderHistory = () => {
                         </Link>
                         <div className="flex-1 min-w-0">
                           <Link to={`/product/${product.id}`}>
-                            <h4 className="text-xs hover:text-rose-600 font-medium text-gray-900 truncate">{product.name}</h4>
+                            <h4 className="text-sm hover:text-rose-600 font-medium text-gray-900 truncate">{product.name}</h4>
                           </Link>
                           <p className="text-xs text-gray-500">{product.category}</p>
                           <div className="mt-1 flex items-center justify-between">
@@ -288,6 +311,30 @@ const OrderHistory = () => {
                       </div>
                     ))}
                   </div>
+
+                  <hr className='my-2' />
+                  {order.status === 'DELIVERED' && (
+                    <div className="mt-3">
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        {order.products.map(product => (
+                          <div key={product.id}>
+                            {reviewedProducts.has(product.id) ? (
+                              <span className="inline-block px-3 py-2 text-xs text-green-700 bg-green-100 rounded-full">
+                                Đã đánh giá
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => openFeedbackModal(product)}
+                                className="px-3 py-2 text-sm font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700 transition-colors"
+                              >
+                                Đánh giá sản phẩm
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -308,8 +355,18 @@ const OrderHistory = () => {
             />
           </div>
         )}
+
       </div>
+      {feedbackModalVisible && (
+        <FeedbackModal
+          isVisible={feedbackModalVisible}
+          onClose={handleFeedbackClose}
+          orderId={selectedProduct?.orderId}
+          product={selectedProduct}
+        />
+      )}
     </div>
+
   );
 };
 
