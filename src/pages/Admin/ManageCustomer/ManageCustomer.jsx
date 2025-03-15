@@ -15,7 +15,9 @@ const ManageCustomer = () => {
             try {
                 const data = await fetchCustomer();
                 console.log(data); // Log the data to see its structure
-                setCustomers(data);
+                // Filter to only include users with the roleEnums "CUSTOMER"
+                const customerData = data.filter(user => user.roleEnums === "USER");
+                setCustomers(customerData);
             } catch (error) {
                 console.error("Error fetching customers:", error);
             } finally {
@@ -56,13 +58,14 @@ const ManageCustomer = () => {
 
     const columns = [
         {
-            title: 'ID',
+            title: 'STT',
             dataIndex: 'id',
             key: 'id',
+            render: (text, record, index) => index + 1
         },
         {
             title: 'Họ và tên',
-            dataIndex: 'fullName',
+            dataIndex: 'fullName',  
             key: 'fullName',
         },
         {
@@ -71,25 +74,27 @@ const ManageCustomer = () => {
             key: 'mail',
         },
         {
+            title: 'Số điện thoại',
+            dataIndex: 'phone',
+            key: 'phone',
+            render: (phone) => phone || 'Chưa cập nhật',
+        },
+        {
             title: 'Trạng thái',
             dataIndex: 'enabled',
             key: 'enabled',
-            render: (enabled) => (
-                <Tag color={enabled === true ? 'green' : 'red'}>
-                    {enabled ? 'ACTIVE' : 'INACTIVE'}
+            render: (accountNonLocked) => (
+                <Tag color={accountNonLocked === true ? 'green' : 'red'}>
+                    {accountNonLocked ? 'ACTIVE' : 'INACTIVE'}
                 </Tag>
             ),
         },
-        // {
-        //     title: 'Tổng đơn hàng',
-        //     dataIndex: 'totalOrder',
-        //     key: 'totalOrder',
-        // },
-        // {
-        //     title: 'Tổng chi tiêu',
-        //     dataIndex: 'totalSpent',
-        //     key: 'totalSpent',
-        // },
+        {
+            title: 'Tổng chi tiêu',
+            dataIndex: 'totalAmount',
+            key: 'totalAmount',
+            render: (amount) => amount ? `${amount.toLocaleString()} đ` : '0 đ',
+        },
         {
             title: 'Hành động',
             key: 'action',

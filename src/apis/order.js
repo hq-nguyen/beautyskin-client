@@ -38,3 +38,12 @@ export const fetchOrderHistory = async () => {
         message.error(error.response.data);
     }
 }
+
+export const fetchOrders = async () => {
+    try {
+        const payload = await api.get("order/getAll");
+        return payload.data;
+    } catch (error) {
+        message.error(error.response.data);
+    }
+}
