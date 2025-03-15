@@ -19,6 +19,15 @@ export const updateStatusOrder = async (id, status) => {
     }
 }
 
+export const updateStatusOrder2 = async (id, status) => {
+    try {
+        const payload = await api.patch(`order/updateStatusOrder/${id}?status=${status}&`);
+        return payload.data;
+    } catch (error) {
+        message.error(error.response.data);
+    }
+}
+
 export const updateStatusPayment = async (id, status) => {
     try {
         
