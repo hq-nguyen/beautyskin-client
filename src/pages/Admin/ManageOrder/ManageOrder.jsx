@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Button, Space, Table, Tag, message, Pagination, Input } from 'antd';
-// import { fetchOrder } from '../../../apis/orderMock';
+import { Button, Space, Table, Tag, message, Pagination, Dropdown, Menu, Modal } from 'antd';
 import dayjs from 'dayjs';
-import { MdOutlineDeleteOutline, MdOutlineRemoveRedEye } from 'react-icons/md';
 import { FaSearch, FaSpinner } from 'react-icons/fa';
-import { fetchOrders } from '../../../apis/order';
+import { fetchOrders, updateStatusOrder2 } from '../../../apis/order';
+import {
+    EditOutlined,
+    DeleteOutlined,
+    DownOutlined
+} from '@ant-design/icons';
 
 const ManageOrder = () => {
   const [loading, setLoading] = useState(true);
@@ -15,15 +18,21 @@ const ManageOrder = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
 
   const statusTabs = [
     { key: 'all', label: 'Tất cả' },
-    { key: 'new', label: 'Đơn mới' },
+    { key: 'pending', label: 'Đơn mới' },
     { key: 'processing', label: 'Đang xử lý' },
     { key: 'shipped', label: 'Đang giao hàng' },
-    { key: 'completed', label: 'Hoàn thành' },
+    { key: 'delivered', label: 'Hoàn thành' },
     { key: 'cancelled', label: 'Đã hủy' },
     { key: 'returned', label: 'Trả hàng/Hoàn tiền' },
+  ];
+  const statusOptions2 = [
+    { key: 'IN_PROGRESS', label: 'Xác nhận đơn' },
+    { key: 'SHIPPED', label: 'Giao hàng' },
+    { key: 'DELIVERED', label: 'Xác nhận hoàn thành' },
   ];
 
   useEffect(() => {
@@ -32,21 +41,21 @@ const ManageOrder = () => {
 
   useEffect(() => {
     applyFiltersAndPagination(orders, searchTerm, activeTab, currentPage, pageSize);
-  }, [searchTerm, activeTab, currentPage, pageSize]);
+  }, [searchTerm, activeTab, currentPage, pageSize, orders]);
 
   const getOrders = async () => {
     try {
       setLoading(true);
       const data = await fetchOrders();
-      
+
       // Sort orders by date (most recent first)
-      const sortedOrders = data.sort((a, b) => 
-        dayjs(b.date).valueOf() - dayjs(a.date).valueOf()
+      const sortedOrders = data.sort((a, b) =>
+        dayjs(b.orderDate).valueOf() - dayjs(a.orderDate).valueOf()
       );
-      
+
       setOrders(sortedOrders);
       setTotal(sortedOrders.length);
-      
+
       // Apply initial filtering and pagination
       applyFiltersAndPagination(sortedOrders, searchTerm, activeTab, currentPage, pageSize);
     } catch (error) {
@@ -58,35 +67,53 @@ const ManageOrder = () => {
   };
 
   const filterOrdersByTab = (orders, tab) => {
-    switch (tab) {
-      case 'new':
-        return orders.filter(order => order.orderStatus === 'Pending');
-      case 'processing':
-        return orders.filter(order => order.orderStatus === 'Processing');
-      case 'shipped':
-        return orders.filter(order => order.orderStatus === 'Shipped');
-      case 'completed':
-        return orders.filter(order => order.orderStatus === 'Delivered');
-      case 'cancelled':
-        return orders.filter(order => order.orderStatus === 'Cancelled');
-      case 'returned':
-        return orders.filter(order => order.orderStatus === 'Returned');
-      case 'all':
-      default:
-        return orders;
-    }
+    if (tab === 'all') return orders;
+
+    // Match the status values exactly as they appear in your API response
+    return orders.filter(order => {
+      const status = order.orderStatus.toUpperCase();
+      switch (tab) {
+        case 'pending':
+          return status === 'PENDING';
+        case 'processing':
+          return status === 'IN_PROGRESS';
+        case 'shipped':
+          return status === 'SHIPPED';
+        case 'delivered':
+          return status === 'DELIVERED';
+        case 'cancelled':
+          return status === 'CANCELLED';
+        case 'returned':
+          return status === 'RETURNED';
+        default:
+          return true;
+      }
+    });
   };
 
   const applyFiltersAndPagination = (orders, search, tab, page, size) => {
+    if (!orders || orders.length === 0) {
+      setDisplayedOrders([]);
+      setTotal(0);
+      return;
+    }
+
     // First apply tab filter
     let filtered = filterOrdersByTab(orders, tab);
 
-    // Then apply search filter for order ID, customer name, or brand
+    // Then apply search filter for order ID or product name
     if (search) {
-      filtered = filtered.filter(order =>
-        String(order.id).toLowerCase().includes(search.toLowerCase()) ||
-        String(order.brand).toLowerCase().includes(search.toLowerCase())
-      );
+      filtered = filtered.filter(order => {
+        // Convert order ID to string and check if it includes search term
+        const orderIdMatch = String(order.id).toLowerCase().includes(search.toLowerCase());
+
+        // Check if any product name in order details includes search term
+        const productNameMatch = order.orderDetails?.some(detail =>
+          detail.product?.name?.toLowerCase().includes(search.toLowerCase())
+        );
+
+        return orderIdMatch || productNameMatch;
+      });
     }
 
     // Update total count after filtering
@@ -113,69 +140,147 @@ const ManageOrder = () => {
     setPageSize(pageSize);
   };
 
-  const handleViewDetails = (record) => {
-    console.log('View details for order:', record);
-    // Implement view details functionality
+  const handleDelete = (orderId) => {
+    Modal.confirm({
+      title: 'Xác nhận xóa đơn hàng',
+      content: `Bạn có chắc chắn muốn xóa đơn hàng #${orderId} không?`,
+      okText: 'Xóa',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk: () => {
+        console.log('Delete order:', orderId);
+        // Implement delete functionality
+      }
+    });
   };
 
-  const handleDelete = (record) => {
-    console.log('Delete order:', record);
-    // Implement delete functionality
+  const handleUpdateStatus = async (orderId, newStatus) => {
+    try {
+      setStatusUpdateLoading(true);
+      
+      // Call API to update status
+      const result = await updateStatusOrder2(orderId, newStatus);
+      
+      // If successful, update local state
+      if (result) {
+        // Update the orders state with the new status
+        const updatedOrders = orders.map(order => {
+          if (order.id === orderId) {
+            return { ...order, orderStatus: newStatus };
+          }
+          return order;
+        });
+        
+        setOrders(updatedOrders);
+        message.success(`Trạng thái đơn hàng đã được cập nhật thành ${getOrderStatusLabel(newStatus)}`);
+      }
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      message.error("Cập nhật trạng thái đơn hàng thất bại");
+    } finally {
+      setStatusUpdateLoading(false);
+    }
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'Pending':
+    switch (status.toUpperCase()) {
+      case 'PENDING':
         return 'gold';
-      case 'Processing':
+      case 'IN_PROGRESS':
         return 'blue';
-      case 'Shipped':
+      case 'SHIPPED':
         return 'orange';
-      case 'Delivered':
+      case 'DELIVERED':
         return 'green';
-      case 'Cancelled':
+      case 'CANCELLED':
         return 'red';
-      case 'Returned':
+      case 'RETURNED':
         return 'volcano';
       default:
         return 'default';
     }
   };
 
+  const getPaymentStatusColor = (status) => {
+    switch (status.toUpperCase()) {
+      case 'PAID':
+        return 'green';
+      case 'CANCELLED':
+        return 'red';
+      case 'PENDING':
+        return 'orange';
+      default:
+        return 'default';
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return `${amount.toLocaleString()} đ`;
+  };
+
+  const getOrderStatusLabel = (status) => {
+    switch (status.toUpperCase()) {
+      case 'PENDING': return 'Đơn mới';
+      case 'IN_PROGRESS': return 'Đang xử lý';
+      case 'SHIPPED': return 'Đang giao hàng';
+      case 'DELIVERED': return 'Hoàn thành';
+      case 'CANCELLED': return 'Đã hủy';
+      case 'RETURNED': return 'Trả hàng/Hoàn tiền';
+      default: return status;
+    }
+  };
+
+  const getPaymentStatusLabel = (status) => {
+    switch (status.toUpperCase()) {
+      case 'PAID': return 'Đã thanh toán';
+      case 'PENDING': return 'Chưa thanh toán';
+      case 'CANCELLED': return 'Thanh toán thất bại';
+      default: return status;
+    }
+  };
+
+  // Generate dropdown menu for status update
+  const statusMenu = (record) => (
+    <Menu
+      onClick={({ key }) => handleUpdateStatus(record.id, key)}
+      items={statusOptions2.map(option => ({
+        key: option.key,
+        label: option.label,
+        disabled: record.orderStatus === option.key
+      }))}
+    />
+  );
+
   const columns = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
+      title: 'STT',
+      key: 'index',
+      render: (_, __, index) => (currentPage - 1) * pageSize + index + 1,
+      width: 70,
     },
     {
       title: 'Ngày đặt',
-      dataIndex: 'date',
-      key: 'date',
-      sorter: (a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf(),
+      dataIndex: 'orderDate',
+      key: 'orderDate',
+      sorter: (a, b) => dayjs(a.orderDate).valueOf() - dayjs(b.orderDate).valueOf(),
       sortDirections: ['descend', 'ascend'],
-      render: (date) => dayjs(date).format('DD/MM/YYYY'),
-    },
-    {
-      title: 'Thương hiệu',
-      dataIndex: 'brand',
-      key: 'brand',
+      render: (date) => dayjs(date).format('DD/MM/YYYY HH:mm'),
     },
     {
       title: 'Tổng tiền',
-      dataIndex: 'total',
-      key: 'total',
-      sorter: (a, b) => a.total - b.total,
+      dataIndex: 'totalPrice',
+      key: 'totalPrice',
+      sorter: (a, b) => a.totalPrice - b.totalPrice,
       sortDirections: ['descend', 'ascend'],
-      render: (total) => `${total.toLocaleString()} đ`,
+      render: (total) => formatCurrency(total),
     },
     {
       title: 'Trạng thái thanh toán',
       dataIndex: 'paymentStatus',
       key: 'paymentStatus',
       render: (paymentStatus) => (
-        <Tag color={paymentStatus === 'Paid' ? 'green' : 'red'}>
-          {paymentStatus === 'Paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+        <Tag color={getPaymentStatusColor(paymentStatus)}>
+          {getPaymentStatusLabel(paymentStatus)}
         </Tag>
       )
     },
@@ -185,34 +290,35 @@ const ManageOrder = () => {
       key: 'orderStatus',
       render: (orderStatus) => (
         <Tag color={getStatusColor(orderStatus)}>
-          {(() => {
-            switch(orderStatus) {
-              case 'Pending': return 'Đơn mới';
-              case 'Processing': return 'Đang xử lý';
-              case 'Shipped': return 'Đang giao hàng';
-              case 'Delivered': return 'Hoàn thành';
-              case 'Cancelled': return 'Đã hủy';
-              case 'Returned': return 'Trả hàng/Hoàn tiền';
-              default: return orderStatus;
-            }
-          })()}
+          {getOrderStatusLabel(orderStatus)}
         </Tag>
       )
     },
     {
       title: 'Hành động',
-      key: 'action',
+      key: 'actions',
+      width: 200,
       render: (_, record) => (
-        <Space size="middle">
-          <Button 
-            onClick={() => handleViewDetails(record)} 
-            icon={<MdOutlineRemoveRedEye className="text-blue-500 w-5 h-5" />} 
-            title="Xem chi tiết"
-          />
-          <Button 
-            onClick={() => handleDelete(record)} 
-            icon={<MdOutlineDeleteOutline className="text-red-500 w-5 h-5" />} 
-            title="Xóa đơn hàng"
+        <Space>
+          <Dropdown 
+            overlay={statusMenu(record)} 
+            trigger={['click']}
+            disabled={statusUpdateLoading}
+          >
+            <Button 
+              type="primary" 
+              size="small"
+              icon={<EditOutlined />}
+              loading={statusUpdateLoading}
+            >
+              Cập nhật <DownOutlined />
+            </Button>
+          </Dropdown>
+          <Button
+            icon={<DeleteOutlined />}
+            type="text"
+            danger
+            onClick={() => handleDelete(record.id)}
           />
         </Space>
       ),
@@ -230,7 +336,7 @@ const ManageOrder = () => {
           <div className="relative">
             <input
               type="text"
-              placeholder="Nhập mã đơn hàng hoặc thương hiệu..."
+              placeholder="Nhập mã đơn hàng hoặc tên sản phẩm..."
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -250,11 +356,10 @@ const ManageOrder = () => {
           {statusTabs.map((tab) => (
             <button
               key={tab.key}
-              className={`px-4 py-2 text-sm font-medium mr-2 transition-colors duration-200 ${
-                activeTab === tab.key
+              className={`px-4 py-2 text-sm font-medium mr-2 transition-colors duration-200 ${activeTab === tab.key
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-500 hover:text-gray-700'
-              }`}
+                }`}
               onClick={() => handleTabChange(tab.key)}
             >
               {tab.label}
@@ -281,7 +386,7 @@ const ManageOrder = () => {
             rowClassName={(record, index) => (index % 2 === 0 ? "bg-gray-50" : "bg-white")}
             className="w-full"
           />
-          
+
           {total > 0 && (
             <div className="py-4 px-6 flex justify-end border-t border-gray-200">
               <Pagination
