@@ -23,14 +23,14 @@ const MedalIcon = () => (
 
 const RewardPointsManagement = () => {
   return (
-    <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px]">
+    <div className="flex-1 p-5">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 mb-6">
-        <h1 className="text-3xl font-semibold text-gray-800 mb-2 md:mb-0">Quản lý điểm thưởng</h1>
+        <h1 className="text-xl font-bold text-gray-800 mb-2 md:mb-0">Quản lý điểm thưởng</h1>
         <div className="flex items-center space-x-2">
-          <span className="text-lg">Tổng điểm hiện có: <strong className="text-red-700">0</strong></span>
+          <span className="text-[16px]">Tổng điểm hiện có: <strong className="text-red-700">0</strong></span>
           <MedalIcon />
-          <span className="text-lg">Tương ứng <strong className="text-red-700">0 đ</strong></span>
+          <span className="text-[16px]">Tương ứng <strong className="text-red-700">0 đ</strong></span>
         </div>
       </div>
       

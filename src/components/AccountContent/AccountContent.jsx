@@ -222,24 +222,24 @@ const AccountContent = () => {
     };
 
     return (
-        <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px]">
-            <h2 className="text-[24px] font-bold mb-5">Quản lý tài khoản</h2>
-
+        <div className="flex-1  p-5 rounded-[10px] ">
+            <h2 className="text-xl font-bold text-gray-900">Quản lý tài khoản</h2>
+            <hr className="my-2" />
             <div className="mb-5 pb-[10px] border-b border-gray-300">
-                <h3 className="text-[18px] font-bold mb-[10px]">Thông tin cá nhân</h3>
-                <div className="flex items-center gap-[15px] text-[16px] pb-4">
+                <h3 className="text-[16px] font-semibold mb-[10px]">Thông tin cá nhân</h3>
+                <div className="flex items-center gap-[15px] text-sm pb-4">
                     <FontAwesomeIcon icon={faUser} />
                     <p className="flex-1">{user.fullName || 'Chưa có tên'}</p>
                 </div>
-                <div className="flex items-center gap-[15px] text-[16px]">
+                <div className="flex items-center gap-[15px] text-sm">
                     <FontAwesomeIcon icon={faEnvelope} />
                     <p className="flex-1">{user.mail}</p>
                 </div>
             </div>
 
             <div className="mb-5 pb-[10px] border-b border-gray-300">
-                <h3 className="text-[18px] font-bold mb-[10px]">Bảo mật</h3>
-                <div className="flex items-center gap-[15px] text-[16px]">
+                <h3 className="text-[16px] font-semibold  mb-[10px]">Bảo mật</h3>
+                <div className="flex items-center gap-[15px] text-sm">
                     <FontAwesomeIcon icon={faLock} />
                     <p className="flex-1">Mật khẩu</p>
                     <button 
@@ -260,8 +260,8 @@ const AccountContent = () => {
             </div>
 
             <div>
-                <h3 className="text-[18px] font-bold mb-[10px]">Địa chỉ mặc định</h3>
-                <div className="flex items-center gap-[15px] text-[16px]">
+                <h3 className="text-[16px] font-semibold d mb-[10px]">Địa chỉ mặc định</h3>
+                <div className="flex items-center gap-[15px] text-sm">
                     <FontAwesomeIcon icon={faMapMarkerAlt} />
                     {defaultAddress ? (
                         <div className="flex-1">
