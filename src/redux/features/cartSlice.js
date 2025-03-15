@@ -55,17 +55,20 @@ export const cartSlice = createSlice({
     },
 
     removeFromCart: (state, action) => {
-      if(!state.cart) {
+      if (!state.listItem || state.listItem.length === 0) {
         state.listItem = [];
+        state.totalQuantity = 0;
+        state.totalPrice = 0;
         return;
       }
+      
       const productId = action.payload;
       const productIndex = state.listItem.findIndex((item) => item.id === productId);
       
       if (productIndex !== -1) {
         const product = state.listItem[productIndex];
-        state.totalQuantity -= product.quantity;
-        state.totalPrice -= product.price * product.quantity;
+        state.totalQuantity -= product.quantity || 1;
+        state.totalPrice -= product.price * (product.quantity || 1);
         state.listItem.splice(productIndex, 1);
       }
     },

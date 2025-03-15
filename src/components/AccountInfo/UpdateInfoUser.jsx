@@ -35,7 +35,7 @@ const UserProfile = () => {
             gender: gender || "",
             birthday: birthday || ""
           });
-          
+
           // Also update formData to match user data
           setFormData({
             fullName: fullName || "",
@@ -89,10 +89,10 @@ const UserProfile = () => {
       try {
         var id = localStorage.getItem("id");
         const token = localStorage.getItem("token");
-  
+
         // Kiểm tra xem birthday đã có "T" chưa để tránh thêm 2 lần
         const formattedBirthday = formData.birthday.includes("T") ? formData.birthday : `${formData.birthday}T00:00:00`;
-  
+
         const response = await api.put(`/user/update/${id}`, {
           fullName: formData.fullName,
           phone: formData.phone,
@@ -103,17 +103,17 @@ const UserProfile = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-  
+
         setUser({
           ...formData,
           birthday: formattedBirthday
         });
-  
+
         setFormData({
           ...formData,
           birthday: formattedBirthday
         });
-  
+
         setIsEditing(false);
         toast.success('Cập nhật thông tin thành công');
       } catch (error) {
@@ -123,8 +123,8 @@ const UserProfile = () => {
       }
     }
   };
-  
-  
+
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -147,10 +147,11 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="flex-1 bg-white p-5 rounded-[10px] shadow-md mt-5 h-full">
+    <div className="flex-1 p-5">
       {isEditing ? (
         <>
-          <h2 className="text-2xl font-bold mb-6">Cập nhật thông tin</h2>
+          <h2 className="text-xl font-bold">Cập nhật thông tin</h2>
+          <hr className="my-2"/>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
@@ -237,12 +238,13 @@ const UserProfile = () => {
         </>
       ) : (
         <>
-          <h2 className="text-2xl font-bold mb-6">Thông tin người dùng</h2>
+          <h2 className="text-xl font-bold">Thông tin người dùng</h2>
+          <hr className="my-2" />
           <div className="space-y-4">
-            <div>Họ và tên: {user.fullName || "Chưa cập nhật"}</div>
-            <div>Số điện thoại: {user.phone}</div>
-            <div>Giới tính: {displayGender()}</div>
-            <div>Ngày sinh: {user.birthday ? new Date(user.birthday).toLocaleDateString("vi-VN") : "Chưa cập nhật"}</div>
+            <div className="text-gray-600">Họ và tên: <span className="text-black"> {user.fullName || "Chưa cập nhật"}</span></div>
+            <div className="text-gray-600">Số điện thoại: <span className="text-black">{user.phone}</span></div>
+            <div className="text-gray-600">Giới tính: <span className="text-black">{displayGender()}</span></div>
+            <div className="text-gray-600">Ngày sinh: <span className="text-black">{user.birthday ? new Date(user.birthday).toLocaleDateString("vi-VN") : "Chưa cập nhật"}</span></div>
             <button onClick={handleUpdateClick} className="px-4 py-2 bg-[#EE1F5B] text-white rounded-md">
               Cập nhật thông tin
             </button>

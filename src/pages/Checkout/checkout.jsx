@@ -132,22 +132,34 @@ const CheckoutPage = () => {
       return;
     }
 
-    // In a real application, you would make an API call to create the order
-    // For now, we'll just navigate to a confirmation page
-    if (paymentMethod === 'cod') {
-      dispatch(clearCart());
-      navigate('/checkout/confirmCOD');
-    } else {
-      const orderData = {
-        details: cart.map((product) => ({
-          productId: product.id,
-          quantity: product.quantity,
-        })),
-      };
-      const payload = await createOrder(orderData);
-      window.location.href = payload;
-      console.log(payload);
-      
+    // Create order data with the same structure for both payment methods
+    const orderData = {
+      details: cart.map((product) => ({
+        productId: product.id,
+        quantity: product.quantity,
+      })),
+    };
+
+    try {
+      if (paymentMethod === 'cod') {
+        const payload = await createOrder(orderData);
+        console.log("COD order created:", payload);
+        dispatch(clearCart());
+        navigate('/checkout/confirmCOD');
+      } else {
+        const payload = await createOrder(orderData);
+
+        // if (payload && typeof payload === 'string') {
+        //   localStorage.setItem('pendingOrderId', payload.split('orderId=')[1]?.split('&')[0] || '');
+        // }
+
+        console.log("Payment redirect URL:", payload);
+        window.location.href = payload;
+        dispatch(clearCart());
+      }
+    } catch (error) {
+      console.error("Error creating order:", error);
+      toast.error('Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại.');
     }
   };
 

@@ -9,7 +9,7 @@ const AccountLayout = () => {
             <Navbar />
             <div className="flex gap-5 max-w-[1200px] mx-auto p-5">
                 <AccountSidebar />
-                <div className="flex-1"> {/*  Take remaining space */}
+                <div className="flex-1 bg-gray-50">
                     <Outlet />
                 </div>
             </div>

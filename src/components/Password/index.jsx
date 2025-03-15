@@ -22,31 +22,35 @@ const ChangePasswordForm = () => {
   });
 
   const [status, setStatus] = useState({
-    loading: false, 
+    loading: false,
     error: '',
-    success:''
+    success: ''
   });
 
-  const validatePasswords = () => {
-    let isValid = true;
-    const newErrors = {
-      newPassword: '',
-      confirmPassword: ''
-    };
+  const validatePassword = (password) => {
+    return (
+      password.length >= 8 &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /[0-9]/.test(password) &&
+      /[^A-Za-z0-9]/.test(password)
+    );
+  };
 
-    if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp với mật khẩu mới';
-      isValid = false;
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!validatePassword(formData.newPassword)) {
+      newErrors.newPassword =
+        "Mật khẩu phải có ít nhất 8 ký tự và chứa chữ hoa, chữ thường, số và ký tự đặc biệt";
     }
 
-    // Kiểm tra mật khẩu mới không được trùng với mật khẩu cũ
-    if (formData.newPassword === formData.oldPassword && formData.newPassword !== '') {
-      newErrors.newPassword = 'Mật khẩu mới không được trùng với mật khẩu cũ';
-      isValid = false;
+    if (formData.newPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
     }
 
     setErrors(newErrors);
-    return isValid;
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
@@ -67,7 +71,9 @@ const ChangePasswordForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (validatePasswords()) {
+    const isValid = validateForm();
+    
+    if (isValid) {
       setStatus({
         loading: true,
         error: '',
@@ -82,8 +88,6 @@ const ChangePasswordForm = () => {
           confirmPassword: formData.confirmPassword
         });
 
-        const data = response.data;
-        
         setStatus({
           loading: false,
           error: '',
@@ -113,8 +117,8 @@ const ChangePasswordForm = () => {
   };
 
   return (
-    <div className="flex-1 bg-white p-5 rounded-[10px] shadow-[0px_0px_10px_rgba(0,0,0,0.1)] mt-[35px]">
-      <h1 className="text-2xl font-medium mb-6">Đổi mật khẩu</h1>
+    <div className="flex-1 p-5">
+      <h1 className="text-xl font-bold mb-6">Đổi mật khẩu</h1>
       
       {status.success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">

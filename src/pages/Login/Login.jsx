@@ -6,9 +6,9 @@ import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { Link, useNavigate } from "react-router-dom";
 import api from '../../config/axios';
-import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { login } from '../../redux/features/useSlice';
+import { message } from 'antd';
 
 
 const Login = () => {
@@ -71,7 +71,6 @@ const Login = () => {
       } else if (roleEnum === 'USER') {
         navigate('/')
       }
-
 
     } catch (error) {
       message.error(error?.response.data);

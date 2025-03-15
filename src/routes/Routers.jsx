@@ -9,10 +9,10 @@ import Register from '../pages/Register/Register';
 import Login from '../pages/Login/Login';
 import AccountManagement from '../pages/ManageAccount/AccountManagement';
 import InfoUser from '../pages/InfoUser/InfoUser';
-import Order from '../pages/ManageOrder';
 import UserLayout from '../layout/UserLayout';
-import MainLayout from '../layout/MainLayout'; // Assuming you have this
+import MainLayout from '../layout/MainLayout';
 import ForgotPassword from "../pages/ForgotPassword";
+
 // admin section
 import AdminLayout from "../layout/AdminLayout";
 import AddProductPage from "../pages/Admin/ManageProduct/AddProduct";
@@ -20,6 +20,7 @@ import ManageProduct from "../pages/Admin/ManageProduct/ManageProduct";
 import ManageStaff from "../pages/Admin/ManageStaff/ManageStaff";
 import AddStaff from "../pages/Admin/ManageStaff/AddStaff";
 import ManageCustomer from "../pages/Admin/ManageCustomer/ManageCustomer";
+import OrderHistory from "../components/Order/OrderHistory";
 import ManageOrder from "../pages/Admin/ManageOrder/ManageOrder";
 import Promotion from "../pages/PromotionManagement/promotion";
 import ShoppingCart from "../pages/ShoppingCart/Cart";
@@ -42,8 +43,6 @@ import ProtectedRoute from "./ProtectedRoute";
 import Unauthorized from "../pages/Unauthorized/Unauthorized";
 import ProductDetail from "../components/ProductDetail/ProductDetail";
 import ManagePromotion from "../pages/Admin/ManagePromotion/ManagePromotion";
-
-// import Transfer from "../components/Payment/Transfer/Tranfer";
 import Oily from "../pages/Landing/Oily";
 import Normal from "../pages/Landing/Normal";
 import Dry from "../pages/Landing/Dry";
@@ -51,6 +50,9 @@ import Combination from "../pages/Landing/Combination";
 import Sensitive from "../pages/Landing/Sensitive";
 import CODPage from "../pages/CheckoutConfirm/CODConfirm";
 import PaymentResult from "../pages/CheckoutConfirm/PaymentResult";
+import ChangePassword from "../pages/ChangePassword";
+import ResetPasswordForm from "../pages/ResetPassword/reset";
+import FavoriteProducts from "../pages/FavoriteList";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -91,6 +93,10 @@ const Routers = () => {
           element: <TestSkinType />,
         },
         {
+          path: '/wishlist',
+          element: <FavoriteProducts />,
+        },
+        {
           path: '/test-skin/oily',
           element: <Oily />
         },
@@ -121,7 +127,11 @@ const Routers = () => {
         {
           path: '/register',
           element: <Register />,
-        },    
+        },
+        {
+          path: '/reset-password/',  
+          element: <ResetPasswordForm />,
+        },
         {
           path: '*',
           element: <NotFoundPage />,
@@ -158,13 +168,16 @@ const Routers = () => {
         },
         {
           path: "manage-order",
-          element: <Order />,
+          element: <OrderHistory />,
         },
         {
           path: "promotion",
           element: <Promotion />,
+        }, 
+        {
+          path: "change-password",
+          element: <ChangePassword />,
         }
-
       ],
     },
     {
@@ -245,7 +258,6 @@ const Routers = () => {
           path: "quiz",
           element: <ManageQuiz />,
         }
-
       ],
     },
     {
