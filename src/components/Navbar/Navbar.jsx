@@ -54,6 +54,15 @@ const Navbar = () => {
     setSearchQuery("");
   };
 
+  const handleWishlistClick = () => {
+    if (user) {
+      navigate('/wishlist');
+    } else {
+      toast.info('Vui lòng đăng nhập để xem danh sách yêu thích của bạn');
+      navigate('/login');
+    }
+  };
+
   return (
     <div className='navbar sticky top-0 z-50 bg-white shadow-md'>
       <div className='navbar sticky top-0 flex items-center justify-between py-5 font-medium px-4 lg:px-[9vw]'>
@@ -113,7 +122,15 @@ const Navbar = () => {
         </div>
 
         <div className='flex items-center gap-6'>
-          <img src={assets.wishlist_icon} className='w-5 cursor-pointer' alt="" />
+          <div 
+            onClick={handleWishlistClick} 
+            className='cursor-pointer relative group'
+          >
+            <img src={assets.wishlist_icon} className='w-5' alt="Danh sách yêu thích" />
+            <div className="absolute opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded py-1 px-2 -left-8 -bottom-8 transition-opacity duration-300 whitespace-nowrap">
+              Danh sách yêu thích
+            </div>
+          </div>
           {user ? (
             <div className='group relative'>
               <CiUser className='w-[1.6rem] h-[2rem] cursor-pointer' />
@@ -148,6 +165,11 @@ const Navbar = () => {
                       <div>
                         <Link to='/user/manage-order' className='block cursor-pointer hover:text-white hover:bg-rose-600 px-2 py-1 rounded-sm duration-300'>
                           Xem đơn hàng
+                        </Link>
+                      </div>
+                      <div>
+                        <Link to='/wishlist' className='block cursor-pointer hover:text-white hover:bg-rose-600 px-2 py-1 rounded-sm duration-300'>
+                          Danh sách yêu thích
                         </Link>
                       </div>
                       <div>
@@ -204,6 +226,9 @@ const Navbar = () => {
           <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/shop'>Mua hàng</NavLink>
           <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/about'>Về chúng tôi</NavLink>
           <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/contact'>Liên hệ</NavLink>
+          {user && (
+            <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/wishlist'>Danh sách yêu thích</NavLink>
+          )}
           {user && user.roleEnum === "MANAGER" && (
             <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/dashboard'>Dashboard</NavLink>
           )}

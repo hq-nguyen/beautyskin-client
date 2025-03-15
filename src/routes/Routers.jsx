@@ -9,10 +9,10 @@ import Register from '../pages/Register/Register';
 import Login from '../pages/Login/Login';
 import AccountManagement from '../pages/ManageAccount/AccountManagement';
 import InfoUser from '../pages/InfoUser/InfoUser';
-
 import UserLayout from '../layout/UserLayout';
-import MainLayout from '../layout/MainLayout'; // Assuming you have this
+import MainLayout from '../layout/MainLayout';
 import ForgotPassword from "../pages/ForgotPassword";
+
 // admin section
 import AdminLayout from "../layout/AdminLayout";
 import AddProductPage from "../pages/Admin/ManageProduct/AddProduct";
@@ -43,8 +43,6 @@ import ProtectedRoute from "./ProtectedRoute";
 import Unauthorized from "../pages/Unauthorized/Unauthorized";
 import ProductDetail from "../components/ProductDetail/ProductDetail";
 import ManagePromotion from "../pages/Admin/ManagePromotion/ManagePromotion";
-
-// import Transfer from "../components/Payment/Transfer/Tranfer";
 import Oily from "../pages/Landing/Oily";
 import Normal from "../pages/Landing/Normal";
 import Dry from "../pages/Landing/Dry";
@@ -53,6 +51,8 @@ import Sensitive from "../pages/Landing/Sensitive";
 import CODPage from "../pages/CheckoutConfirm/CODConfirm";
 import PaymentResult from "../pages/CheckoutConfirm/PaymentResult";
 import ChangePassword from "../pages/ChangePassword";
+import ResetPasswordForm from "../pages/ResetPassword/reset";
+import FavoriteProducts from "../pages/FavoriteList";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -93,6 +93,10 @@ const Routers = () => {
           element: <TestSkinType />,
         },
         {
+          path: '/wishlist',
+          element: <FavoriteProducts />,
+        },
+        {
           path: '/test-skin/oily',
           element: <Oily />
         },
@@ -123,7 +127,11 @@ const Routers = () => {
         {
           path: '/register',
           element: <Register />,
-        },    
+        },
+        {
+          path: '/reset-password/',  
+          element: <ResetPasswordForm />,
+        },
         {
           path: '*',
           element: <NotFoundPage />,
@@ -170,7 +178,6 @@ const Routers = () => {
           path: "change-password",
           element: <ChangePassword />,
         }
-
       ],
     },
     {
@@ -251,7 +258,6 @@ const Routers = () => {
           path: "quiz",
           element: <ManageQuiz />,
         }
-
       ],
     },
     {
