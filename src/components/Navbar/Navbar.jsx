@@ -7,13 +7,14 @@ import { assets } from '../../assets/frontend_assets/assets';
 import { IoIosLogIn } from "react-icons/io";
 import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
 import { CiUser } from "react-icons/ci";
-import { fetchProducts } from '../../apis/product'; // Import fetchProducts API
+import api from '../../apis/product';
 import { logout } from '../../redux/features/useSlice';
 import { clearCart } from '../../redux/features/cartSlice';
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResult, setSearchResult] = useState([]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
@@ -29,29 +30,49 @@ const Navbar = () => {
     navigate('/');
   };
 
+  const handleSearchInputChange = async (e) => {
+    const query = e.target.value;
+    setSearchQuery(query)
+
+    if (query.trim()) {
+      try {
+        const response = await api.get(`/product/getByName?name=${query}`)
+
+        const validResults = response.data.filter(product => product.id && !isNaN(product.id))
+        setSearchResult(validResults)
+      } catch (error) {
+        console.error("Error fetching search results:", error)
+        setSearchResult([])
+        toast.error('Không tìm thấy sản phẩm')
+      }
+    } else {
+      setSearchResult([])
+    }
+  } 
+
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
-    try {
-      //Lấy các sản phẩm
-      const allProducts = await fetchProducts();
-      //Lọc sản phẩm
-      const filteredProducts = allProducts.filter((product) =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
 
+    try {
+      const response = await api.get(`/product/getByName?name=${searchQuery}`);
+      // Lọc sản phẩm có id hợp lệ
+      const filteredProducts = response.data.filter(product => product.id && !isNaN(product.id));
+      
       localStorage.setItem('searchQuery', searchQuery);
       localStorage.setItem('filteredProducts', JSON.stringify(filteredProducts));
 
       navigate('/shop');
+      setSearchResult([]);
     } catch (error) {
-      console.error("Error fetching products for search:", error);
+      console.error("Error searching products:", error);
       toast.error('Không thể tìm kiếm sản phẩm. Vui lòng thử lại.');
     }
   };
 
   const clearSearch = () => {
     setSearchQuery("");
+    setSearchResult([])
   };
 
   const handleWishlistClick = () => {
@@ -99,7 +120,7 @@ const Navbar = () => {
                 placeholder="Tìm kiếm sản phẩm"
                 className="bg-transparent outline-none flex-grow text-gray-600"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchInputChange}
               />
               {searchQuery && (
                 <button
@@ -119,6 +140,30 @@ const Navbar = () => {
               </button>
             </div>
           </form>
+          {searchResult.length > 0 && (
+  <div className="absolute left-1/2 transform -translate-x-1/2 z-10 bg-white border border-gray-300 rounded-lg mt-2 max-h-108 overflow-y-auto shadow-lg">
+    {searchResult.map((product) => (
+      <Link
+        key={product.id}
+        to={`/product/${product.id}`}
+        className="flex items-center p-3 hover:bg-gray-100"
+        onClick={() => setSearchResult([])}
+      >
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-16 h-16 object-cover rounded mr-3"
+        />
+        <div>
+          <p className="text-gray-700">{product.name}</p>
+          <p className="text-orange-500 font-bold">
+            {product.price.toLocaleString('vi-VN')} đ
+          </p>
+        </div>
+      </Link>
+    ))}
+  </div>
+)}
         </div>
 
         <div className='flex items-center gap-6'>
