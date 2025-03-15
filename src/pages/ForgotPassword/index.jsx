@@ -15,7 +15,7 @@ const ForgotPassword = () => {
   };
 
   const handleSendResetLink = async (e) => {
-    e && e.preventDefault();
+    e.preventDefault();
     setError("");
 
     if (!email || !validateEmail(email)) {
@@ -33,7 +33,7 @@ const ForgotPassword = () => {
       const errorMessage = error.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại sau.";
       toast.error(errorMessage);
       setError(errorMessage);
-    } finally {
+    } finally { 
       setLoading(false);
     }
   };
