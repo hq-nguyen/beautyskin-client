@@ -5,11 +5,13 @@ import StarRating from '../utils/StarRating';
 import { assets } from '../../assets/frontend_assets/assets';
 import api from '../../config/axios';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice }) => {
     const [isFavoriting, setIsFavoriting] = useState(false);
     const [isInFavorites, setIsInFavorites] = useState(false);
     const [error, setError] = useState(null);
+    const [favoriteMessage, setFavoriteMessage] = useState(null); // Added favoriteMessage state
 
     const formattedOldPrice = oldPrice ? oldPrice.toLocaleString() : '0';
     const formattedNewPrice = newPrice ? newPrice.toLocaleString() : '0';
@@ -17,9 +19,18 @@ const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice })
     const displayPromotion = promotion && promotion > 0;
 
     const handleAddFavorites = async () => {
+        if (isInFavorites) {
+            // If already in favorites, show a message and do nothing
+            setFavoriteMessage('Sản phẩm đã có trong danh sách yêu thích!');
+            setTimeout(() => setFavoriteMessage(null), 2000);
+            return;
+        }
+
         try {
             setIsFavoriting(true);
             setError(null);
+            setFavoriteMessage(null);
+
             const response = await api.post(`favorites/addToFavorites/${id}`);
             
             if (response.status !== 200 && response.status !== 201) {
@@ -27,15 +38,20 @@ const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice })
             }
 
             setIsInFavorites(true);
-            console.log('Đã thêm vào danh sách yêu thích:', response.data);
+            setFavoriteMessage('Đã thêm vào danh sách yêu thích thành công!'); // Success message
+            setTimeout(() => setFavoriteMessage(null), 2000); // Clear message after 2 seconds
             
+            console.log('Đã thêm vào danh sách yêu thích:', response.data);
         } catch (error) {
-            setError(error.message);
+            setFavoriteMessage('Sản phẩm đã tồn tại trong danh sách yêu thích'); // Error message
+            setTimeout(() => setFavoriteMessage(null), 2000); // Clear message after 2 seconds
             console.error('Lỗi khi thêm vào sản phẩm yêu thích', error);
+            // Optionally keep toast.error if you want both popup and toast notifications
+            toast.error('Sản phẩm đã tồn tại trong danh sách yêu thích');
         } finally {
             setIsFavoriting(false);
         }
-    }
+    };
     
     return (
         <div className="relative flex flex-col bg-white p-2 pb-8 hover:border hover:border-rose-500 transition-transform duration-150">
@@ -93,6 +109,19 @@ const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice })
                     <div className="text-xs text-red-500 mt-1">{error}</div>
                 )}
             </div>
+
+            {/* Popup notification for favorite messages */}
+            {favoriteMessage && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className={`p-4 rounded-md shadow-lg border ${
+                        favoriteMessage.includes('Lỗi') || favoriteMessage.includes('tồn tại') || favoriteMessage.includes('đã có')
+                            ? 'bg-red-100 border-red-300 text-red-700'
+                            : 'bg-green-100 border-green-300 text-green-700'
+                    }`}>
+                        <p className="font-medium">{favoriteMessage}</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
