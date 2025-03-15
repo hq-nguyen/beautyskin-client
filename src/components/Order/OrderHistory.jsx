@@ -89,7 +89,7 @@ const OrderHistory = () => {
     switch (tab) {
       case 'wait-payment':
         return orders.filter(order => 
-          (order.paymentStatus === 'PENDING' || order.paymentStatus === null) && 
+          (order.paymentStatus == 'PENDING' || order.paymentStatus === null || order.paymentStatus == "CANCELLED") && 
           order.status === 'PENDING'
         );
       case 'wait-product':
