@@ -79,7 +79,7 @@ const Navbar = () => {
 
   const handleWishlistClick = () => {
     if (user) {
-      navigate('/wishlist');
+      navigate('/user/wishlist');
     } else {
       toast.info('Vui lòng đăng nhập để xem danh sách yêu thích của bạn');
       navigate('/login');
@@ -215,7 +215,7 @@ const Navbar = () => {
                         </Link>
                       </div>
                       <div>
-                        <Link to='/wishlist' className='block cursor-pointer hover:text-white hover:bg-rose-600 px-2 py-1 rounded-sm duration-300'>
+                        <Link to='/user/wishlist' className='block cursor-pointer hover:text-white hover:bg-rose-600 px-2 py-1 rounded-sm duration-300'>
                           Danh sách yêu thích
                         </Link>
                       </div>
@@ -274,7 +274,7 @@ const Navbar = () => {
           <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/about'>Về chúng tôi</NavLink>
           <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/contact'>Liên hệ</NavLink>
           {user && (
-            <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/wishlist'>Danh sách yêu thích</NavLink>
+            <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/user/wishlist'>Danh sách yêu thích</NavLink>
           )}
           {user && user.roleEnum === "MANAGER" && (
             <NavLink onClick={() => setVisible(false)} className='text-primary py-2 pl-5 border' to='/dashboard'>Dashboard</NavLink>
