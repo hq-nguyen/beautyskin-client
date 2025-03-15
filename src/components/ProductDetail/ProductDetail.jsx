@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { FiMinus, FiPlus } from 'react-icons/fi';
@@ -7,7 +7,8 @@ import { AiOutlineHeart } from 'react-icons/ai';
 import { MdCompare } from 'react-icons/md';
 import StarRating from '../utils/StarRating';
 import { assets } from '../../assets/frontend_assets/assets';
-import { fetchProductById } from '../../apis/product';
+import api, { fetchProductById } from '../../apis/product';
+import { toast } from 'react-toastify';
 import { addToCartWithQuantity } from '../../redux/features/cartSlice';
 
 const ProductDetail = () => {
@@ -20,6 +21,9 @@ const ProductDetail = () => {
     const [selectedTab, setSelectedTab] = useState('description');
     const [quantity, setQuantity] = useState(1);
     const [showPopup, setShowPopup] = useState(false);
+    const [isFavoriting, setIsFavoriting] = useState(false);
+    const [isInFavorites, setIsInFavorites] = useState(false);
+    const [favoriteMessage, setFavoriteMessage] = useState(null);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -59,6 +63,34 @@ const ProductDetail = () => {
         }
     };
 
+    const handleAddFavorites = async () => {
+        try {
+            setIsFavoriting(true);
+            setError(null);
+            setFavoriteMessage(null);
+            
+            const response = await api.post(`favorites/addToFavorites/${id}`);
+            
+            if (response.status !== 200 && response.status !== 201) {
+                throw new Error('Không thể thêm vào danh sách yêu thích');
+            }
+
+            setIsInFavorites(true);
+            setFavoriteMessage('Đã thêm vào danh sách yêu thích thành công!');
+            setTimeout(() => setFavoriteMessage(null), 2000);
+            
+            console.log('Đã thêm vào danh sách yêu thích:', response.data);
+            
+        } catch (error) {   
+            // setFavoriteMessage('Lỗi khi thêm vào sản phẩm yêu thích');
+            toast.error('Sản phẩm đã tồn tại trong danh sách yêu thích')
+            setTimeout(() => setFavoriteMessage(null), 2000);
+            console.error('Lỗi khi thêm vào sản phẩm yêu thích', error);
+        } finally {
+            setIsFavoriting(false);
+        }
+    };
+
     const handleAddToCart = () => {
         if (quantity > 3) {
             setShowPopup(true);
@@ -72,7 +104,7 @@ const ProductDetail = () => {
                 quantity: quantity,
                 image: product.images?.[0]?.url || 'https://via.placeholder.com/80x80',
                 description: product.description,
-                originalPrice: product.price, // Assuming no discount for simplicity
+                originalPrice: product.price,
                 promo: product.promotions?.[0]?.value || 0
             }));
         }
@@ -108,24 +140,15 @@ const ProductDetail = () => {
         );
     }
 
-    // Format price with locale string
     const formattedPrice = product.price?.toLocaleString() || "0";
-
-    // Create image URLs array
     const imageUrls = product.images?.map(img => img.url) || [];
-
-    // Calculate any promotions
     const promotionValue = product.promotions && product.promotions.length > 0
         ? product.promotions[0].value
         : 0;
-
     const discountedPrice = promotionValue > 0
         ? Math.round(product.price * (1 - promotionValue / 100))
         : product.price;
-
     const formattedDiscountedPrice = discountedPrice.toLocaleString();
-
-    // Extract skin types, concerns and tags as comma-separated strings
     const skinTypes = product.skinTypes?.map(type => type.name).join(', ') || '';
     const skinConcerns = product.skinConcerns?.map(concern => concern.name).join(', ') || '';
     const tags = product.tags?.map(tag => tag.name).join(', ') || '';
@@ -139,8 +162,6 @@ const ProductDetail = () => {
                 <a href="/shop" className="text-gray-500 hover:text-primary">
                     {product.category?.name || 'Danh mục'}
                 </a>
-                {/* <span className="text-gray-400">/</span>
-                <span className="text-primary">{product.name}</span> */}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -193,8 +214,7 @@ const ProductDetail = () => {
                                 <button
                                     key={index}
                                     onClick={() => setCurrentImageIndex(index)}
-                                    className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border ${currentImageIndex === index ? "ring-2 ring-primary" : "opacity-70"
-                                        }`}
+                                    className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border ${currentImageIndex === index ? "ring-2 ring-primary" : "opacity-70"}`}
                                 >
                                     <img
                                         src={img}
@@ -218,7 +238,7 @@ const ProductDetail = () => {
 
                         <div className="mt-2 flex items-center space-x-4">
                             <div className="flex">
-                                <StarRating rating={4.5} /> {/* You may replace with actual rating */}
+                                <StarRating rating={4.5} />
                                 <span className="ml-2 text-sm text-gray-500">(10 đánh giá)</span>
                             </div>
                             {product.stock > 0 ? (
@@ -260,19 +280,6 @@ const ProductDetail = () => {
                     </div>
 
                     <div className="space-y-6">
-                        {/* <div className="flex items-center space-x-2">
-                            <span
-                                className={`px-3 py-1 rounded-full text-sm ${product.stock > 10
-                                    ? "bg-green-100 text-green-800"
-                                    : product.stock > 0
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : "bg-red-100 text-red-800"
-                                    }`}
-                            >
-                                {product.stock > 0 ? `${product.stock} sản phẩm có sẵn` : 'Hết hàng'}
-                            </span>
-                        </div> */}
-
                         <div className="flex items-center space-x-4">
                             <span className="text-gray-600">Số lượng:</span>
                             <div className="flex items-center border rounded-md">
@@ -313,21 +320,43 @@ const ProductDetail = () => {
                             >
                                 Thêm vào giỏ hàng
                             </button>
-                            <button className="p-3 border rounded-md hover:bg-gray-50 hover:text-white hover:bg-rose-500 transition-all">
+                            <button
+                                onClick={handleAddFavorites}
+                                disabled={isFavoriting}
+                                className={`p-3 border rounded-md transition-all ${isInFavorites
+                                    ? 'bg-rose-500 text-white'
+                                    : 'hover:bg-rose-500 hover:text-white'
+                                } ${isFavoriting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                title={isInFavorites ? "Đã trong danh sách yêu thích" : "Thêm vào yêu thích"}
+                            >
                                 <AiOutlineHeart size={24} />
                             </button>
-                            <button className="flex items-center justify-center bg-white text-black p-3 border border-rose-500 rounded-md hover:bg-rose-500 hover:text-white transition-all">
+                            <button
+                                className="flex items-center justify-center bg-white text-black p-3 border border-rose-500 rounded-md hover:bg-rose-500 hover:text-white transition-all"
+                            >
                                 <MdCompare className="mr-2" size={20} /> So sánh
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
-            {/* Popup notification */}
+
+            {/* Popup notifications */}
             {showPopup && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
                     <div className="bg-white p-4 rounded-md shadow-lg border border-red-300">
                         <p className="text-red-500 font-medium">Sản phẩm chỉ có thể thêm tối đa là 3</p>
+                    </div>
+                </div>
+            )}
+            {favoriteMessage && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className={`p-4 rounded-md shadow-lg border ${
+                        favoriteMessage.includes('Lỗi') 
+                            ? 'bg-red-100 border-red-300 text-red-700'
+                            : 'bg-green-100 border-green-300 text-green-700'
+                    }`}>
+                        <p className="font-medium">{favoriteMessage}</p>
                     </div>
                 </div>
             )}
@@ -343,7 +372,7 @@ const ProductDetail = () => {
                                 className={`pb-4 px-2 ${selectedTab === tab
                                     ? "border-b-2 border-primary text-primary font-medium"
                                     : "text-gray-500"
-                                    }`}
+                                }`}
                             >
                                 {tab === "description" ? "Mô tả" :
                                     tab === "ingredients" ? "Thành phần" :
@@ -357,7 +386,6 @@ const ProductDetail = () => {
                     {selectedTab === "description" && (
                         <div className="prose max-w-none">
                             <div dangerouslySetInnerHTML={{ __html: product.description }} />
-
                             <div className="grid gap-4 mt-6">
                                 {Object.entries({
                                     'Phù hợp cho loại da': skinTypes,
@@ -368,24 +396,19 @@ const ProductDetail = () => {
                                 }).map(([key, value]) => (
                                     value && (
                                         <div key={key} className="py-2 border-b">
-                                            <p>
-                                                <strong>{key}: </strong>
-                                                {value}
-                                            </p>
+                                            <p><strong>{key}: </strong>{value}</p>
                                         </div>
                                     )
                                 ))}
                             </div>
                         </div>
                     )}
-
                     {selectedTab === "ingredients" && (
                         <div className="prose max-w-none">
                             <h3 className="text-xl font-semibold mb-4">Thành phần</h3>
                             <p>{product.ingredient || "Không có thông tin thành phần."}</p>
                         </div>
                     )}
-
                     {selectedTab === "how to use" && (
                         <div className="prose max-w-none">
                             <h3 className="text-xl font-semibold mb-4">Hướng dẫn sử dụng</h3>
@@ -399,7 +422,6 @@ const ProductDetail = () => {
             <div className="mt-12">
                 <h2 className="text-2xl font-bold mb-6">Sản phẩm liên quan</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {/* This would be populated with actual related products */}
                     <div className="text-center py-12 text-gray-500">
                         Không có sản phẩm liên quan
                     </div>
