@@ -5,7 +5,7 @@ import {
 } from '@ant-design/icons';
 import { MdBlock } from "react-icons/md";
 import { CiUnlock } from "react-icons/ci";
-import { fetchCustomer, lockCustomer } from '../../../apis/customer';
+import { fetchCustomer, lockCustomer, unLockCustomer } from '../../../apis/customer';
 import CustomerModel from './CustomerModel';
 
 const { Option } = Select;
@@ -41,9 +41,9 @@ const ManageCustomer = () => {
         if (statusFilter === 'all') {
             setFilteredCustomers(customers);
         } else if (statusFilter === 'active') {
-            setFilteredCustomers(customers.filter(customer => customer.accountNonLocked === true));
+            setFilteredCustomers(customers.filter(customer => customer.active === true));
         } else if (statusFilter === 'locked') {
-            setFilteredCustomers(customers.filter(customer => customer.accountNonLocked === false));
+            setFilteredCustomers(customers.filter(customer => customer.active === false));
         }
     }, [statusFilter, customers]);
 
@@ -60,7 +60,7 @@ const ManageCustomer = () => {
                     // Update the local state after successful API call
                     const updatedCustomers = customers.map(c => {
                         if (c.id === customer.id) {
-                            return { ...c, accountNonLocked: false };
+                            return { ...c, active: false };
                         }
                         return c;
                     });
@@ -82,11 +82,11 @@ const ManageCustomer = () => {
             cancelText: 'Không',
             onOk: async () => {
                 try {
-                    await lockCustomer(customer.id); // Assume you have this API function
+                    await unLockCustomer(customer.id); // Assume you have this API function
                     // Update the local state after successful API call
                     const updatedCustomers = customers.map(c => {
                         if (c.id === customer.id) {
-                            return { ...c, accountNonLocked: true };
+                            return { ...c, active: true };
                         }
                         return c;
                     });
@@ -134,8 +134,8 @@ const ManageCustomer = () => {
         },
         {
             title: 'Trạng thái khóa',
-            dataIndex: 'accountNonLocked',
-            key: 'accountNonLocked',
+            dataIndex: 'active',
+            key: 'active',
             render: (locked) => (
                 <Tag color={locked === true ? 'blue' : 'volcano'}>
                     {locked ? 'Đang hoạt động' : 'Đã khóa'}
@@ -158,7 +158,7 @@ const ManageCustomer = () => {
                         type="text"
                         onClick={() => handleViewDetails(record)}
                     />
-                    {record.accountNonLocked === true ? (
+                    {record.active === true ? (
                         <Button
                             icon={<MdBlock />}
                             type="text"

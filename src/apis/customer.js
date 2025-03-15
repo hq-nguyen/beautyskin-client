@@ -35,3 +35,16 @@ export const lockCustomer = async (id) => {
     }
 };
 
+
+export const unLockCustomer = async (id) => {
+    try {
+        const response = await api.put(`/user/unlock/${id}`);
+        console.log(response); 
+        return response; // You can return the response if needed
+    } catch (error) {
+        console.error(`Error locking customer with ID ${id}:`, error);
+        throw new Error("Failed to lock customer. Please try again later.");
+    }
+};
+
+
