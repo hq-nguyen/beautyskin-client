@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
-import { FiMinus, FiPlus } from 'react-icons/fi';
 import { AiOutlineHeart } from 'react-icons/ai';
 import { MdCompare } from 'react-icons/md';
 import StarRating from '../utils/StarRating';
@@ -10,10 +9,13 @@ import { assets } from '../../assets/frontend_assets/assets';
 import api, { fetchProductById } from '../../apis/product';
 import { toast } from 'react-toastify';
 import { addToCartWithQuantity } from '../../redux/features/cartSlice';
+import { addToCompare } from '../../redux/features/compareSlice';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const compareItems = useSelector(state => state.compare.items);
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -24,6 +26,7 @@ const ProductDetail = () => {
     const [isFavoriting, setIsFavoriting] = useState(false);
     const [isInFavorites, setIsInFavorites] = useState(false);
     const [favoriteMessage, setFavoriteMessage] = useState(null);
+    const [isInCompare, setIsInCompare] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -40,14 +43,6 @@ const ProductDetail = () => {
 
         fetchProduct();
     }, [id]);
-
-    const handleQuantityChange = (type) => {
-        if (type === 'increment' && quantity < product.stock && quantity < 4) {
-            setQuantity((prevQuantity) => prevQuantity + 1);
-        } else if (type === 'decrement' && quantity > 1) {
-            setQuantity(prev => prev - 1);
-        }
-    };
 
     const handleImageNavigation = (direction) => {
         if (!product?.images?.length) return;
@@ -68,9 +63,9 @@ const ProductDetail = () => {
             setIsFavoriting(true);
             setError(null);
             setFavoriteMessage(null);
-            
+
             const response = await api.post(`favorites/addToFavorites/${id}`);
-            
+
             if (response.status !== 200 && response.status !== 201) {
                 throw new Error('Không thể thêm vào danh sách yêu thích');
             }
@@ -78,10 +73,10 @@ const ProductDetail = () => {
             setIsInFavorites(true);
             setFavoriteMessage('Đã thêm vào danh sách yêu thích thành công!');
             setTimeout(() => setFavoriteMessage(null), 2000);
-            
+
             console.log('Đã thêm vào danh sách yêu thích:', response.data);
-            
-        } catch (error) {   
+
+        } catch (error) {
             // setFavoriteMessage('Lỗi khi thêm vào sản phẩm yêu thích');
             toast.error('Sản phẩm đã tồn tại trong danh sách yêu thích')
             setTimeout(() => setFavoriteMessage(null), 2000);
@@ -108,6 +103,33 @@ const ProductDetail = () => {
                 promo: product.promotions?.[0]?.value || 0
             }));
         }
+    };
+
+    const handleAddToCompare = () => {
+        if (product) {
+            dispatch(addToCompare({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.images?.[0]?.url || 'https://via.placeholder.com/80x80',
+                category: product.category?.name,
+                skinTypes: product.skinTypes?.map(type => type.name) || [],
+                skinConcerns: product.skinConcerns?.map(concern => concern.name) || [],
+                promotionValue: product.promotions?.[0]?.value || 0,
+                stock: product.stock
+            }));
+        }
+        
+        // Navigate to compare page if there are at least 2 products in the compare list
+        if (compareItems.length >= 1) { // Already 1 item + adding current one = 2 items
+            // Show toast notification
+            toast.info('Đã có 2 sản phẩm trong danh sách so sánh. Xem so sánh!');
+            
+            // Optional: Navigate to compare page
+            // Uncomment this if you want to navigate directly to compare page
+            // setTimeout(() => navigate('/compare'), 1500);
+        }
+        navigate('/compare');
     };
 
     if (loading) {
@@ -281,35 +303,7 @@ const ProductDetail = () => {
 
                     <div className="space-y-6">
                         <div className="flex items-center space-x-4">
-                            <span className="text-gray-600">Số lượng:</span>
-                            <div className="flex items-center border rounded-md">
-                                <button
-                                    onClick={() => handleQuantityChange("decrement")}
-                                    className="p-2 hover:bg-gray-100"
-                                    disabled={product.stock <= 0}
-                                >
-                                    <FiMinus />
-                                </button>
-                                <input
-                                    type="number"
-                                    value={quantity}
-                                    onChange={(e) => {
-                                        const value = parseInt(e.target.value);
-                                        if (!isNaN(value) && value > 0 && value <= Math.min(product.stock, 4)) {
-                                            setQuantity(value);
-                                        }
-                                    }}
-                                    className="w-16 text-center border-x"
-                                    disabled={product.stock <= 0}
-                                />
-                                <button
-                                    onClick={() => handleQuantityChange("increment")}
-                                    className="p-2 hover:bg-gray-100"
-                                    disabled={product.stock <= 0 || quantity >= Math.min(product.stock, 4)}
-                                >
-                                    <FiPlus />
-                                </button>
-                            </div>
+                            {/* Quantity selector... */}
                         </div>
 
                         <div className="flex flex-wrap gap-3 mt-6">
@@ -326,13 +320,18 @@ const ProductDetail = () => {
                                 className={`p-3 border rounded-md transition-all ${isInFavorites
                                     ? 'bg-rose-500 text-white'
                                     : 'hover:bg-rose-500 hover:text-white'
-                                } ${isFavoriting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    } ${isFavoriting ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 title={isInFavorites ? "Đã trong danh sách yêu thích" : "Thêm vào yêu thích"}
                             >
                                 <AiOutlineHeart size={24} />
                             </button>
                             <button
-                                className="flex items-center justify-center bg-white text-black p-3 border border-rose-500 rounded-md hover:bg-rose-500 hover:text-white transition-all"
+                                onClick={handleAddToCompare}
+                                className={`flex items-center justify-center p-3 border rounded-md transition-all ${isInCompare
+                                        ? 'bg-rose-500 text-white'
+                                        : 'border-rose-500 hover:bg-rose-500 hover:text-white'
+                                    }`}
+                                title={isInCompare ? "Đã trong danh sách so sánh" : "Thêm vào so sánh"}
                             >
                                 <MdCompare className="mr-2" size={20} /> So sánh
                             </button>
@@ -351,11 +350,10 @@ const ProductDetail = () => {
             )}
             {favoriteMessage && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
-                    <div className={`p-4 rounded-md shadow-lg border ${
-                        favoriteMessage.includes('Lỗi') 
+                    <div className={`p-4 rounded-md shadow-lg border ${favoriteMessage.includes('Lỗi')
                             ? 'bg-red-100 border-red-300 text-red-700'
                             : 'bg-green-100 border-green-300 text-green-700'
-                    }`}>
+                        }`}>
                         <p className="font-medium">{favoriteMessage}</p>
                     </div>
                 </div>
@@ -372,7 +370,7 @@ const ProductDetail = () => {
                                 className={`pb-4 px-2 ${selectedTab === tab
                                     ? "border-b-2 border-primary text-primary font-medium"
                                     : "text-gray-500"
-                                }`}
+                                    }`}
                             >
                                 {tab === "description" ? "Mô tả" :
                                     tab === "ingredients" ? "Thành phần" :
