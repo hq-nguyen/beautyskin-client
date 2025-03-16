@@ -200,13 +200,6 @@ const OrderHistory = () => {
     fetchOrders();
   }, []);
 
-  const filterOrders = order?.filter(order => {
-    const matchesSearch =
-      order?.orderDetails.some((orderDetail) => orderDetail.product.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = activeTab === 'all' || order.status === activeTab.toUpperCase();
-    return matchesSearch && matchesStatus;
-  })
-
   if (loading && displayedOrders.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -264,13 +257,13 @@ const OrderHistory = () => {
           </div>
         )}
 
-        {!loading && filterOrders.length === 0 ? (
+        {!loading && displayedOrders.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500 text-sm">Không tìm thấy đơn hàng nào.</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {filterOrders.map((order) => (
+            {displayedOrders.map((order) => (
               <div
                 key={order.orderId}
                 className="border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200 overflow-hidden"
@@ -325,8 +318,8 @@ const OrderHistory = () => {
                                 className="text-xs px-2 py-1 text-white bg-rose-600 hover:bg-rose-700"
                                 onClick={() => {
                                   handleOpenPopup("feedback")
-                                  setSelectedOrderDetail(selectedOrderDetail)
-                                  console.log(selectedOrderDetail)
+                                  setSelectedOrderDetail(orderDetail)
+                                  // console.log(orderDetail)
                                 }
                                 }
                               >
