@@ -8,7 +8,6 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [emailSent, setEmailSent] = useState(false);
-  const navigate = useNavigate();
 
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -25,7 +24,8 @@ const ForgotPassword = () => {
 
     setLoading(true);
     try {
-      const response = await api.post(`user/forgot-password?email=${encodeURIComponent(email)}`);
+      const response = await api.post('forgot-password', {email});
+
       setEmailSent(true);
       toast.success("Link đặt lại mật khẩu đã được gửi đến email của bạn");
     } catch (error) {
@@ -33,7 +33,7 @@ const ForgotPassword = () => {
       const errorMessage = error.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại sau.";
       toast.error(errorMessage);
       setError(errorMessage);
-    } finally { 
+    } finally {
       setLoading(false);
     }
   };

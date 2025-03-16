@@ -6,20 +6,6 @@ import { useLocation } from 'react-router-dom';
 const ResetPasswordForm = () => {
   const location = useLocation();
   const [token, setToken] = useState('');
-
-  // Get token from URL on mount
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const urlToken = queryParams.get('token');
-    if (urlToken) {
-      setToken(urlToken);
-      localStorage.setItem('resetPasswordToken', urlToken);
-    } else {
-      const storedToken = localStorage.getItem('resetPasswordToken');
-      if (storedToken) setToken(storedToken);
-    }
-  }, [location.search]);
-
   const [formData, setFormData] = useState({
     newPassword: '',
     confirmPassword: ''
@@ -32,7 +18,8 @@ const ResetPasswordForm = () => {
 
   const [errors, setErrors] = useState({
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    token: ''
   });
 
   const [status, setStatus] = useState({
@@ -41,6 +28,22 @@ const ResetPasswordForm = () => {
     success: ''
   });
 
+  //lấy token từ url
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const urlToken = queryParams.get('token');
+    console.log('Token from URL:', urlToken);
+    if (urlToken) {
+      setToken(urlToken);
+      localStorage.setItem('resetPasswordToken', urlToken);
+    } else {
+      const storedToken = localStorage.getItem('resetPasswordToken');
+      console.log('Token from localStorage:', storedToken);
+      if (storedToken) setToken(storedToken);
+    }
+  }, [location.search]);
+
+  //dưới backend nó validate rồi, này cũng ko cần lắm
   const validatePasswords = () => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     const newErrors = {};
@@ -57,7 +60,7 @@ const ResetPasswordForm = () => {
       newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp với mật khẩu mới';
     }
 
-    setErrors(newErrors);
+    setErrors(prev => ({ ...prev, ...newErrors }));
     return Object.keys(newErrors).length === 0;
   };
 
@@ -65,61 +68,72 @@ const ResetPasswordForm = () => {
     const { name, value } = e.target;
     if (name === 'token') {
       setToken(value);
+      localStorage.setItem('resetPasswordToken', value);
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
-    setErrors(prev => ({ ...prev, [name]: name === 'token' ? '' : prev[name] }));
+    setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
+  //submit xong là gửi password với confirmPassword về backend
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    if (!validatePasswords()) return;
-    if (!token) {
-      setStatus({
-        loading: false,
-        error: 'Vui lòng nhập token',
-        success: ''
-      });
+
+    if (!token || token.trim() === '') {
+      setErrors(prev => ({ ...prev, token: 'Vui lòng nhập token hợp lệ' }));
+      setStatus({ loading: false, error: 'Vui lòng nhập token', success: '' });
       return;
     }
-  
+
+    if (!validatePasswords()) return;
+
     setStatus({ loading: true, error: '', success: '' });
-  
+
     try {
-      const payload = {
-        token: token,
-        newPassword: formData.newPassword,
-        confirmPassword: formData.confirmPassword
-      };
-      console.log('Sending payload:', payload);
-      console.log('Authorization header:', `Bearer ${token}`);
-  
-      const response = await api.post('user/reset-password', payload, {
-        headers: {
-          Authorization: `Bearer ${token}`
+
+      const response = await api.post(
+        '/reset-password', 
+        {
+          password: formData.newPassword,
+          confirmPassword: formData.confirmPassword,
+        },
+        {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
-      });
-  
+      );
+
       console.log('Response:', response.data);
-  
+
       setStatus({
         loading: false,
         error: '',
         success: 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập với mật khẩu mới.'
       });
-  
+
       localStorage.removeItem('resetPasswordToken');
       setToken('');
       setFormData({ newPassword: '', confirmPassword: '' });
-  
+      setErrors({ newPassword: '', confirmPassword: '', token: '' });
+
     } catch (error) {
       console.error('Error response:', error.response?.data || error.message);
+      const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi đặt lại mật khẩu';
+      
       setStatus({
         loading: false,
-        error: error.response?.data?.message || 'Có lỗi xảy ra khi đặt lại mật khẩu',
+        error: errorMessage,
         success: ''
       });
+      
+      if (errorMessage.includes('token')) {
+        setErrors(prev => ({
+          ...prev,
+          token: 'Token không hợp lệ hoặc đã hết hạn'
+        }));
+      }
     }
   };
 
@@ -145,21 +159,20 @@ const ResetPasswordForm = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Token
-          </label>
+          
           <input
+            hidden
             type="text"
             name="token"
             value={token}
             onChange={handleChange}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-              !token && status.error.includes('token') ? 'border-red-500' : 'border-gray-300'
+              errors.token ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="Nhập token tại đây"
           />
-          {!token && status.error.includes('token') && (
-            <p className="text-red-500 text-sm">Vui lòng nhập token</p>
+          {errors.token && (
+            <p className="text-red-500 text-sm">{errors.token}</p>
           )}
         </div>
 
@@ -227,9 +240,9 @@ const ResetPasswordForm = () => {
 
         <button
           type="submit"
-          disabled={status.loading || !token}
+          disabled={status.loading || !token || token.trim() === ''}
           className={`w-full bg-[#d90429] text-white py-2 px-4 rounded-md transition-colors duration-200 ${
-            (status.loading || !token)
+            (status.loading || !token || token.trim() === '')
               ? 'opacity-50 cursor-not-allowed'
               : 'hover:bg-opacity-80'
           }`}
