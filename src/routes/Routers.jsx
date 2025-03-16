@@ -53,6 +53,9 @@ import PaymentResult from "../pages/CheckoutConfirm/PaymentResult";
 import ChangePassword from "../pages/ChangePassword";
 import ResetPasswordForm from "../pages/ResetPassword/reset";
 import FavoriteProducts from "../pages/FavoriteList";
+import StaffLayout from "../layout/StaffLayout";
+import Dashboard from "../pages/Staff/Dashboard";
+import OrderManagement from "../pages/Staff/OrderManagement";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -257,6 +260,24 @@ const Routers = () => {
         {
           path: "quiz",
           element: <ManageQuiz />,
+        }
+      ],
+    },
+    {
+      path: "/staff",
+      element: (
+        <ProtectedRoute allowedRoles={["USER"]}>
+          <StaffLayout />
+        </ProtectedRoute>
+      ),
+      children: [
+        {
+          index: true,
+          element: <Dashboard />,
+        },
+        {
+          path: 'orders',
+          element: <OrderManagement />,
         }
       ],
     },
