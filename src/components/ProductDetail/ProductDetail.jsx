@@ -10,6 +10,7 @@ import api, { fetchProductById } from '../../apis/product';
 import { toast } from 'react-toastify';
 import { addToCartWithQuantity } from '../../redux/features/cartSlice';
 import { addToCompare } from '../../redux/features/compareSlice';
+import { fetchProductFeedbacks } from '../../apis/feedback';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -27,6 +28,7 @@ const ProductDetail = () => {
     const [isInFavorites, setIsInFavorites] = useState(false);
     const [favoriteMessage, setFavoriteMessage] = useState(null);
     const [isInCompare, setIsInCompare] = useState(false);
+    const [feedbackData, setFeedbackData] = useState(null);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -34,6 +36,14 @@ const ProductDetail = () => {
                 setLoading(true);
                 const data = await fetchProductById(id);
                 setProduct(data);
+
+                // fetch feedback data
+                try {
+                    const response = await fetchProductFeedbacks(id);
+                    setFeedbackData(response);
+                } catch (error) {
+                    console.error('Error fetching feedback data:', error);
+                }
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -119,12 +129,12 @@ const ProductDetail = () => {
                 stock: product.stock
             }));
         }
-        
+
         // Navigate to compare page if there are at least 2 products in the compare list
         if (compareItems.length >= 1) { // Already 1 item + adding current one = 2 items
             // Show toast notification
             toast.info('Đã có 2 sản phẩm trong danh sách so sánh. Xem so sánh!');
-            
+
             // Optional: Navigate to compare page
             // Uncomment this if you want to navigate directly to compare page
             // setTimeout(() => navigate('/compare'), 1500);
@@ -260,8 +270,10 @@ const ProductDetail = () => {
 
                         <div className="mt-2 flex items-center space-x-4">
                             <div className="flex">
-                                <StarRating rating={4.5} />
-                                <span className="ml-2 text-sm text-gray-500">(10 đánh giá)</span>
+                                <StarRating rating={feedbackData.length > 0
+                                    ? feedbackData.reduce((sum, item) => sum + item.rating, 0) / feedbackData.length
+                                    : 0} />
+                                <span className="ml-2 text-sm text-gray-500">( {feedbackData.length} đánh giá)</span>
                             </div>
                             {product.stock > 0 ? (
                                 <span className="text-green-600 text-sm">Còn hàng</span>
@@ -328,8 +340,8 @@ const ProductDetail = () => {
                             <button
                                 onClick={handleAddToCompare}
                                 className={`flex items-center justify-center p-3 border rounded-md transition-all ${isInCompare
-                                        ? 'bg-rose-500 text-white'
-                                        : 'border-rose-500 hover:bg-rose-500 hover:text-white'
+                                    ? 'bg-rose-500 text-white'
+                                    : 'border-rose-500 hover:bg-rose-500 hover:text-white'
                                     }`}
                                 title={isInCompare ? "Đã trong danh sách so sánh" : "Thêm vào so sánh"}
                             >
@@ -351,8 +363,8 @@ const ProductDetail = () => {
             {favoriteMessage && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
                     <div className={`p-4 rounded-md shadow-lg border ${favoriteMessage.includes('Lỗi')
-                            ? 'bg-red-100 border-red-300 text-red-700'
-                            : 'bg-green-100 border-green-300 text-green-700'
+                        ? 'bg-red-100 border-red-300 text-red-700'
+                        : 'bg-green-100 border-green-300 text-green-700'
                         }`}>
                         <p className="font-medium">{favoriteMessage}</p>
                     </div>
@@ -362,7 +374,7 @@ const ProductDetail = () => {
             {/* Tabs Section */}
             <div className="mt-12 border-t pt-8">
                 <div className="flex space-x-8 border-b">
-                    {["description", "ingredients", "how to use"].map(
+                    {["description", "ingredients", "how to use", "feedback"].map(
                         (tab) => (
                             <button
                                 key={tab}
@@ -374,7 +386,8 @@ const ProductDetail = () => {
                             >
                                 {tab === "description" ? "Mô tả" :
                                     tab === "ingredients" ? "Thành phần" :
-                                        "Hướng dẫn sử dụng"}
+                                        tab === "how to use" ? "Hướng dẫn sử dụng" :
+                                            "Đánh giá"}
                             </button>
                         )
                     )}
@@ -411,6 +424,76 @@ const ProductDetail = () => {
                         <div className="prose max-w-none">
                             <h3 className="text-xl font-semibold mb-4">Hướng dẫn sử dụng</h3>
                             <div dangerouslySetInnerHTML={{ __html: product.instruction || "Không có hướng dẫn sử dụng." }} />
+                        </div>
+                    )}
+                    {selectedTab === "feedback" && (
+                        <div className="prose max-w-none">
+                            <h3 className="text-xl font-semibold mb-4">Đánh giá từ khách hàng</h3>
+
+                            {feedbackData && feedbackData.length > 0 ? (
+                                <div className="mt-6 space-y-6">
+                                    {feedbackData.map((feedback, index) => (
+                                        <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center">
+                                                    <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                        <span className="text-gray-600 font-semibold">
+                                                            {feedback.user?.fullName?.charAt(0) || "U"}
+                                                        </span>
+                                                    </div>
+                                                    <div className="ml-3">
+                                                        <p className="font-medium">{feedback.user?.fullName || "Người dùng"}</p>
+                                                        <div className="flex items-center mt-1">
+                                                            <StarRating rating={feedback.rating || 5} />
+                                                            <p className="text-xs text-gray-500 ml-2">
+                                                                {new Date(feedback.feedBackDate || Date.now()).toLocaleDateString('vi-VN')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p className="mt-3 text-gray-600">{feedback.comment || "Không có nhận xét."}</p>
+                                            {feedback.image && feedback.image !== "deo co hinh" && feedback.image !== "" && (
+                                                <div className="mt-3">
+                                                    <img
+                                                        src={feedback.image}
+                                                        alt="Feedback"
+                                                        className="max-h-40 rounded-md object-cover"
+                                                        onError={(e) => {
+                                                            e.target.onerror = null;
+                                                            e.target.style.display = 'none';
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-6 bg-gray-50 rounded-lg">
+                                    <p className="text-gray-500">Chưa có đánh giá nào cho sản phẩm này</p>
+                                </div>
+                            )}
+
+                            {/* Add rating summary if needed */}
+                            <div className="mt-8 border-t pt-6">
+                                <h4 className="text-lg font-semibold mb-4">Tóm tắt đánh giá</h4>
+                                <div className="flex items-center mb-4">
+                                    <div className="text-3xl font-bold mr-2">
+                                        {feedbackData.length > 0
+                                            ? (feedbackData.reduce((sum, item) => sum + item.rating, 0) / feedbackData.length).toFixed(1)
+                                            : "0.0"}
+                                    </div>
+                                    <div>
+                                        <StarRating rating={feedbackData.length > 0
+                                            ? feedbackData.reduce((sum, item) => sum + item.rating, 0) / feedbackData.length
+                                            : 0} />
+                                        <div className="text-sm text-gray-500 mt-1">
+                                            {feedbackData.length} đánh giá
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
