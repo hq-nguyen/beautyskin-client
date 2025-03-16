@@ -56,6 +56,7 @@ import FavoriteProducts from "../pages/FavoriteList";
 import StaffLayout from "../layout/StaffLayout";
 import Dashboard from "../pages/Staff/Dashboard";
 import OrderManagement from "../pages/Staff/OrderManagement";
+import ComparePage from "../pages/Shop/Compare";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -128,8 +129,12 @@ const Routers = () => {
           element: <Register />,
         },
         {
-          path: '/reset-password/',  
+          path: '/reset-password/',
           element: <ResetPasswordForm />,
+        },
+        {
+          path: '/compare',
+          element: <ComparePage />,
         },
         {
           path: '*',
@@ -176,7 +181,7 @@ const Routers = () => {
         {
           path: "promotion",
           element: <Promotion />,
-        }, 
+        },
         {
           path: "change-password",
           element: <ChangePassword />,
@@ -192,15 +197,15 @@ const Routers = () => {
       ),
       children: [
         {
-          path: "cart",   
+          path: "cart",
           element: <ShoppingCart />,
         },
         {
-          index: true,   
+          index: true,
           element: <CheckoutPage />,
         },
         {
-          path: "confirmCOD",   
+          path: "confirmCOD",
           element: <CODPage />,
         },
         {
