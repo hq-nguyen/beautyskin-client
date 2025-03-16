@@ -3,6 +3,7 @@ import { message, Pagination } from 'antd';
 import { formatDate, formatCurrency } from '../../utils/format';
 import { fetchOrderHistory } from '../../apis/order';
 import { FaSearch, FaSpinner } from 'react-icons/fa';
+import { CheckCircleTwoTone } from '@ant-design/icons';
 import { assets } from '../../assets/frontend_assets/assets';
 import { Link } from 'react-router-dom';
 import { createFeedback } from '../../apis/feedback';
@@ -48,6 +49,7 @@ const OrderHistory = () => {
           orderDetailId: detail.orderDetailId,
           quantity: detail.quantity,
           price: detail.unitPrice,
+          feedback: detail.feedback,
           product: {
             id: detail.product.id,
             name: detail.product.name,
@@ -185,6 +187,7 @@ const OrderHistory = () => {
         // console.log(filterOrders);
         const newData = { ...data, orderDetailId: selectedOrderDetail.orderDetailId };
         const response = await createFeedback(newData);
+        fetchOrders();
       } catch (error) {
         console.error(error);
       }
@@ -302,7 +305,7 @@ const OrderHistory = () => {
                         </Link>
                         <div className="flex-1 min-w-0">
                           <Link to={`/product/${orderDetail?.product?.id}`}>
-                            <h4 className="text-xs hover:text-rose-600 font-medium text-gray-900 truncate">{orderDetail?.product?.name}</h4>
+                            <h4 className="text-sm hover:text-rose-600 font-medium text-gray-900 truncate">{orderDetail?.product?.name}</h4>
                           </Link>
                           <p className="text-xs text-gray-500">{orderDetail?.product?.category}</p>
                           <div className="mt-1 flex items-center justify-between">
@@ -311,23 +314,30 @@ const OrderHistory = () => {
                           </div>
 
                           {/* Add feedback button for delivered orders */}
-                          {order?.status === "DELIVERED" && (
-                            <div className="mt-2 flex justify-between ">
-                              <div></div>
-                              <button
-                                className="text-xs px-2 py-1 text-white bg-rose-600 hover:bg-rose-700"
-                                onClick={() => {
-                                  handleOpenPopup("feedback")
-                                  setSelectedOrderDetail(orderDetail)
-                                  // console.log(orderDetail)
-                                }
-                                }
-                              >
-                                Đánh giá sản phẩm
-                              </button>
-                            </div>
-                          )
-                          }
+                          {order?.status === "DELIVERED" ? (
+                            orderDetail?.feedback === false ? (
+                              <div className="mt-2 flex justify-between">
+                                <div></div>
+                                <button
+                                  className="text-xs px-2 py-1 text-white bg-rose-600 hover:bg-rose-700"
+                                  onClick={() => {
+                                    handleOpenPopup("feedback")
+                                    setSelectedOrderDetail(orderDetail)
+                                    console.log(orderDetail)
+                                  }}
+                                >
+                                  Đánh giá sản phẩm
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="mt-2 flex justify-between">
+                                <div></div>
+                                <div className="text-sm px-2 py-1 text-green-600">
+                                  Đã đánh giá <CheckCircleTwoTone twoToneColor="#52c41a" />
+                                </div>
+                              </div>
+                            )
+                          ) : null}
                         </div>
                       </div>
                     ))}
