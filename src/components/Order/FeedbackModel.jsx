@@ -1,105 +1,136 @@
-import { useState } from 'react';
-import { Modal, Rate, Input, Button, message, Card } from 'antd';
-import { createFeedback } from '../../apis/feedback';
+import { Button, Modal, Rate, Select, Upload } from "antd";
+import TextArea from "antd/es/input/TextArea";
+import { useState } from "react";
+import { UploadOutlined } from "@ant-design/icons";
+import uploadFile from "../../utils/upload";
 
-const { TextArea } = Input;
+function FeedbackModel({ mode, visible, close, submit }) {
 
-// This component can be added to the same file as OrderHistory or in a separate file
-const FeedbackModal = ({ isVisible, onClose, orderId, product }) => {
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [image, setImage] = useState("");
+  const [uploading, setUploading] = useState(false);
+  // report
+  const [reason, setReason] = useState("");
+  const [description, setDescription] = useState(0);
 
-  const handleSubmit = async () => {
-    if (!rating) {
-      message.error('Vui lòng chọn số sao đánh giá');
-      return;
-    }
-
+  // Handle image upload
+  const handleUpload = async (file) => {
+    setUploading(true);
     try {
-      setSubmitting(true);
-      
-      const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-      
-      const feedbackData = {
-        rating: rating,
-        comment: comment,
-        feedBackDate: currentDate
-      };
-      
-      await createFeedback(product.id, feedbackData);
-      
-      message.success('Cảm ơn đánh giá của bạn!');
-      onClose(true); // Pass true to indicate successful submission
+      const url = await uploadFile(file);
+      if (typeof url === "string") {
+        setImage(url);
+      } else {
+        console.error("Upload failed:", url?.data?.message || "Unknown error");
+      }
     } catch (error) {
-      message.error('Không thể gửi đánh giá. Vui lòng thử lại!');
-      console.error(error);
+      console.error("Upload error:", error);
     } finally {
-      setSubmitting(false);
+      setUploading(false);
     }
+    return false; // Prevent default upload behavior
+  };
+
+  const handleSubmit = () => {
+    if (mode == "feedback") {
+      submit({ rating, comment, image });
+    } else {
+      submit({ reason, description });
+    }
+  };
+
+  const resetForm = () => {
+    setRating(0);
+    setComment("");
+    setImage("");
   };
 
   return (
     <Modal
-      title="Đánh giá sản phẩm"
-      open={isVisible}
-      onCancel={() => onClose(false)}
-      footer={null}
-      centered
-      width={500}
+      title={mode === "feedback" ? "Đánh giá sản phẩm" : "Báo cáo đơn hàng"}
+      open={visible}
+      onCancel={() => {
+        resetForm();
+        close();
+      }}
+      footer={[
+        <Button key="cancel" onClick={close}>
+          Hủy
+        </Button>,
+        <Button
+          key="submit"
+          type="primary"
+          onClick={handleSubmit}
+          disabled={rating === 0}
+        >
+          Gửi
+        </Button>,
+      ]}
     >
-      <Card className="border border-gray-200 rounded-lg mt-4">
-        <div className="flex items-start gap-4">
-          <img
-            src={product?.image || "https://images.unsplash.com/photo-1560393464-5c69a73c5770"}
-            alt={product?.name}
-            className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-            onError={(e) => {
-              e.target.src = "https://via.placeholder.com/150";
-            }}
-          />
-          <div className="flex-1">
-            <h3 className="font-medium text-gray-900">{product?.name}</h3>
-            <p className="text-sm text-gray-500 mb-2">{product?.category}</p>
-            
-            <div className="mb-4">
-              <p className="text-sm font-medium text-gray-700 mb-1">Đánh giá của bạn</p>
-              <Rate 
-                allowHalf 
-                defaultValue={5} 
-                value={rating}
-                onChange={setRating} 
-              />
-            </div>
-            
-            <div className="mb-4">
-              <p className="text-sm font-medium text-gray-700 mb-1">Nhận xét (tùy chọn)</p>
-              <TextArea 
-                rows={3} 
-                placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." 
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex justify-end gap-2">
-              <Button onClick={() => onClose(false)}>
-                Hủy
-              </Button>
-              <Button
-                type="primary"
-                className="bg-rose-600 hover:bg-rose-700 border-rose-600"
-                onClick={handleSubmit}
-                loading={submitting}
-              >
-                Gửi đánh giá
-              </Button>
-            </div>
+      {mode === "feedback" ? (
+        <>
+          <div style={{ marginBottom: 16 }}>
+            <p>How would you rate this product?</p>
+            <Rate value={rating} onChange={setRating} />
           </div>
-        </div>
-      </Card>
+
+          <TextArea
+            rows={4}
+            placeholder="Share your experience with this product..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            style={{ marginBottom: 16 }}
+          />
+
+          <div>
+            <p>Add an image (optional):</p>
+            <Upload
+              beforeUpload={handleUpload}
+              maxCount={1}
+              listType="picture"
+              showUploadList={true}
+              onRemove={() => setImage("")}
+            >
+              <Button icon={<UploadOutlined />} loading={uploading}>
+                {image ? "Change Image" : "Upload Image"}
+              </Button>
+            </Upload>
+          </div>
+
+          {image && (
+            <div style={{ marginTop: 16 }}>
+              <img
+                src={image}
+                alt="Feedback"
+                style={{ maxWidth: "100%", maxHeight: 200 }}
+              />
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <Select
+            style={{ width: "100%", marginBottom: 10 }}
+            value={reason}
+            onChange={setReason}
+            placeholder="Select a reason"
+            options={[
+              { label: "spam", value: "Mistake" },
+              { label: "fake", value: "Product is not good" },
+              { label: "orther", value: "Not in above" },
+            ]}
+          />
+          <TextArea
+            rows={4}
+            placeholder="Leave your specific reasons here..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </>
+      )}
     </Modal>
   );
-};
+}
 
-export default FeedbackModal;
+export default FeedbackModel;

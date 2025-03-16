@@ -1,8 +1,8 @@
 import api from "../config/axios";
 
-export const createFeedback = async (productId, feedbackData) => {
+export const createFeedback = async (feedbackData) => {
     try {
-      const response = await api.post(`/feedback/create/${productId}`, feedbackData);
+      const response = await api.post(`/feedback/create`, feedbackData);
       return response.data;
     } catch (error) {
       console.error('Error creating feedback:', error);
