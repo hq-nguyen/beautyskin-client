@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { message, Pagination, Button } from 'antd';
+import { message, Pagination } from 'antd';
 import { formatDate, formatCurrency } from '../../utils/format';
 import { fetchOrderHistory } from '../../apis/order';
 import { FaSearch, FaSpinner } from 'react-icons/fa';
@@ -45,16 +45,15 @@ const OrderHistory = () => {
         status: order.orderStatus,
         paymentStatus: order.paymentStatus,
         orderDetails: order.orderDetails.map(detail => ({
-          orderDetailId: detail.id,
+          orderDetailId: detail.orderDetailId,
+          quantity: detail.quantity,
+          price: detail.unitPrice,
           product: {
             id: detail.product.id,
             name: detail.product.name,
             images: detail.product.images,
-            price: detail.unitPrice,
             category: detail.product.category ? detail.product.category.name : 'Unknown',
-            quantity: detail.quantity
           },
-          rated: detail.rated || false
         }))
       }));
 
@@ -182,10 +181,13 @@ const OrderHistory = () => {
 
   const handleSubmitFeedback = async (data) => {
     if (popupMode == 'feedback') {
-      console.log(filterOrders);
-      const newData = { ...data, orderDetailId: selectedOrderDetail.id};
-      const response = await createFeedback(newData);
-      // console.log(response);
+      try {
+        // console.log(filterOrders);
+        const newData = { ...data, orderDetailId: selectedOrderDetail.orderDetailId };
+        const response = await createFeedback(newData);
+      } catch (error) {
+        console.error(error);
+      }
     } else {
       const newData = { ...data, orderId: selectedOrder.id, image: "" };
       // const response = await createReport(newData);
@@ -201,7 +203,7 @@ const OrderHistory = () => {
   const filterOrders = order?.filter(order => {
     const matchesSearch =
       order?.orderDetails.some((orderDetail) => orderDetail.product.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = activeTab === 'all' || order.status === activeTab;
+    const matchesStatus = activeTab === 'all' || order.status === activeTab.toUpperCase();
     return matchesSearch && matchesStatus;
   })
 
@@ -312,23 +314,24 @@ const OrderHistory = () => {
                           <p className="text-xs text-gray-500">{orderDetail?.product?.category}</p>
                           <div className="mt-1 flex items-center justify-between">
                             <p className="text-xs text-gray-600">Số lượng: {orderDetail?.quantity}</p>
-                            <p className="font-medium text-xs text-gray-900">{formatCurrency(orderDetail?.product?.price)}</p>
+                            <p className="font-medium text-xs text-gray-900">{formatCurrency(orderDetail?.price)} x {orderDetail?.quantity}</p>
                           </div>
 
                           {/* Add feedback button for delivered orders */}
                           {order?.status === "DELIVERED" && (
-                            <div className="mt-2">
-                              <Button
-                                className="text-xs p-0 text-rose-600"
+                            <div className="mt-2 flex justify-between ">
+                              <div></div>
+                              <button
+                                className="text-xs px-2 py-1 text-white bg-rose-600 hover:bg-rose-700"
                                 onClick={() => {
                                   handleOpenPopup("feedback")
-                                  setSelectedOrderDetail(orderDetail)
-                                  console.log(filterOrders)
+                                  setSelectedOrderDetail(selectedOrderDetail)
+                                  console.log(selectedOrderDetail)
                                 }
                                 }
                               >
                                 Đánh giá sản phẩm
-                              </Button>
+                              </button>
                             </div>
                           )
                           }
