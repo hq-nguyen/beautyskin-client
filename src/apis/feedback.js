@@ -18,3 +18,12 @@ export const fetchFeedbacks = async () => {
     message.error(error.response.data);
   }
 };
+
+export const fetchProductFeedbacks = async (productId) => {
+  try {
+    const response = await api.get(`/feedback/getFeedbackById/${productId}`);
+    return response.data;
+  } catch (error) {
+    message.error(error.response.data);
+  }
+}
