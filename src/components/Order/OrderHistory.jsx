@@ -100,7 +100,7 @@ const OrderHistory = () => {
           order.status === 'PENDING'
         );
       case 'wait-product':
-        return orders.filter(order => order.status === 'IN_PROGRESS');
+        return orders.filter(order => order.status === 'PENDING');
       case 'shipping':
         return orders.filter(order => order.status === 'SHIPPED');
       case 'delivered':

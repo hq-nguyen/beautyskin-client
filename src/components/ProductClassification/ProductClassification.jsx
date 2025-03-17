@@ -8,7 +8,7 @@ const ProductClassification = () => {
 
     const tabs = [
         { id: "skinType", label: "Mua theo loại da" },
-        { id: "skinProblem", label: "Mua theo vấn đề da" },
+        { id: "skinConcern", label: "Mua theo vấn đề da" },
         { id: "texture", label: "Mua theo kết cấu" }
     ];
 
@@ -19,13 +19,13 @@ const ProductClassification = () => {
         { id: 4, title: "Da tổng hợp", icon: <FaBalanceScale />, image: assets.da_tonghop, filter: "combination" }
     ];
 
-    const skinProblemData = [
-        { id: 1, title: "Da khô, mất nước", icon: <FaAllergies />, image: assets.concern_dry, filter: "dry-dehydrated" },
-        { id: 2, title: "Da không đều màu", icon: <FaHeartbeat />, image: assets.concern_pigmentation, filter: "uneven-tone" },
+    const skinConcern = [
+        { id: 1, title: "Da khô, mất nước", icon: <FaAllergies />, image: assets.concern_dry, filter: "dehydrated" },
+        { id: 2, title: "Da không đều màu", icon: <FaHeartbeat />, image: assets.concern_pigmentation, filter: "uneven" },
         { id: 3, title: "Da lão hóa", icon: <FaSun />, image: assets.concern_anti_aging, filter: "aging" },
-        { id: 4, title: "Da lỗ chân lông to", icon: <FaFeather />, image: assets.concern_sensitive, filter: "large-pores" },
+        { id: 4, title: "Da lỗ chân lông to", icon: <FaFeather />, image: assets.concern_sensitive, filter: "pores" },
         { id: 5, title: "Da mụn", icon: <FaFeather />, image: assets.concern_acne, filter: "acne" },
-        { id: 6, title: "Da kém đàn hồi", icon: <FaFeather />, image: assets.concern_oil, filter: "loss-elasticity" }
+        { id: 6, title: "Da kém đàn hồi", icon: <FaFeather />, image: assets.concern_oil, filter: "elasticity" }
     ];
 
     const textureData = [
@@ -40,8 +40,8 @@ const ProductClassification = () => {
         switch (activeTab) {
             case "skinType":
                 return skinTypeData;
-            case "skinProblem":
-                return skinProblemData;
+            case "skinConcern":
+                return skinConcern;
             case "texture":
                 return textureData;
             default:
@@ -53,7 +53,7 @@ const ProductClassification = () => {
         switch (activeTab) {
             case "skinType":
                 return "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4";
-            case "skinProblem":
+            case "skinConcern":
                 return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6";
             case "texture":
                 return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
