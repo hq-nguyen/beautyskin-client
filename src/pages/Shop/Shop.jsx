@@ -7,7 +7,7 @@ import ProductItem from "../../components/Card/ProductItem";
 import { useLocation } from "react-router-dom"; // Import useLocation
 
 const Shop = () => {
-  const location = useLocation(); //dùng useLocation để lấy category và giá trị lọc trong url
+  const location = useLocation(); //dùng useLocation để lấy category và giá trị lọc
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [skinTypes, setSkinTypes] = useState([]);
