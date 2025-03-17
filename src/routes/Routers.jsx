@@ -87,11 +87,7 @@ const Routers = () => {
         {
           path: '/blog/:slug',
           element: <BlogDetail />,
-        },
-        {
-          path: '/news',
-          element: <News />,
-        },
+        },  
         {
           path: '/test-skin',
           element: <TestSkinType />,
