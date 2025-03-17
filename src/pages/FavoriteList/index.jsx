@@ -4,6 +4,7 @@ import api from '../../config/axios';
 import { assets } from '../../assets/frontend_assets/assets';
 import { addToCart } from '../../redux/features/cartSlice';
 import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 
 const FavoriteProducts = () => {
@@ -186,16 +187,16 @@ const FavoriteProducts = () => {
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="py-4 px-2 w-5/12">
                     <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0 w-12 h-12">
+                      <Link to={`/product/${product.id}`} className="flex-shrink-0 w-12 h-12">
                         <img
                           src={product.images[0].url || assets.da_kho}
                           alt={product.name}
                           className="w-full h-full object-cover rounded"
                         />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-700 line-clamp-2">{product.name}</p>
-                      </div>
+                      </Link>
+                      <Link to={`/product/${product.id}`} className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-700 line-clamp-2 hover:text-rose-500">{product.name}</p>
+                      </Link>
                     </div>
                   </td>
                   <td className="py-4 px-4">
@@ -220,13 +221,6 @@ const FavoriteProducts = () => {
                       >
                         xóa
                       </button>
-                      <button
-                        className="py-2 bg-rose-500 text-white text-sm rounded-md hover:bg-rose-600 transition-colors"
-                        onClick={handleAddToCart}
-                      >
-                        Thêm giỏ hàng
-                      </button>
-
                     </div>
                   </td>
                 </tr>

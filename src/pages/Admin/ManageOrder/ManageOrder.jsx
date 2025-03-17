@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Button, Space, Table, Tag, message, Pagination, Dropdown, Menu, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { FaSearch, FaSpinner } from 'react-icons/fa';
-import { fetchOrders, updateStatusOrder2 } from '../../../apis/order';
+import { fetchOrders, updateStatusOrder2, updateStatusPayment } from '../../../apis/order';
 import {
-    EditOutlined,
-    DeleteOutlined,
-    DownOutlined
+  EditOutlined,
+  DeleteOutlined,
+  DownOutlined
 } from '@ant-design/icons';
 
 const ManageOrder = () => {
@@ -157,22 +157,61 @@ const ManageOrder = () => {
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
       setStatusUpdateLoading(true);
-      
-      // Call API to update status
+
+      // Call API to update order status
       const result = await updateStatusOrder2(orderId, newStatus);
-      
+
       // If successful, update local state
       if (result) {
-        // Update the orders state with the new status
-        const updatedOrders = orders.map(order => {
-          if (order.id === orderId) {
-            return { ...order, orderStatus: newStatus };
+        // If the new status is DELIVERED, also update the payment status for COD orders
+        if (newStatus === 'DELIVERED') {
+          // Find the order to check if it's a COD order (no transaction or pending payment)
+          const order = orders.find(order => order.id === orderId);
+
+          // Check if it's a COD order that needs payment update
+          // (Either no transaction or payment status is PENDING)
+          if (order && (order.transaction === null || order.paymentStatus === 'PENDING')) {
+            // Call the API to update payment status to PAID
+            await updateStatusPayment(orderId, 'PAID');
+
+            // Update local state with both status changes
+            const updatedOrders = orders.map(order => {
+              if (order.id === orderId) {
+                return {
+                  ...order,
+                  orderStatus: newStatus,
+                  paymentStatus: 'PAID'
+                };
+              }
+              return order;
+            });
+
+            setOrders(updatedOrders);
+            message.success(`Đơn hàng đã được cập nhật thành ${getOrderStatusLabel(newStatus)} và thanh toán đã được xác nhận`);
+          } else {
+            // Just update the order status without changing payment status
+            const updatedOrders = orders.map(order => {
+              if (order.id === orderId) {
+                return { ...order, orderStatus: newStatus };
+              }
+              return order;
+            });
+
+            setOrders(updatedOrders);
+            message.success(`Trạng thái đơn hàng đã được cập nhật thành ${getOrderStatusLabel(newStatus)}`);
           }
-          return order;
-        });
-        
-        setOrders(updatedOrders);
-        message.success(`Trạng thái đơn hàng đã được cập nhật thành ${getOrderStatusLabel(newStatus)}`);
+        } else {
+          // For non-DELIVERED status updates, just update the order status
+          const updatedOrders = orders.map(order => {
+            if (order.id === orderId) {
+              return { ...order, orderStatus: newStatus };
+            }
+            return order;
+          });
+
+          setOrders(updatedOrders);
+          message.success(`Trạng thái đơn hàng đã được cập nhật thành ${getOrderStatusLabel(newStatus)}`);
+        }
       }
     } catch (error) {
       console.error("Error updating order status:", error);
@@ -300,13 +339,13 @@ const ManageOrder = () => {
       width: 200,
       render: (_, record) => (
         <Space>
-          <Dropdown 
-            overlay={statusMenu(record)} 
+          <Dropdown
+            overlay={statusMenu(record)}
             trigger={['click']}
             disabled={statusUpdateLoading}
           >
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               size="small"
               icon={<EditOutlined />}
               loading={statusUpdateLoading}
@@ -357,8 +396,8 @@ const ManageOrder = () => {
             <button
               key={tab.key}
               className={`px-4 py-2 text-sm font-medium mr-2 transition-colors duration-200 ${activeTab === tab.key
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-500 hover:text-gray-700'
                 }`}
               onClick={() => handleTabChange(tab.key)}
             >
