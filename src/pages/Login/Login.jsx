@@ -90,22 +90,72 @@ const Login = () => {
 
   const handleLoginGoogle = () => {
     const provider = new GoogleAuthProvider();
-
+    setIsLoading(true);
+  
     signInWithPopup(auth, provider)
-      .then((result) => {
-        const token = result.user.accessToken;
-        const user = result.user;
-        console.log(user);
-        navigate('/');
+      .then(async (result) => {
+        try {
+          // Get ID token from Firebase instead of access token
+          const idToken = await result.user.getIdToken();
+          if (!idToken) {
+            throw new Error("Không nhận được token từ Google");
+          }
+          
+          console.log("Firebase ID token received"); // For debugging
+          
+          // Send token to backend in the correct format
+          const response = await api.post('api/login-google', { 
+            token: idToken 
+          });
+          
+          // Check if response.data exists and contains the expected properties
+          console.log("Backend response:", response.data);
+          
+          // Make sure we're correctly accessing the properties from the response
+          if (response && response.data) {
+            // Assuming the backend returns these fields directly in the response body
+            const { token, roleEnum, id } = response.data;
+            
+            // Verify we have a token before saving
+            if (token) {
+              localStorage.setItem('token', token);
+              console.log("Token saved to localStorage");
+            } else {
+              console.error("No token received from backend");
+            }
+            
+            if (id) {
+              localStorage.setItem('id', id);
+              console.log("ID saved to localStorage");
+            } else {
+              console.error("No id received from backend");
+            }
+            
+            // Dispatch login action with complete response data
+            dispatch(login(response.data));
+            
+            // Navigate based on role
+            if (roleEnum === 'MANAGER') {
+              navigate('/admin');
+            } else if (roleEnum === 'USER') {
+              navigate('/');
+            }
+          } else {
+            throw new Error("Invalid response format from backend");
+          }
+        } catch (error) {
+          console.error("Login error:", error);
+          message.error(error?.response?.data || "Đăng nhập Google thất bại");
+        } finally {
+          setIsLoading(false);
+        }
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        const email = error.customData.email;
-        const credential = GoogleAuthProvider.credentialFromError(error);
+        console.error("Google sign-in error:", error);
+        message.error("Đăng nhập Google thất bại");
+        setIsLoading(false);
       });
   };
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-8">
       <div className="max-w-xl w-full bg-card rounded-lg shadow-lg p-8">
