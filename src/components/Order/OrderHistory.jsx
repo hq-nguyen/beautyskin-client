@@ -184,16 +184,24 @@ const OrderHistory = () => {
   const handleSubmitFeedback = async (data) => {
     if (popupMode == 'feedback') {
       try {
-        // console.log(filterOrders);
-        const newData = { ...data, orderDetailId: selectedOrderDetail.orderDetailId };
+        // Transform the images array to match API expectation
+        const formattedImages = data.images.map(url => ({ url }));
+
+        const newData = {
+          ...data,
+          orderDetailId: selectedOrderDetail.orderDetailId,
+          image: formattedImages,  // Use the formatted images array with the key "image"
+          images: undefined  // Remove the original images array
+        };
+
         const response = await createFeedback(newData);
         fetchOrders();
       } catch (error) {
         console.error(error);
       }
     } else {
+      // Your existing report code
       const newData = { ...data, orderId: selectedOrder.id, image: "" };
-      // const response = await createReport(newData);
       console.log(newData);
     }
     handleClosePopup();
