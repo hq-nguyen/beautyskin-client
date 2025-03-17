@@ -3,7 +3,6 @@ import Home from '../pages/Home';
 import Shop from '../pages/Shop/Shop';
 import About from '../pages/About/About';
 import Blog from '../pages/Blog/Blog';
-import News from '../pages/News/News';
 import TestSkinType from '../pages/TestSkinType/TestSkinType';
 import Register from '../pages/Register/Register';
 import Login from '../pages/Login/Login';
