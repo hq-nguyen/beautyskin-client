@@ -13,27 +13,27 @@ const ProductClassification = () => {
     ];
 
     const skinTypeData = [
-        { id: 1, title: "Da dầu", icon: <FaOilCan />, image: assets.da_dau },
-        { id: 2, title: "Da khô", icon: <FaLeaf />, image: assets.da_kho },
-        { id: 3, title: "Da thường", icon: <FaTint />, image: assets.da_thuong },
-        { id: 4, title: "Da tổng hợp", icon: <FaBalanceScale />, image: assets.da_tonghop }
+        { id: 1, title: "Da dầu", icon: <FaOilCan />, image: assets.da_dau, filter: "oily" },
+        { id: 2, title: "Da khô", icon: <FaLeaf />, image: assets.da_kho, filter: "dry" },
+        { id: 3, title: "Da thường", icon: <FaTint />, image: assets.da_thuong, filter: "normal" },
+        { id: 4, title: "Da tổng hợp", icon: <FaBalanceScale />, image: assets.da_tonghop, filter: "combination" }
     ];
 
     const skinProblemData = [
-        { id: 1, title: "Da khô, mất nước", icon: <FaAllergies />, image: assets.concern_dry },
-        { id: 2, title: "Da không đều màu", icon: <FaHeartbeat />, image: assets.concern_pigmentation },
-        { id: 3, title: "Da lão hóa", icon: <FaSun />, image: assets.concern_anti_aging },
-        { id: 4, title: "Da lỗ chân lông to", icon: <FaFeather />, image: assets.concern_sensitive },
-        { id: 5, title: "Da mụn", icon: <FaFeather />, image: assets.concern_acne },
-        { id: 6, title: "Da kém đàn hồi", icon: <FaFeather />, image: assets.concern_oil }
+        { id: 1, title: "Da khô, mất nước", icon: <FaAllergies />, image: assets.concern_dry, filter: "dry-dehydrated" },
+        { id: 2, title: "Da không đều màu", icon: <FaHeartbeat />, image: assets.concern_pigmentation, filter: "uneven-tone" },
+        { id: 3, title: "Da lão hóa", icon: <FaSun />, image: assets.concern_anti_aging, filter: "aging" },
+        { id: 4, title: "Da lỗ chân lông to", icon: <FaFeather />, image: assets.concern_sensitive, filter: "large-pores" },
+        { id: 5, title: "Da mụn", icon: <FaFeather />, image: assets.concern_acne, filter: "acne" },
+        { id: 6, title: "Da kém đàn hồi", icon: <FaFeather />, image: assets.concern_oil, filter: "loss-elasticity" }
     ];
 
     const textureData = [
-        { id: 1, title: "Dạng kem", icon: <FaTint />, image: assets.type_cream },
-        { id: 2, title: "Kết cấu gel", icon: <FaTint />, image: assets.type_gel },
-        { id: 3, title: "Kết cấu tạo bọt", icon: <FaTint />, image: assets.type_foam },
-        { id: 4, title: "Dung dịch tẩy rửa", icon: <FaTint />, image: assets.type_cleanser },
-        { id: 5, title: "Serum cho da mặt", icon: <FaTint />, image: assets.type_serum }
+        { id: 1, title: "Dạng kem", icon: <FaTint />, image: assets.type_cream, filter: "cream" },
+        { id: 2, title: "Kết cấu gel", icon: <FaTint />, image: assets.type_gel, filter: "gel" },
+        { id: 3, title: "Kết cấu tạo bọt", icon: <FaTint />, image: assets.type_foam, filter: "foam" },
+        { id: 4, title: "Dung dịch tẩy rửa", icon: <FaTint />, image: assets.type_cleanser, filter: "cleanser" },
+        { id: 5, title: "Serum cho da mặt", icon: <FaTint />, image: assets.type_serum, filter: "serum" }
     ];
 
     const getActiveData = () => {
@@ -52,26 +52,27 @@ const ProductClassification = () => {
     const getGridClass = () => {
         switch (activeTab) {
             case "skinType":
-                return "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4"; // 4 columns
+                return "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4";
             case "skinProblem":
-                return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"; // 6 columns
+                return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6";
             case "texture":
-                return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"; // 5 columns
+                return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
             default:
-                return "grid-cols-4"; // Default to 4 columns
+                return "grid-cols-4";
         }
     };
 
     const ProductCard = ({ item }) => (
-        <Link to={""} className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+        <Link
+            to={`/shop?category=${activeTab}&filter=${item.filter}`} 
+            className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+        >
             <div className="relative h-200 overflow-hidden">
                 <img
                     src={item.image}
                     alt={item.title}
                     className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
-                    style={{
-                        aspectRatio: "2 / 2.6"
-                    }}
+                    style={{ aspectRatio: "2 / 2.6" }}
                     onError={(e) => {
                         e.target.src = "https://images.unsplash.com/photo-1556228578-0d85b1a4d571";
                     }}
@@ -109,7 +110,6 @@ const ProductClassification = () => {
                 </div>
             </div>
 
-            {/* Dynamic grid based on activeTab */}
             <div className={`grid ${getGridClass()} gap-6 px-4 sm:px-12 lg:px-24`}>
                 {getActiveData().map((item) => (
                     <ProductCard key={item.id} item={item} />
