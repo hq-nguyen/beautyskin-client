@@ -7,6 +7,7 @@ import Error from '../../components/Quiz/Error';
 import EmptyQuestions from '../../components/Quiz/EmptyQuestion';
 import Question from '../../components/Quiz/Question';
 import Result from '../../components/Quiz/Result';
+import { createSkinProfile } from '../../apis/customer'; 
 
 const SkinTypeQuiz = () => {
   const navigate = useNavigate();
@@ -20,6 +21,9 @@ const SkinTypeQuiz = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [id, setId] = useState(null);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [profileSaveError, setProfileSaveError] = useState(null);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
     const userIdFromStorage = localStorage.getItem('id');
@@ -60,6 +64,29 @@ const SkinTypeQuiz = () => {
     loadQuestions();
   }, []);
 
+  // Save skin profile to API when quiz is completed
+  useEffect(() => {
+    const saveSkinProfile = async () => {
+      if (showResult && id && !profileSaved && !profileSaveError && !savingProfile) {
+        try {
+          setSavingProfile(true);
+          
+          // Use the updateSkinProfile function to save the profile
+          await createSkinProfile(totalPoints);
+          
+          setProfileSaved(true);
+          setSavingProfile(false);
+        } catch (err) {
+          console.error('Error saving skin profile:', err);
+          setProfileSaveError(err.message || 'Không thể lưu hồ sơ da. Vui lòng thử lại sau.');
+          setSavingProfile(false);
+        }
+      }
+    };
+
+    saveSkinProfile();
+  }, [showResult, totalPoints, id, profileSaved, profileSaveError, savingProfile]);
+
   const handleAnswer = (questionId, optionId, point) => {
     const newAnswer = { questionId, optionId, point };
     
@@ -88,6 +115,9 @@ const SkinTypeQuiz = () => {
       setSkinType(skinTypeResult.type);
       setRecommendations(skinTypeResult.recommendations);
       setShowResult(true);
+      setProfileSaved(false); // Reset profile saved state when reshowing results
+      setProfileSaveError(null);
+      setSavingProfile(false);
     }
   };
 
@@ -98,6 +128,7 @@ const SkinTypeQuiz = () => {
   };
 
   const determineSkinType = (points) => {
+    // This matches the backend logic for skin type determination
     if (points <= 11) {
       return {
         type: 'Da dầu',
@@ -138,6 +169,9 @@ const SkinTypeQuiz = () => {
     setTotalPoints(0);
     setSkinType('');
     setRecommendations('');
+    setProfileSaved(false);
+    setProfileSaveError(null);
+    setSavingProfile(false);
   };
 
   const navigateToSkinTypePage = (route) => {
@@ -179,6 +213,10 @@ const SkinTypeQuiz = () => {
               recommendations={recommendations}
               onReset={resetQuiz}
               onNavigate={() => navigateToSkinTypePage(determineSkinType(totalPoints).route)}
+              profileSaved={profileSaved}
+              profileSaveError={profileSaveError}
+              savingProfile={savingProfile}
+              isLoggedIn={!!id}
             />
           )}
         </div>

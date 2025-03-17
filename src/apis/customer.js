@@ -47,4 +47,27 @@ export const unLockCustomer = async (id) => {
     }
 };
 
+export const createSkinProfile = async (skinPoint) => {
+    try {
+        const response = await api.post('/skin-profile/create', null, {
+            params: {
+                skinPoint: skinPoint
+            }
+        });
+        console.log('Skin profile updated:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating skin profile:', error);
+        throw new Error("Có lỗi xảy ra khi lưu dữ liệu loại da của bạn. Xin thông cảm!");
+    }
+};
 
+export const getSkinProfile = async (id) => {
+    try {
+        const response = await api.get(`/skin-profile/get-by-user/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating skin profile:', error);
+        throw new Error("Có lỗi xảy ra khi lưu dữ liệu loại da của bạn. Xin thông cảm!");
+    }
+};
