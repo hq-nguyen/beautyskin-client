@@ -271,7 +271,7 @@ const Routers = () => {
     {
       path: "/staff",
       element: (
-        <ProtectedRoute allowedRoles={["USER"]}>
+        <ProtectedRoute allowedRoles={["STAFF"]}>
           <StaffLayout />
         </ProtectedRoute>
       ),

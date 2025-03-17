@@ -68,9 +68,11 @@ const Login = () => {
 
       if (roleEnum === 'MANAGER') {
         navigate('/admin')
+      } else if (roleEnum === 'STAFF') {
+        navigate('/staff')
       } else if (roleEnum === 'USER') {
         navigate('/')
-      }
+      } 
 
     } catch (error) {
       message.error(error?.response.data);
