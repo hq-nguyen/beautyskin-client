@@ -130,7 +130,7 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
                     </h3>
                 </Link>
                 <div className="flex my-1">
-                    <StarRating rating={feedbackSummary.averageRating} />
+                    <StarRating rating={(feedbackSummary.averageRating).toFixed(1)} />
                     <span className="ml-2 text-xs text-gray-500">({feedbackSummary.count})</span>
                 </div>
                 <div className="flex items-center">
