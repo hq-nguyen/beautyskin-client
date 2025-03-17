@@ -4,8 +4,10 @@ import { assets } from "../../assets/frontend_assets/assets";
 import { fetchProducts } from '../../apis/product';
 import { ProductAttributeService } from "../../apis/productAttribute";
 import ProductItem from "../../components/Card/ProductItem";
+import { useLocation } from "react-router-dom"; // Import useLocation
 
 const Shop = () => {
+  const location = useLocation(); //dùng useLocation để lấy category và giá trị lọc trong url
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [skinTypes, setSkinTypes] = useState([]);
@@ -14,14 +16,38 @@ const Shop = () => {
 
   const [filters, setFilters] = useState({
     category: [],
-    priceRange: [0, 10000000], // Default price range in VND
+    priceRange: [0, 10000000], 
     skinType: [],
     skinConcern: [],
     texture: []
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState(""); // Added sortBy state
+  const [sortBy, setSortBy] = useState("");
+
+  const filterMap = {
+    skinType: {
+      oily: null, 
+      dry: null,
+      normal: null,
+      combination: null
+    },
+    skinConcern: {
+      "dry-dehydrated": null,
+      "uneven-tone": null,
+      aging: null,
+      "large-pores": null,
+      acne: null,
+      "loss-elasticity": null
+    },
+    texture: {
+      cream: null,
+      gel: null,
+      foam: null,
+      cleanser: null,
+      serum: null
+    }
+  };
 
   useEffect(() => {
     const getProducts = async () => {
@@ -50,11 +76,6 @@ const Shop = () => {
       }
     };
     getProducts();
-    
-    
-    return () => {
-      // Don't remove search data here, as it might be needed when returning to the shop page
-    };
   }, []);
 
   useEffect(() => {
@@ -71,13 +92,48 @@ const Shop = () => {
         setTextures(text);
         setSkinTypes(skinType);
         setSkinConcerns(concerns);
+
+        // Dùng filterMap để ánh xạ giá trị của filter từ product classification sang id từ api
+        skinType.forEach(type => {
+          if (type.name.toLowerCase().includes("dầu")) filterMap.skinType.oily = type.id;
+          if (type.name.toLowerCase().includes("khô")) filterMap.skinType.dry = type.id;
+          if (type.name.toLowerCase().includes("thường")) filterMap.skinType.normal = type.id;
+          if (type.name.toLowerCase().includes("tổng hợp")) filterMap.skinType.combination = type.id;
+        });
+        concerns.forEach(concern => {
+          if (concern.name.toLowerCase().includes("khô")) filterMap.skinConcern["dry-dehydrated"] = concern.id;
+          if (concern.name.toLowerCase().includes("không đều màu")) filterMap.skinConcern["uneven-tone"] = concern.id;
+          if (concern.name.toLowerCase().includes("lão hóa")) filterMap.skinConcern.aging = concern.id;
+          if (concern.name.toLowerCase().includes("lỗ chân lông")) filterMap.skinConcern["large-pores"] = concern.id;
+          if (concern.name.toLowerCase().includes("mụn")) filterMap.skinConcern.acne = concern.id;
+          if (concern.name.toLowerCase().includes("đàn hồi")) filterMap.skinConcern["loss-elasticity"] = concern.id;
+        });
+        text.forEach(form => {
+          if (form.name.toLowerCase().includes("kem")) filterMap.texture.cream = form.id;
+          if (form.name.toLowerCase().includes("gel")) filterMap.texture.gel = form.id;
+          if (form.name.toLowerCase().includes("bọt")) filterMap.texture.foam = form.id;
+          if (form.name.toLowerCase().includes("tẩy rửa")) filterMap.texture.cleanser = form.id;
+          if (form.name.toLowerCase().includes("serum")) filterMap.texture.serum = form.id;
+        });
+
+        // Apply query parameters from URL
+        const queryParams = new URLSearchParams(location.search);
+        const category = queryParams.get("category");
+        const filterValue = queryParams.get("filter");
+
+        if (category && filterValue && filterMap[category]?.[filterValue]) {
+          setFilters(prev => ({
+            ...prev,
+            [category]: [filterMap[category][filterValue]]
+          }));
+        }
       } catch (error) {
         console.error("Error fetching product attributes:", error);
       }
     };
 
     fetchAttributes();
-  }, []);
+  }, [location.search]); // Re-run when URL changes
 
   const getFilterCounts = (filterType, options) => {
     const counts = {};
@@ -107,28 +163,16 @@ const Shop = () => {
   };
 
   const filteredAndSortedProducts = useMemo(() => {
-    // First filter the products
     let filtered = products.filter(product => {
-      // Price range filter
       const priceInRange = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
-
-      // Category filter
       const matchesCategory = filters.category.length === 0 || 
         filters.category.some(catId => product.category && product.category.id === catId);
-      
-      // Skin type filter
       const matchesSkinType = filters.skinType.length === 0 || 
         (product.skinTypes && product.skinTypes.some(type => filters.skinType.includes(type.id)));
-      
-      // Skin concern filter
       const matchesSkinConcern = filters.skinConcern.length === 0 || 
         (product.skinConcerns && product.skinConcerns.some(concern => filters.skinConcern.includes(concern.id)));
-      
-      // Texture filter
       const matchesTexture = filters.texture.length === 0 || 
         (product.forms && product.forms.some(form => filters.texture.includes(form.id)));
-      
-      // Search query filter
       const matchesSearch = !searchQuery || 
         (product.name && product.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -136,21 +180,17 @@ const Shop = () => {
              matchesSkinConcern && matchesTexture && matchesSearch;
     });
 
-    // Then apply sorting
     switch (sortBy) {
       case "low-high":
         filtered.sort((a, b) => a.price - b.price);
         break;
       case "high-low":
-        filtered.sort((a, b) => b.price - a.price);
+        filtered.sort((a, b) => b.price - b.price);
         break;
       case "hot":
         filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case "newest":
-        // API now returns products in the order of newest already
-        // If you have a createdAt field, you could uncomment this:
-        // filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         break;
       default:
         break;
@@ -275,7 +315,6 @@ const Shop = () => {
               </button>
             </div>
 
-            {/* Search bar */}
             <div className="mb-6">
               <h3 className="text-md font-semibold mb-2">Tìm kiếm</h3>
               <div className="relative">
@@ -304,8 +343,6 @@ const Shop = () => {
             </div>
 
             <FilterSection title="Danh mục" options={categories} filterType="category" />
-
-            {/* Price Range Filter with Slider */}
             <div className="mb-6">
               <h3 className="text-md font-semibold mb-2">Lọc theo giá</h3>
               <Slider
@@ -323,7 +360,6 @@ const Shop = () => {
                 <span>{filters.priceRange[1].toLocaleString()} đ</span>
               </div>
             </div>
-
             <FilterSection title="Loại da" options={skinTypes} filterType="skinType" />
             <FilterSection title="Mối quan tâm về da" options={skinConcerns} filterType="skinConcern" />
             <FilterSection title="Kết cấu sản phẩm" options={textures} filterType="texture" />
@@ -338,7 +374,6 @@ const Shop = () => {
               </div>
             </div>
 
-            {/* Sorting options */}
             <div className="flex items-center justify-between px-4 py-2 mb-4 bg-white rounded-lg shadow-sm">
               <div className="flex space-x-2 text-sm">
                 <span className="mr-2">Sắp xếp</span>
@@ -369,7 +404,6 @@ const Shop = () => {
               </div>
             </div>
 
-            {/* Search result information */}
             {searchQuery && (
               <div className="mb-4 p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm">
@@ -378,7 +412,6 @@ const Shop = () => {
               </div>
             )}
 
-            {/* Products grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredAndSortedProducts.map((product) => (
                 <ProductItem
@@ -396,7 +429,6 @@ const Shop = () => {
               ))}
             </div>
 
-            {/* Empty state */}
             {filteredAndSortedProducts.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-lg text-gray-600">Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</p>
