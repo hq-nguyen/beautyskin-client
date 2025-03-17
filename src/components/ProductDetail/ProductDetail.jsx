@@ -271,7 +271,7 @@ const ProductDetail = () => {
                         <div className="mt-2 flex items-center space-x-4">
                             <div className="flex">
                                 <StarRating rating={feedbackData.length > 0
-                                    ? feedbackData.reduce((sum, item) => sum + item.rating, 0) / feedbackData.length
+                                    ? (feedbackData.reduce((sum, item) => sum + item.rating, 0) / feedbackData.length).toFixed(1)
                                     : 0} />
                                 <span className="ml-2 text-sm text-gray-500">( {feedbackData.length} đánh giá)</span>
                             </div>
@@ -444,7 +444,7 @@ const ProductDetail = () => {
                                                     <div className="ml-3">
                                                         <p className="font-medium">{feedback.user?.fullName || "Người dùng"}</p>
                                                         <div className="flex items-center mt-1">
-                                                            <StarRating rating={feedback.rating || 5} />
+                                                            <StarRating rating={(feedback.rating).toFixed(1) || 5} />
                                                             <p className="text-xs text-gray-500 ml-2">
                                                                 {new Date(feedback.feedBackDate || Date.now()).toLocaleDateString('vi-VN')}
                                                             </p>
@@ -486,7 +486,7 @@ const ProductDetail = () => {
                                     </div>
                                     <div>
                                         <StarRating rating={feedbackData.length > 0
-                                            ? feedbackData.reduce((sum, item) => sum + item.rating, 0) / feedbackData.length
+                                            ? (feedbackData.reduce((sum, item) => sum + item.rating, 0) / feedbackData.length).toFixed(1)
                                             : 0} />
                                         <div className="text-sm text-gray-500 mt-1">
                                             {feedbackData.length} đánh giá
