@@ -8,6 +8,7 @@ import EmptyQuestions from '../../components/Quiz/EmptyQuestion';
 import Question from '../../components/Quiz/Question';
 import Result from '../../components/Quiz/Result';
 import { createSkinProfile } from '../../apis/customer'; 
+import ProductRecommendations from '../../components/ProductRecommend/product';
 
 const SkinTypeQuiz = () => {
   const navigate = useNavigate();
@@ -195,7 +196,7 @@ const SkinTypeQuiz = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
         <QuizHeader questionsCount={questions.length} />
-
+  
         <div className="bg-white rounded-lg shadow-md p-6">
           {!showResult ? (
             <Question 
@@ -207,17 +208,20 @@ const SkinTypeQuiz = () => {
               onPrevious={handlePreviousQuestion}
             />
           ) : (
-            <Result 
-              skinType={skinType}
-              totalPoints={totalPoints}
-              recommendations={recommendations}
-              onReset={resetQuiz}
-              onNavigate={() => navigateToSkinTypePage(determineSkinType(totalPoints).route)}
-              profileSaved={profileSaved}
-              profileSaveError={profileSaveError}
-              savingProfile={savingProfile}
-              isLoggedIn={!!id}
-            />
+            <>
+              <Result 
+                skinType={skinType}
+                totalPoints={totalPoints}
+                recommendations={recommendations}
+                onReset={resetQuiz}
+                onNavigate={() => navigateToSkinTypePage(determineSkinType(totalPoints).route)}
+                profileSaved={profileSaved}
+                profileSaveError={profileSaveError}
+                savingProfile={savingProfile}
+                isLoggedIn={!!id}
+              />
+              <ProductRecommendations skinType={skinType} />
+            </>
           )}
         </div>
       </div>
