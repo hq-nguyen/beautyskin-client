@@ -15,7 +15,6 @@ const Home = () => {
       <ProductClassification />
       <ProductHighlights />
       <DealBanner />
-      <News />
       <FAQSection />
       <Blog />
     </div>
