@@ -23,7 +23,7 @@ const FavoriteProducts = () => {
   const fetchFavoriteProducts = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/favorites');
+      const response = await api.get('/favorites/getFavorites');
       console.log(response);
 
       if (response.status !== 200) {
