@@ -6,7 +6,6 @@ import Slider from "react-slick";
 import { getProductBySkinType } from "../../apis/product";
 import { getSkinProfile } from "../../apis/customer";
 import { ChevronRight, Sparkles } from "lucide-react";
-import { assets } from "../../assets/frontend_assets/assets";
 
 const SkinTypeRecommendations = () => {
     const [products, setProducts] = useState([]);
@@ -144,9 +143,10 @@ const SkinTypeRecommendations = () => {
                             <div key={index} className="px-2 py-4 transition-transform duration-300 hover:scale-105">
                                 <ProductItem
                                     id={product.id}
-                                    image={product?.images[0]?.url || assets.product_new_1}
+                                    image={product.images[0] || "default-image-url"}
                                     promotion={product.discount || 20}
                                     name={product.name}
+                                    rating={product.rating || 4.0}
                                     oldPrice={product.oldPrice || product.price * 1.2}
                                     newPrice={product.price}
                                 />

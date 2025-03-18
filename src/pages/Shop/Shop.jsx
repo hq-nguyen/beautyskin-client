@@ -13,7 +13,6 @@ const Shop = () => {
   const [skinTypes, setSkinTypes] = useState([]);
   const [skinConcerns, setSkinConcerns] = useState([]);
   const [textures, setTextures] = useState([]);
-  const [feedbackData, setFeedbackData] = useState(null);
 
   const [filters, setFilters] = useState({
     category: [],
@@ -34,12 +33,12 @@ const Shop = () => {
       combination: null
     },
     skinConcern: {
-      dehydrated: null,
-      uneven: null,
+      "dry-dehydrated": null,
+      "uneven-tone": null,
       aging: null,
-      pores: null,
+      "large-pores": null,
       acne: null,
-      elasticity: null
+      "loss-elasticity": null
     },
     texture: {
       cream: null,
@@ -99,21 +98,21 @@ const Shop = () => {
           if (type.name.toLowerCase().includes("dầu")) filterMap.skinType.oily = type.id;
           if (type.name.toLowerCase().includes("khô")) filterMap.skinType.dry = type.id;
           if (type.name.toLowerCase().includes("thường")) filterMap.skinType.normal = type.id;
-          if (type.name.toLowerCase().includes("hỗn hợp")) filterMap.skinType.combination = type.id;
+          if (type.name.toLowerCase().includes("tổng hợp")) filterMap.skinType.combination = type.id;
         });
         concerns.forEach(concern => {
-          if (concern.name.toLowerCase().includes("mất nước")) filterMap.skinConcern.dehydrated = concern.id;
-          if (concern.name.toLowerCase().includes("đều màu")) filterMap.skinConcern.uneven = concern.id;
+          if (concern.name.toLowerCase().includes("khô")) filterMap.skinConcern["dry-dehydrated"] = concern.id;
+          if (concern.name.toLowerCase().includes("không đều màu")) filterMap.skinConcern["uneven-tone"] = concern.id;
           if (concern.name.toLowerCase().includes("lão hóa")) filterMap.skinConcern.aging = concern.id;
-          if (concern.name.toLowerCase().includes("lỗ chân lông")) filterMap.skinConcern.pores = concern.id;
+          if (concern.name.toLowerCase().includes("lỗ chân lông")) filterMap.skinConcern["large-pores"] = concern.id;
           if (concern.name.toLowerCase().includes("mụn")) filterMap.skinConcern.acne = concern.id;
-          if (concern.name.toLowerCase().includes("đàn hồi")) filterMap.skinConcern.elasticity = concern.id;
+          if (concern.name.toLowerCase().includes("đàn hồi")) filterMap.skinConcern["loss-elasticity"] = concern.id;
         });
         text.forEach(form => {
           if (form.name.toLowerCase().includes("kem")) filterMap.texture.cream = form.id;
           if (form.name.toLowerCase().includes("gel")) filterMap.texture.gel = form.id;
-          if (form.name.toLowerCase().includes("sữa")) filterMap.texture.foam = form.id;
-          if (form.name.toLowerCase().includes("dung dịch")) filterMap.texture.cleanser = form.id;
+          if (form.name.toLowerCase().includes("bọt")) filterMap.texture.foam = form.id;
+          if (form.name.toLowerCase().includes("tẩy rửa")) filterMap.texture.cleanser = form.id;
           if (form.name.toLowerCase().includes("serum")) filterMap.texture.serum = form.id;
         });
 
@@ -421,6 +420,7 @@ const Shop = () => {
                   image={getProductImage(product)}
                   promotion={getPromotionPercentage(product)}
                   name={product.name}
+                  rating={product.rating || 5}
                   oldPrice={product.price}
                   newPrice={getDiscountedPrice(product)}
                   stock={product.stock}
