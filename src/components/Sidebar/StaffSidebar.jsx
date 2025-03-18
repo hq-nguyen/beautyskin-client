@@ -15,11 +15,11 @@ const StaffSidebar = () => {
   const dispatch = useDispatch();
   
   const menuItems = [
-    // {
-    //   key: '/staff',
-    //   icon: <DashboardOutlined />,
-    //   label: 'Thống kê công việc',
-    // },
+    {
+      key: '/staff',
+      icon: <DashboardOutlined />,
+      label: 'Thống kê công việc',
+    },
     {
       key: '/staff/orders',
       icon: <ShoppingCartOutlined />,

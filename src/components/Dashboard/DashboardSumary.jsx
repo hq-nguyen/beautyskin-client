@@ -1,31 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Row, Col, Card, message } from 'antd';
 import { Pie } from '@ant-design/plots';
 import StatisticCard from './StatisticCard';
-
-// Mock statistics data
-const mockStats = {
-  completed: 42,
-  inProgress: 28,
-  pending: 15,
-  total: 85
-};
-
-// Mock function to get dashboard stats - simulates API call
-const getMockDashboardStats = () => {
-  return new Promise((resolve) => {
-    // Simulate network delay
-    setTimeout(() => {
-      resolve(mockStats);
-    }, 800);
-  });
-};
+import { getOrdersFromStaff } from '../../apis/staff';
 
 const DashboardSummary = () => {
   const [stats, setStats] = useState({
     completed: 0,
     inProgress: 0,
     pending: 0,
+    cancelled: 0,
     total: 0
   });
   const [loading, setLoading] = useState(false);
@@ -37,11 +21,39 @@ const DashboardSummary = () => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      // Use mock function instead of API call
-      const data = await getMockDashboardStats();
-      setStats(data);
+      // Use the real API call
+      const orders = await getOrdersFromStaff();
+      
+      // Calculate statistics from orders
+      const statusCounts = {
+        completed: 0,
+        inProgress: 0,
+        pending: 0,
+        cancelled: 0
+      };
+      
+      orders.forEach(orderAssignment => {
+        const status = orderAssignment.order.orderStatus;
+        if (status === 'SHIPPED' || status === 'DELIVERED') {
+          statusCounts.completed++;
+        } else if (status === 'IN_PROGRESS') {
+          statusCounts.inProgress++;
+        } else if (status === 'CANCELLED') {
+          statusCounts.cancelled++;
+        }
+      });
+      
+      const totalOrders = orders.length;
+      
+      setStats({
+        completed: statusCounts.completed,
+        inProgress: statusCounts.inProgress,
+        cancelled: statusCounts.cancelled,
+        total: totalOrders
+      });
     } catch (error) {
       message.error('Failed to fetch dashboard statistics');
+      console.error('Error fetching stats:', error);
     } finally {
       setLoading(false);
     }
@@ -57,9 +69,10 @@ const DashboardSummary = () => {
       value: stats.inProgress,
     },
     {
-      type: 'Chờ xử lí',
-      value: stats.pending,
-    },
+      type: 'Đã hủy',
+      value: stats.cancelled,
+    },  
+    
   ];
 
   const config = {
@@ -72,7 +85,7 @@ const DashboardSummary = () => {
       type: 'outer',
       content: '{name}: {value}',
     },
-    color: ['#52c41a', '#1890ff', '#faad14'],
+    color: ['#5dd821', '#faad14', '#ff4d4f'],
     interactions: [
       {
         type: 'element-active',
@@ -83,25 +96,28 @@ const DashboardSummary = () => {
   return (
     <div>
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={12} md={6}>
           <StatisticCard
             title="Số đơn hoàn thành"
             value={stats.completed}
             loading={loading}
+            icon="completed"
           />
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={12} md={6}>
           <StatisticCard
             title="Số đơn đang xử lí"
             value={stats.inProgress}
             loading={loading}
+            icon="inProgress"
           />
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={12} md={6}>
           <StatisticCard
-            title="Số đơn chờ xử lí"
-            value={stats.pending}
+            title="Số đơn đã hủy"
+            value={stats.cancelled}
             loading={loading}
+            icon="cancelled"
           />
         </Col>
       </Row>
@@ -110,7 +126,13 @@ const DashboardSummary = () => {
         <Col span={24}>
           <Card title="Phân phối trạng thái đơn hàng" bordered={false}>
             <div style={{ height: 300 }}>
-              <Pie {...config} />
+              {stats.total > 0 ? (
+                <Pie {...config} />
+              ) : (
+                <div style={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  {loading ? 'Đang tải dữ liệu...' : 'Không có dữ liệu đơn hàng'}
+                </div>
+              )}
             </div>
           </Card>
         </Col>
