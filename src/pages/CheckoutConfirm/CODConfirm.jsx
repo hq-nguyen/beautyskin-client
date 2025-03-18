@@ -1,122 +1,182 @@
-import { useState } from "react";
-import { FaLeaf, FaOilCan, FaTint, FaBalanceScale, FaAllergies, FaHeartbeat, FaSun, FaFeather } from "react-icons/fa";
-import { assets } from "../../assets/frontend_assets/assets";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
+import { toast } from "react-toastify";
+import api from '../../config/axios';
 
-const ProductClassification = () => {
-    const [activeTab, setActiveTab] = useState("skinType");
+const CODPage = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [orderData, setOrderData] = useState(null);
 
-    const tabs = [
-        { id: "skinType", label: "Mua theo loại da" },
-        { id: "skinConcern", label: "Mua theo vấn đề da" },
-        { id: "texture", label: "Mua theo kết cấu" }
-    ];
+    useEffect(() => {
+        const fetchOrderData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
 
-    const skinTypeData = [
-        { id: 1, title: "Da dầu", icon: <FaOilCan />, image: assets.da_dau, filter: "oily" },
-        { id: 2, title: "Da khô", icon: <FaLeaf />, image: assets.da_kho, filter: "dry" },
-        { id: 3, title: "Da thường", icon: <FaTint />, image: assets.da_thuong, filter: "normal" },
-        { id: 4, title: "Da tổng hợp", icon: <FaBalanceScale />, image: assets.da_tonghop, filter: "combination" }
-    ];
+                const defaultAddress = JSON.parse(localStorage.getItem('defaultAddress')) || 
+                                    (location.state?.orderData?.shippingAddress);
 
-    const skinConcern = [
-        { id: 1, title: "Da khô, mất nước", icon: <FaAllergies />, image: assets.concern_dry, filter: "dehydrated" },
-        { id: 2, title: "Da không đều màu", icon: <FaHeartbeat />, image: assets.concern_pigmentation, filter: "uneven" },
-        { id: 3, title: "Da lão hóa", icon: <FaSun />, image: assets.concern_anti_aging, filter: "aging" },
-        { id: 4, title: "Da lỗ chân lông to", icon: <FaFeather />, image: assets.concern_sensitive, filter: "pores" },
-        { id: 5, title: "Da mụn", icon: <FaFeather />, image: assets.concern_acne, filter: "acne" },
-        { id: 6, title: "Da kém đàn hồi", icon: <FaFeather />, image: assets.concern_oil, filter: "elasticity" }
-    ];
+                let shippingAddr = defaultAddress;
 
-    const textureData = [
-        { id: 1, title: "Dạng kem", icon: <FaTint />, image: assets.type_cream, filter: "cream" },
-        { id: 2, title: "Kết cấu gel", icon: <FaTint />, image: assets.type_gel, filter: "gel" },
-        { id: 3, title: "Kết cấu tạo bọt", icon: <FaTint />, image: assets.type_foam, filter: "foam" },
-        { id: 4, title: "Dung dịch tẩy rửa", icon: <FaTint />, image: assets.type_cleanser, filter: "cleanser" },
-        { id: 5, title: "Serum cho da mặt", icon: <FaTint />, image: assets.type_serum, filter: "serum" }
-    ];
+                if (!defaultAddress) {
+                    const userId = localStorage.getItem('id');
+                    const response = await api.get(`address/getByUser/${userId}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    const defaultAddr = response.data.find(addr => addr.isDefault);
+                    localStorage.setItem('defaultAddress', JSON.stringify(defaultAddr));
+                    shippingAddr = defaultAddr;
+                }
 
-    const getActiveData = () => {
-        switch (activeTab) {
-            case "skinType":
-                return skinTypeData;
-            case "skinConcern":
-                return skinConcern;
-            case "texture":
-                return textureData;
-            default:
-                return skinTypeData;
-        }
+                const orderResponse = await api.get('order/getLastedOrder', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                const order = orderResponse.data;
+
+                setOrderData({
+                    orderId: order.id.toString(),
+                    total: order.totalPrice,
+                    shippingFee: 0,
+                    items: order.orderDetails.map(detail => ({
+                        name: detail.product?.name || 'Unknown Product',
+                        price: detail.unitPrice,
+                        quantity: detail.quantity,
+                    })),
+                    shippingAddress: shippingAddr,
+                    estimatedDelivery: '15-03-2025'
+                });
+            } catch (error) {
+                console.error("Error fetching order data:", error);
+                toast.error('Không thể tải thông tin đơn hàng gần nhất!');
+            }
+        };
+
+        fetchOrderData();
+    }, [location.state]);
+
+    const handleContinueShopping = () => {
+        navigate('/shop');
     };
 
-    const getGridClass = () => {
-        switch (activeTab) {
-            case "skinType":
-                return "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4";
-            case "skinConcern":
-                return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6";
-            case "texture":
-                return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
-            default:
-                return "grid-cols-4";
-        }
-    };
-
-    const ProductCard = ({ item }) => (
-        <Link
-            to={`/shop?category=${activeTab}&filter=${item.filter}`} 
-            className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-        >
-            <div className="relative h-200 overflow-hidden">
-                <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
-                    style={{ aspectRatio: "2 / 2.6" }}
-                    onError={(e) => {
-                        e.target.src = "https://images.unsplash.com/photo-1556228578-0d85b1a4d571";
-                    }}
-                />
-            </div>
-            <div className="p-4">
-                <div className="flex justify-center items-center space-x-2 mb-2">
-                    <span className="text-sm text-primary">{item.icon}</span>
-                    <p className="text-sm font-heading text-foreground">{item.title}</p>
-                </div>
-            </div>
-        </Link>
-    );
+    if (!orderData) {
+        return <div className="text-center p-4">Đang tải...</div>;
+    }
 
     return (
-        <div className="container mx-auto mt-12 mb-8 px-4 sm:px-12 lg:px-24 py-8 bg-white rounded-lg shadow-lg mt-24">
-            <h4 className="text-primary text-sm font-semibold mb-2">TRẢI NGHIỆM MUA HÀNG</h4>
-            <h4 className="text-primary mb-8 text-2xl">Phân loại phổ biến tại BeautySkin</h4>
+        <div className="max-w-3xl mx-auto p-4 font-sans mt-8">
+            {/* Success Header */}
+            <div className="text-center mb-8">
+                <div className="flex justify-center mb-4">
+                    <CheckCircle2 className="w-16 h-16 text-green-500" />
+                </div>
+                <h1 className="text-2xl font-medium text-[#d90429] mb-2">
+                    Đặt hàng thành công!
+                </h1>
+                <p className="text-gray-600">
+                    Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn sẽ được giao trong thời gian sớm nhất.
+                </p>
+                <p className="text-gray-600 mt-1">
+                    Mã đơn hàng: <span className="font-bold">{orderData.orderId}</span>
+                </p>
+            </div>
 
-            <div className="mb-8">
-                <div className="rounded-lg bg-secondary overflow-hidden">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`rounded-xl mr-4 mb-4 py-2 px-4 transition-colors duration-300 ${
-                                activeTab === tab.id
-                                    ? "bg-primary text-white"
-                                    : "bg-gray-100 text-foreground hover:bg-muted"
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
+            {/* Order Summary */}
+            <div className="bg-white border border-gray-200 rounded p-6 mb-6">
+                <h2 className="text-xl font-medium text-[#d90429] mb-4">
+                    Thông tin đơn hàng
+                </h2>
+                <div className="border-b border-gray-200 pb-4 mb-4">
+                    {orderData.items.map((item, index) => (
+                        <div key={index} className="flex justify-between py-2">
+                            <div>
+                                <p className="text-gray-800">{item.name}</p>
+                                <p className="text-gray-600 text-sm">Số lượng: {item.quantity}</p>
+                            </div>
+                            <span className="text-gray-800 font-medium">
+                                {(item.price * item.quantity).toLocaleString()} đ
+                            </span>
+                        </div>
                     ))}
+                </div>
+                <div className="space-y-2">
+                    <div className="flex justify-between">
+                        <span className="text-gray-700">Tạm tính:</span>
+                        <span className="text-gray-800">
+                            {orderData.total.toLocaleString()} đ
+                        </span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-gray-700">Phí vận chuyển:</span>
+                        <span className="text-gray-800">
+                            {orderData.shippingFee.toLocaleString()} đ
+                        </span>
+                    </div>
+                    <div className="flex justify-between pt-2 border-t border-gray-200">
+                        <span className="text-lg font-medium">Tổng cộng:</span>
+                        <span className="text-lg font-bold text-[#d90429]">
+                            {orderData.total.toLocaleString()} đ
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <div className={`grid ${getGridClass()} gap-6 px-4 sm:px-12 lg:px-24`}>
-                {getActiveData().map((item) => (
-                    <ProductCard key={item.id} item={item} />
-                ))}
+            {/* Shipping Information */}
+            <div className="bg-white border border-gray-200 rounded p-6 mb-6">
+                <h2 className="text-xl font-medium text-[#d90429] mb-4">
+                    Thông tin giao hàng
+                </h2>
+                <div className="space-y-2">
+                    <p className="text-gray-800">
+                        <span className="font-medium">Người nhận:</span> {orderData.shippingAddress?.name || 'Chưa có thông tin'}
+                    </p>
+                    <p className="text-gray-800">
+                        <span className="font-medium">Số điện thoại:</span> {orderData.shippingAddress?.phone || 'Chưa có thông tin'}
+                    </p>
+                    <p className="text-gray-800">
+                        <span className="font-medium">Địa chỉ:</span> {orderData.shippingAddress?.address || 'Chưa có thông tin'}
+                    </p>
+                    <p className="text-gray-800">
+                        <span className="font-medium">Phương thức thanh toán:</span> Thanh toán khi nhận hàng (COD)
+                    </p>
+                    <p className="text-gray-800">
+                        <span className="font-medium">Dự kiến giao hàng:</span> {orderData.estimatedDelivery}
+                    </p>
+                </div>
+            </div>
+
+            {/* Instructions */}
+            <div className="bg-red-50 border border-red-200 rounded p-6 mb-6">
+                <h3 className="text-lg font-medium text-[#d90429] mb-2">
+                    Hướng dẫn thanh toán COD
+                </h3>
+                <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                    <li>Vui lòng chuẩn bị số tiền chính xác: {orderData.total.toLocaleString()} đ</li>
+                    <li>Kiểm tra kỹ sản phẩm khi nhận hàng</li>
+                    <li>Liên hệ ngay nếu có vấn đề với đơn hàng</li>
+                    <li>Thời gian giao hàng có thể thay đổi tùy theo khu vực</li>
+                </ul>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-center gap-4">
+                <button
+                    onClick={handleContinueShopping}
+                    className="bg-[#EE1F5B] text-white py-3 px-6 rounded text-sm font-medium hover:bg-[#d90429]"
+                >
+                    Tiếp tục mua sắm
+                </button>
             </div>
         </div>
     );
 };
 
-export default ProductClassification;
+export default CODPage;
