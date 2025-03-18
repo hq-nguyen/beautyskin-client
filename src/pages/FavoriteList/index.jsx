@@ -30,15 +30,7 @@ const FavoriteProducts = () => {
         throw new Error('Không thể lấy danh sách sản phẩm yêu thích');
       }
       const sortedProducts = [...response.data].sort((a, b) => {
-        if (a.createdAt && b.createdAt) {
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        }
-        else if (a.favoriteId && b.favoriteId) {
-          return b.favoriteId - a.favoriteId;
-        }
-        else {
-          return b.id - a.id;
-        }
+       return b.id - a.id;
       });
 
       setFavoriteProducts(sortedProducts);
