@@ -67,8 +67,7 @@ function AdminSidebar({
       path: '/admin', // Base path for the group
       mark: 'dashboard',
       subItems: [
-        { label: 'Trang chủ', path: 'dashboard' },
-        { label: 'Thống kê', path: 'dashboard-analytics' },
+        { label: 'Thống kê', path: 'dashboard' },
         { label: 'Doanh thu', path: 'dashboard-reports' },
       ],
     },

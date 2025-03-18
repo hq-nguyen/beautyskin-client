@@ -1,5 +1,4 @@
 import { FaStar } from "react-icons/fa";
-import PropTypes from 'prop-types';
 
 const StarRating = ({ rating }) => {
     const filledStars = Math.floor(rating);
@@ -43,10 +42,6 @@ const StarRating = ({ rating }) => {
             <span className="mx-2 text-gray-600 text-xs">{rating}</span>
         </div>
     );
-};
-
-StarRating.propTypes = {
-    rating: PropTypes.number.isRequired,
 };
 
 export default StarRating;
