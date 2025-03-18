@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// import { mapSkinTypeToId } from '../../apis/products';
 import { getProductBySkinType, mapSkinTypeToId } from '../../apis/product';
 
 const ProductRecommendations = ({ skinType }) => {
-  const [products, setProducts] = useState([]);
+  const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const getRecommendedProducts = async () => {
+    const getRecommendedProduct = async () => {
       if (!skinType) return;
       
       try {
@@ -18,90 +17,133 @@ const ProductRecommendations = ({ skinType }) => {
         
         const data = await getProductBySkinType(skinTypeId);
         
-        setProducts(data || []);
+        // Get only the latest product (assuming the API returns sorted data)
+        // If not sorted, we can sort by createDateTime
+        const latestProduct = data && data.length > 0 
+          ? data.sort((a, b) => new Date(b.createDateTime) - new Date(a.createDateTime))[0]
+          : null;
+        
+        setProduct(latestProduct);
         setLoading(false);
       } catch (err) {
         setError('Không thể tải sản phẩm đề xuất. Vui lòng thử lại sau.');
         setLoading(false);
-        console.error('Error fetching recommended products:', err);
+        console.error('Error fetching recommended product:', err);
       }
     };
 
-    getRecommendedProducts();
+    getRecommendedProduct();
   }, [skinType]);
 
   if (loading) return (
-    <div className="mt-8">
-      <h3 className="text-xl font-semibold mb-4">Sản phẩm đề xuất cho {skinType}</h3>
+    <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+      <h3 className="text-xl font-semibold mb-4 text-indigo-700">Sản phẩm đề xuất cho {skinType}</h3>
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
     </div>
   );
   
   if (error) return (
-    <div className="mt-8">
-      <h3 className="text-xl font-semibold mb-4">Sản phẩm đề xuất cho {skinType}</h3>
+    <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+      <h3 className="text-xl font-semibold mb-4 text-indigo-700">Sản phẩm đề xuất cho {skinType}</h3>
       <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
         {error}
       </div>
     </div>
   );
   
-  if (!products.length) return (
-    <div className="mt-8">
-      <h3 className="text-xl font-semibold mb-4">Sản phẩm đề xuất cho {skinType}</h3>
+  if (!product) return (
+    <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+      <h3 className="text-xl font-semibold mb-4 text-indigo-700">Sản phẩm đề xuất cho {skinType}</h3>
       <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-md">
         Hiện chưa có sản phẩm đề xuất cho loại da này.
       </div>
     </div>
   );
 
+  // Get the first image URL if available
+  const productImage = product.images && product.images.length > 0 
+    ? product.images[0].url 
+    : '/images/products/placeholder.jpg';
+
+  // Format price with Vietnamese currency
+  const formattedPrice = new Intl.NumberFormat('vi-VN', { 
+    style: 'currency', 
+    currency: 'VND' 
+  }).format(product.price);
+
+  // Extract plain text from HTML description if needed
+  const getPlainTextFromHTML = (html) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || '';
+  };
+
+  // Get a short description
+  const shortDescription = product.description ? 
+    getPlainTextFromHTML(product.description).substring(0, 120) + '...' : 
+    'Không có mô tả.';
+
   return (
-    <div className="mt-8">
-      <h3 className="text-xl font-semibold mb-4">Sản phẩm đề xuất cho {skinType}</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {products.map(product => (
-          <div key={product.id} className="bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            <div className="h-48 bg-gray-200 flex items-center justify-center">
-              {product.thumbnail ? (
-                <img 
-                  src={product.thumbnail} 
-                  alt={product.name} 
-                  className="object-cover h-full w-full"
-                  onError={(e) => {
-                    e.target.onerror = null; 
-                    e.target.src = '/images/products/placeholder.jpg';
-                  }}
-                />
-              ) : (
-                <div className="text-gray-400 text-center">Hình ảnh<br/>sản phẩm</div>
-              )}
-            </div>
-            <div className="p-4">
-              <h4 className="font-medium text-lg mb-1">{product.name}</h4>
-              <p className="text-gray-600 text-sm mb-2 line-clamp-2">{product.description}</p>
-              <div className="flex justify-between items-center mt-3">
-                <span className="font-semibold text-lg">
-                  {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+    <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+      <div className="flex items-center mb-4">
+        <h3 className="text-xl font-semibold text-indigo-700">Sản phẩm đề xuất cho {skinType}</h3>
+        <div className="ml-2 bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
+          Phù hợp nhất
+        </div>
+      </div>
+      
+      <div className="bg-white border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
+        <div className="md:flex">
+          <div className="md:w-1/3 h-64 md:h-auto bg-gray-100 flex items-center justify-center overflow-hidden">
+            <img 
+              src={productImage}
+              alt={product.name} 
+              className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
+              onError={(e) => {
+                e.target.onerror = null; 
+                e.target.src = '/images/products/placeholder.jpg';
+              }}
+            />
+          </div>
+          
+          <div className="md:w-2/3 p-6">
+            <div className="flex flex-col h-full justify-between">
+              <div>
+                <h4 className="font-semibold text-xl mb-2 text-gray-800">{product.name}</h4>
+                <p className="text-gray-600 mb-4">{shortDescription}</p>
+                
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {product.skinConcerns && product.skinConcerns.map(concern => (
+                    <span key={concern.id} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                      {concern.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4">
+                <span className="font-bold text-xl text-indigo-700">
+                  {formattedPrice}
                 </span>
                 <Link 
                   to={`/product/${product.id}`} 
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors"
+                  className="bg-indigo-600 text-white px-6 py-3 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors w-full sm:w-auto text-center"
                 >
                   Xem chi tiết
                 </Link>
               </div>
             </div>
           </div>
-        ))}
+        </div>
       </div>
+      
       <div className="text-center mt-6">
         <Link 
-          to={`/products?skinType=${mapSkinTypeToId(skinType)}`}
-          className="inline-block bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors"
+          to={'/shop'}
+          className="inline-block bg-white text-indigo-600 border border-indigo-600 px-6 py-2 rounded-md hover:bg-indigo-50 transition-colors font-medium"
         >
-          Xem tất cả sản phẩm cho {skinType}
+          Khám phá thêm các sản phẩm khác
         </Link>
       </div>
     </div>
