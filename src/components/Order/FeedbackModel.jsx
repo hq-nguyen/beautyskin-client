@@ -5,14 +5,13 @@ import { UploadOutlined } from "@ant-design/icons";
 import uploadFile from "../../utils/upload";
 
 function FeedbackModel({ mode, visible, close, submit }) {
-
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [image, setImage] = useState("");
+  const [images, setImages] = useState([]); // Changed to array for multiple images
   const [uploading, setUploading] = useState(false);
   // report
   const [reason, setReason] = useState("");
-  const [description, setDescription] = useState(0);
+  const [description, setDescription] = useState("");
 
   // Handle image upload
   const handleUpload = async (file) => {
@@ -20,7 +19,8 @@ function FeedbackModel({ mode, visible, close, submit }) {
     try {
       const url = await uploadFile(file);
       if (typeof url === "string") {
-        setImage(url);
+        // Add the new image URL to the existing array
+        setImages(prevImages => [...prevImages, url]);
       } else {
         console.error("Upload failed:", url?.data?.message || "Unknown error");
       }
@@ -32,9 +32,14 @@ function FeedbackModel({ mode, visible, close, submit }) {
     return false; // Prevent default upload behavior
   };
 
+  const handleRemove = (fileUrl) => {
+    // Filter out the removed image
+    setImages(images.filter(url => url !== fileUrl));
+  };
+
   const handleSubmit = () => {
-    if (mode == "feedback") {
-      submit({ rating, comment, image });
+    if (mode === "feedback") {
+      submit({ rating, comment, images }); // Pass images array instead of single image
     } else {
       submit({ reason, description });
     }
@@ -43,7 +48,9 @@ function FeedbackModel({ mode, visible, close, submit }) {
   const resetForm = () => {
     setRating(0);
     setComment("");
-    setImage("");
+    setImages([]);
+    setReason("");
+    setDescription("");
   };
 
   return (
@@ -62,7 +69,7 @@ function FeedbackModel({ mode, visible, close, submit }) {
           key="submit"
           type="primary"
           onClick={handleSubmit}
-          disabled={rating === 0}
+          disabled={mode === "feedback" && rating === 0}
         >
           Gửi
         </Button>,
@@ -84,27 +91,48 @@ function FeedbackModel({ mode, visible, close, submit }) {
           />
 
           <div>
-            <p>Add an image (optional):</p>
+            <p>Add images (optional):</p>
             <Upload
               beforeUpload={handleUpload}
-              maxCount={1}
+              maxCount={5} // Allow up to 5 images
               listType="picture"
-              showUploadList={true}
-              onRemove={() => setImage("")}
+              showUploadList={{
+                showPreviewIcon: true,
+                showRemoveIcon: true,
+                removeIcon: file => (
+                  <button onClick={() => handleRemove(file.url || file.response)}>
+                    Remove
+                  </button>
+                )
+              }}
+              fileList={images.map((url, index) => ({
+                uid: `image-${index}`,
+                name: `Image ${index + 1}`,
+                status: 'done',
+                url: url,
+              }))}
             >
-              <Button icon={<UploadOutlined />} loading={uploading}>
-                {image ? "Change Image" : "Upload Image"}
+              <Button 
+                icon={<UploadOutlined />} 
+                loading={uploading}
+                disabled={images.length >= 5} // Disable when max images reached
+              >
+                Upload Images
               </Button>
             </Upload>
           </div>
 
-          {image && (
-            <div style={{ marginTop: 16 }}>
-              <img
-                src={image}
-                alt="Feedback"
-                style={{ maxWidth: "100%", maxHeight: 200 }}
-              />
+          {images.length > 0 && (
+            <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {images.map((url, index) => (
+                <div key={index} style={{ position: "relative" }}>
+                  <img
+                    src={url}
+                    alt={`Feedback ${index + 1}`}
+                    style={{ width: 100, height: 100, objectFit: "cover" }}
+                  />
+                </div>
+              ))}
             </div>
           )}
         </>
@@ -116,9 +144,9 @@ function FeedbackModel({ mode, visible, close, submit }) {
             onChange={setReason}
             placeholder="Select a reason"
             options={[
-              { label: "spam", value: "Mistake" },
-              { label: "fake", value: "Product is not good" },
-              { label: "orther", value: "Not in above" },
+              { label: "Mistake", value: "Mistake" },
+              { label: "Product is not good", value: "Product is not good" },
+              { label: "Not in above", value: "Not in above" },
             ]}
           />
           <TextArea
@@ -133,4 +161,4 @@ function FeedbackModel({ mode, visible, close, submit }) {
   );
 }
 
-export default FeedbackModel;
+export default FeedbackModel; 

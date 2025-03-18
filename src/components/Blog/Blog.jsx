@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { fetchBlogsIsFalse } from "../../apis/blog";
+import { assets } from "../../assets/frontend_assets/assets";
 
 const BlogCard = React.memo(({ post }) => {
     return (
@@ -9,7 +10,7 @@ const BlogCard = React.memo(({ post }) => {
             <Link to={`/blog/${post.slug}`}>
                 <div className="relative overflow-hidden aspect-video lg:h-36">
                     <img
-                        src={post.image}
+                        src={post.image || assets.blog_4}
                         alt={post.title}
                         className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300 cursor-pointer"
                         loading="lazy"

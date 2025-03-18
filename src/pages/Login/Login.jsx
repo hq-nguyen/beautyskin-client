@@ -69,7 +69,7 @@ const Login = () => {
       if (roleEnum === 'MANAGER') {
         navigate('/admin')
       } else if (roleEnum === 'STAFF') {
-        navigate('/staff')
+        navigate('/staff/orders')
       } else if (roleEnum === 'USER') {
         navigate('/')
       } 

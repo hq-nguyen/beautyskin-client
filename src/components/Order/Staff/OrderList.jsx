@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Space, Table, Tag, message, Pagination } from 'antd';
+import { Button, Space, Table, Tag, message, Pagination, Dropdown, Menu } from 'antd';
 import dayjs from 'dayjs';
 import { FaSearch, FaSpinner } from 'react-icons/fa';
+import { EditOutlined, DownOutlined } from '@ant-design/icons';
+import { fetchOrders, updateStatusOrder2 } from '../../../apis/order';
 
 const OrderList = () => {
   const [loading, setLoading] = useState(true);
@@ -12,8 +14,9 @@ const OrderList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
 
-  // Staff-specific status tabs (read-only view)
+  // Staff-specific status tabs (limited view)
   const statusTabs = [
     { key: 'all', label: 'Tất cả' },
     { key: 'pending', label: 'Đơn mới' },
@@ -21,80 +24,49 @@ const OrderList = () => {
     { key: 'shipped', label: 'Đang giao hàng' },
   ];
 
-  // Fake order data
-  const fakeOrders = [
-    {
-      id: 1001,
-      orderDate: '2025-03-15T09:30:00',
-      totalPrice: 1250000,
-      paymentStatus: 'PAID',
-      orderStatus: 'PENDING',
-      orderDetails: [
-        { 
-          id: 1, 
-          quantity: 2, 
-          price: 625000,
-          product: { id: 101, name: 'Áo sơ mi nam trắng' }
-        }
-      ],
-      customerName: 'Nguyễn Văn A',
-      customerPhone: '0987654321'
-    },
-    {
-      id: 1002,
-      orderDate: '2025-03-14T14:45:00',
-      totalPrice: 2800000,
-      paymentStatus: 'PENDING',
-      orderStatus: 'IN_PROGRESS',
-      orderDetails: [
-        { 
-          id: 2, 
-          quantity: 1, 
-          price: 1800000,
-          product: { id: 102, name: 'Giày thể thao Nike' }
-        },
-        { 
-          id: 3, 
-          quantity: 1, 
-          price: 1000000,
-          product: { id: 103, name: 'Quần Jean nam' }
-        }
-      ],
-      customerName: 'Trần Thị B',
-      customerPhone: '0901234567'
-    },
-    {
-      id: 1003,
-      orderDate: '2025-03-13T11:20:00',
-      totalPrice: 3500000,
-      paymentStatus: 'PAID',
-      orderStatus: 'SHIPPED',
-      orderDetails: [
-        { 
-          id: 4, 
-          quantity: 1, 
-          price: 3500000,
-          product: { id: 104, name: 'Đồng hồ thông minh Samsung' }
-        }
-      ],
-      customerName: 'Lê Văn C',
-      customerPhone: '0912345678'
-    }
+  // Limited status options for staff
+  const statusOptions = [
+    { key: 'IN_PROGRESS', label: 'Xác nhận đơn' },
+    { key: 'SHIPPED', label: 'Giao hàng' },
   ];
 
   useEffect(() => {
-    // Simulate API call with fake data
-    setTimeout(() => {
-      setOrders(fakeOrders);
-      setTotal(fakeOrders.length);
-      applyFiltersAndPagination(fakeOrders, searchTerm, activeTab, currentPage, pageSize);
-      setLoading(false);
-    }, 800);
+    getOrders();
   }, []);
 
   useEffect(() => {
     applyFiltersAndPagination(orders, searchTerm, activeTab, currentPage, pageSize);
   }, [searchTerm, activeTab, currentPage, pageSize, orders]);
+
+  const getOrders = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchOrders();
+
+      // Sort orders by date (most recent first)
+      const sortedOrders = data.sort((a, b) =>
+        dayjs(b.orderDate).valueOf() - dayjs(a.orderDate).valueOf()
+      );
+
+      // Filter out completed, cancelled or returned orders - staff only sees active orders
+      const filteredOrders = sortedOrders.filter(order => {
+        const status = order.orderStatus.toUpperCase();
+        return ['PENDING', 'IN_PROGRESS', 'SHIPPED', 'DELIVERED'].includes(status);
+      });
+
+      setOrders(filteredOrders);
+      setTotal(filteredOrders.length);
+      console.log("order:", filteredOrders);
+
+      // Apply initial filtering and pagination
+      applyFiltersAndPagination(filteredOrders, searchTerm, activeTab, currentPage, pageSize);
+    } catch (error) {
+      message.error('Không thể tải danh sách đơn hàng');
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filterOrdersByTab = (orders, tab) => {
     if (tab === 'all') return orders;
@@ -166,6 +138,33 @@ const OrderList = () => {
     setPageSize(pageSize);
   };
 
+  const handleUpdateStatus = async (orderId, newStatus) => {
+    try {
+      setStatusUpdateLoading(true);
+
+      // Call API to update order status
+      const result = await updateStatusOrder2(orderId, newStatus);
+
+      // If successful, update local state
+      if (result) {
+        const updatedOrders = orders.map(order => {
+          if (order.id === orderId) {
+            return { ...order, orderStatus: newStatus };
+          }
+          return order;
+        });
+
+        setOrders(updatedOrders);
+        message.success(`Trạng thái đơn hàng đã được cập nhật thành ${getOrderStatusLabel(newStatus)}`);
+      }
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      message.error("Cập nhật trạng thái đơn hàng thất bại");
+    } finally {
+      setStatusUpdateLoading(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status.toUpperCase()) {
       case 'PENDING':
@@ -174,6 +173,8 @@ const OrderList = () => {
         return 'blue';
       case 'SHIPPED':
         return 'orange';
+      case 'DELIVERED':
+        return 'green';
       default:
         return 'default';
     }
@@ -201,6 +202,7 @@ const OrderList = () => {
       case 'PENDING': return 'Đơn mới';
       case 'IN_PROGRESS': return 'Đang xử lý';
       case 'SHIPPED': return 'Đang giao hàng';
+      case 'DELIVERED': return 'Đã giao hàng';
       default: return status;
     }
   };
@@ -214,6 +216,33 @@ const OrderList = () => {
     }
   };
 
+  // Generate dropdown menu for status update
+  const statusMenu = (record) => {
+    // Determine available next statuses based on current status
+    let availableOptions = [];
+    
+    switch(record.orderStatus.toUpperCase()) {
+      case 'PENDING':
+        availableOptions = [{ key: 'IN_PROGRESS', label: 'Xác nhận đơn' }];
+        break;
+      case 'IN_PROGRESS':
+        availableOptions = [{ key: 'SHIPPED', label: 'Giao hàng' }];
+        break;
+      default:
+        availableOptions = [];
+    }
+    
+    return (
+      <Menu
+        onClick={({ key }) => handleUpdateStatus(record.id, key)}
+        items={availableOptions.map(option => ({
+          key: option.key,
+          label: option.label
+        }))}
+      />
+    );
+  };
+
   const columns = [
     {
       title: 'STT',
@@ -222,10 +251,9 @@ const OrderList = () => {
       width: 70,
     },
     {
-      title: 'Mã đơn hàng',
+      title: 'Mã đơn',
       dataIndex: 'id',
       key: 'id',
-      width: 120,
     },
     {
       title: 'Khách hàng',
@@ -233,8 +261,7 @@ const OrderList = () => {
       key: 'customerName',
       render: (name, record) => (
         <div>
-          <div>{name}</div>
-          <div className="text-xs text-gray-500">{record.customerPhone}</div>
+          <div className="text-sm">{record?.userAddress?.user?.fullName}</div>
         </div>
       ),
     },
@@ -286,6 +313,29 @@ const OrderList = () => {
           {getOrderStatusLabel(orderStatus)}
         </Tag>
       )
+    },
+    {
+      title: 'Hành động',
+      key: 'actions',
+      render: (_, record) => (
+        // Only show actions dropdown if there are available status updates
+        record.orderStatus !== 'SHIPPED' && (
+          <Dropdown
+            overlay={statusMenu(record)}
+            trigger={['click']}
+            disabled={statusUpdateLoading}
+          >
+            <Button
+              type="primary"
+              size="small"
+              icon={<EditOutlined />}
+              loading={statusUpdateLoading}
+            >
+              Cập nhật <DownOutlined />
+            </Button>
+          </Dropdown>
+        )
+      ),
     },
   ];
 

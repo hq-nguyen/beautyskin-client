@@ -4,19 +4,69 @@ import { FaEye, FaHeart } from 'react-icons/fa';
 import StarRating from '../utils/StarRating';
 import { assets } from '../../assets/frontend_assets/assets';
 import api from '../../config/axios';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { fetchProductFeedbacks } from '../../apis/feedback';
 
-const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice }) => {
+const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
     const [isFavoriting, setIsFavoriting] = useState(false);
     const [isInFavorites, setIsInFavorites] = useState(false);
     const [error, setError] = useState(null);
-    const [favoriteMessage, setFavoriteMessage] = useState(null); // Added favoriteMessage state
+    const [favoriteMessage, setFavoriteMessage] = useState(null);
+    const [feedbackSummary, setFeedbackSummary] = useState({ count: 0, averageRating: 0 });
 
     const formattedOldPrice = oldPrice ? oldPrice.toLocaleString() : '0';
     const formattedNewPrice = newPrice ? newPrice.toLocaleString() : '0';
     
     const displayPromotion = promotion && promotion > 0;
+
+    // Fetch feedback summary when component mounts
+    useEffect(() => {
+        const getFeedbackSummary = async () => {
+            try {
+                const feedbacks = await fetchProductFeedbacks(id);
+                
+                if (Array.isArray(feedbacks) && feedbacks.length > 0) {
+                    // Calculate average rating from all feedbacks
+                    const totalRating = feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0);
+                    const avgRating = totalRating / feedbacks.length;
+                    
+                    setFeedbackSummary({
+                        count: feedbacks.length,
+                        averageRating: avgRating || 0
+                    });
+                } else {
+                    // If no feedbacks or invalid data, keep default rating
+                    setFeedbackSummary({
+                        count: 0,
+                        averageRating: 0
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching feedback summary:", error);
+                // Keep the default rating if there's an error
+            }
+        };
+
+        getFeedbackSummary();
+    }, [id]);
+
+    // Check if product is already in favorites
+    useEffect(() => {
+        const checkFavoriteStatus = async () => {
+            try {
+                const response = await api.get('favorites/getFavorites');
+                if (response.data && Array.isArray(response.data.products)) {
+                    const isInList = response.data.products.some(product => product.id === id);
+                    setIsInFavorites(isInList);
+                }
+            } catch (error) {
+                console.error("Error checking favorite status:", error);
+            }
+        };
+        
+        checkFavoriteStatus();
+    }, [id]);
 
     const handleAddFavorites = async () => {
         if (isInFavorites) {
@@ -38,15 +88,14 @@ const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice })
             }
 
             setIsInFavorites(true);
-            setFavoriteMessage('Đã thêm vào danh sách yêu thích thành công!'); // Success message
-            setTimeout(() => setFavoriteMessage(null), 2000); // Clear message after 2 seconds
+            setFavoriteMessage('Đã thêm vào danh sách yêu thích thành công!');
+            setTimeout(() => setFavoriteMessage(null), 2000);
             
             console.log('Đã thêm vào danh sách yêu thích:', response.data);
         } catch (error) {
-            setFavoriteMessage('Sản phẩm đã tồn tại trong danh sách yêu thích'); // Error message
-            setTimeout(() => setFavoriteMessage(null), 2000); // Clear message after 2 seconds
+            setFavoriteMessage('Sản phẩm đã tồn tại trong danh sách yêu thích');
+            setTimeout(() => setFavoriteMessage(null), 2000);
             console.error('Lỗi khi thêm vào sản phẩm yêu thích', error);
-            // Optionally keep toast.error if you want both popup and toast notifications
             toast.error('Sản phẩm đã tồn tại trong danh sách yêu thích');
         } finally {
             setIsFavoriting(false);
@@ -81,8 +130,8 @@ const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice })
                     </h3>
                 </Link>
                 <div className="flex my-1">
-                    <StarRating rating={rating} />
-                    <span className="ml-2 text-xs text-gray-500">(10)</span>
+                    <StarRating rating={(feedbackSummary.averageRating).toFixed(1)} />
+                    <span className="ml-2 text-xs text-gray-500">({feedbackSummary.count})</span>
                 </div>
                 <div className="flex items-center">
                     <span className="text-xs text-gray-500 line-through">{formattedOldPrice} đ</span>
@@ -102,7 +151,7 @@ const ProductItem = ({ id, image, promotion, name, rating, oldPrice, newPrice })
                             isFavoriting ? "opacity-50 cursor-not-allowed" : ""
                         }`}
                     >
-                        <FaHeart className={`w-4 h-4 ${isInFavorites ? "text-red-500" : "hover:text-red-500"}`} />
+                        <FaHeart className={`w-4 h-4 ${isInFavorites ? "text-red-500" : "text-gray-500 hover:text-red-500"}`} />
                     </button>
                 </div>
                 {error && (
@@ -131,7 +180,6 @@ ProductItem.propTypes = {
     image: PropTypes.string.isRequired,
     promotion: PropTypes.number,
     name: PropTypes.string.isRequired,
-    rating: PropTypes.number,
     oldPrice: PropTypes.number.isRequired,
     newPrice: PropTypes.number
 };

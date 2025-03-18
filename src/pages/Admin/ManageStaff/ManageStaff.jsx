@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Table, Tag, Space, Modal, Button, Avatar } from 'antd';
 import { MdOutlineDeleteOutline, MdOutlineRemoveRedEye } from "react-icons/md";
-import { fetchStaff, deleteStaff, addStaff } from '../../../apis/staff';
+// import { fetchStaff, deleteStaff, addStaff } from '../../../apis/staff';
 import StaffModel from './StaffModel';
-import AddStaff from './AddStaff'; // Import the AddStaff component
+import AddStaff from './AddStaff';
+import { createStaff, deleteCustomer, fetchCustomer } from '../../../apis/customer';
+import { render } from 'react-dom';
 
 const ManageStaff = () => {
   const [staffs, setStaffs] = useState([]);
@@ -15,8 +17,9 @@ const ManageStaff = () => {
   useEffect(() => {
     const getStaffs = async () => {
       try {
-        const data = await fetchStaff();
-        setStaffs(data);
+        const data = await fetchCustomer();
+        const staffData = data.filter(user => user.roleEnums === "STAFF");
+        setStaffs(staffData);
       } catch (error) {
         console.error("Error fetching staffs:", error);
       } finally {
@@ -46,7 +49,7 @@ const ManageStaff = () => {
       cancelText: 'Không',
       onOk: async () => {
         try {
-          await deleteStaff(staff.id);
+          await deleteCustomer(staff.id);
           setStaffs(staffs.filter(s => s.id !== staff.id));
           Modal.success({ content: 'Xóa nhân viên thành công!' });
         } catch (error) {
@@ -58,7 +61,7 @@ const ManageStaff = () => {
 
   const handleAddNewStaff = async (newStaff) => {
     try {
-      const response = await addStaff(newStaff); 
+      const response = await createStaff(newStaff);
       const newStaffWithId = { ...newStaff, id: response.id };
       setStaffs([...staffs, newStaffWithId]); // Update the state with the new staff
       setIsAddModalVisible(false); // Close the modal
@@ -74,43 +77,38 @@ const ManageStaff = () => {
       key: 'id',
     },
     {
-      title: 'Avatar',
-      dataIndex: 'avatar',
-      key: 'avatar',
-      render: (avatar) => (<Avatar src={avatar} alt="Avatar" />),
-    },
-    {
       title: 'Họ và tên',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'fullName',
+      key: 'fullName',
     },
     {
       title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
-      title: 'Số điện thoại',
-      dataIndex: 'phoneNumber',
-      key: 'phoneNumber',
+      dataIndex: 'mail',
+      key: 'mail',
     },
     {
       title: 'Số đơn đã giao',
       dataIndex: 'numberOfAssigned',
       key: 'numberOfAssigned',
+      render: (numberOfAssigned) => (
+        <Tag color="blue">hello {numberOfAssigned}</Tag>
+      )
     },
     {
       title: 'Số đơn đã xử lý',
       dataIndex: 'numberOfOrderProcessed',
       key: 'numberOfOrderProcessed',
+      render: (numberOfAssigned) => (
+        <Tag color="blue">hi {numberOfAssigned}</Tag>
+      )
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => (
-        <Tag color={status.toUpperCase() === 'ACTIVE' ? 'green' : 'red'}>
-          {status ? status.toUpperCase() : 'INACTIVE'}
+      dataIndex: 'active',
+      key: 'active',
+      render: (active) => (
+        <Tag color={active ?  'green' : 'red'}>
+          {active ? 'Đang hoạt động' : 'Tạm khóa'}
         </Tag>
       ),
     },

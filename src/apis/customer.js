@@ -71,3 +71,16 @@ export const getSkinProfile = async (id) => {
         throw new Error("Có lỗi xảy ra khi lưu dữ liệu loại da của bạn. Xin thông cảm!");
     }
 };
+
+
+// staff 
+export const createStaff = async (staff) => {
+    try {
+        const response = await api.post('/user/create-staff', staff);
+        console.log('Staff created:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating staff:', error);
+        throw new Error("Có lỗi xảy ra khi tạo nhân viên. Xin thông cảm!");
+    }
+} 
