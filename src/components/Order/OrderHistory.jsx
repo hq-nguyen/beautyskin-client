@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { message, Pagination } from 'antd';
+import { message, Pagination, Modal } from 'antd';
 import { formatDate, formatCurrency } from '../../utils/format';
-import { fetchOrderHistory } from '../../apis/order';
+import { fetchOrderHistory, cancelOrder } from '../../apis/order';
 import { FaSearch, FaSpinner } from 'react-icons/fa';
-import { CheckCircleTwoTone } from '@ant-design/icons';
+import { CheckCircleTwoTone, ExclamationCircleOutlined } from '@ant-design/icons';
 import { assets } from '../../assets/frontend_assets/assets';
 import { Link } from 'react-router-dom';
 import { createFeedback } from '../../apis/feedback';
 import FeedbackModel from './FeedbackModel';
+
+const { confirm } = Modal;
 
 const OrderHistory = () => {
   const [loading, setLoading] = useState(true);
@@ -18,6 +20,7 @@ const OrderHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [total, setTotal] = useState(0);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   // Feedback state
   const [popupMode, setPopupMode] = useState(null);
@@ -207,6 +210,35 @@ const OrderHistory = () => {
     handleClosePopup();
   };
 
+  // New cancel order function
+  const handleCancelOrder = (orderId) => {
+    confirm({
+      title: 'Hủy đơn hàng',
+      icon: <ExclamationCircleOutlined />,
+      content: 'Bạn có chắc chắn muốn hủy đơn hàng này không?',
+      okText: 'Xác nhận',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        try {
+          setCancelLoading(true);
+          await cancelOrder(orderId);
+          message.success('Đơn hàng đã được hủy thành công');
+          fetchOrders(); // Refresh order list
+        } catch (error) {
+          console.error('Cancel order error:', error);
+          // Error message is already handled in the cancelOrder function
+        } finally {
+          setCancelLoading(false);
+        }
+      },
+    });
+  };
+
+  // Check if order can be cancelled
+  const canCancelOrder = (order) => {
+    return order.status === 'PENDING';
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -327,7 +359,7 @@ const OrderHistory = () => {
                               <div className="mt-2 flex justify-between">
                                 <div></div>
                                 <button
-                                  className="text-xs px-2 py-1 text-white bg-rose-600 hover:bg-rose-700"
+                                  className="text-xs px-2 py-1 text-white bg-rose-600 hover:bg-rose-700 rounded"
                                   onClick={() => {
                                     handleOpenPopup("feedback")
                                     setSelectedOrderDetail(orderDetail)
@@ -349,6 +381,19 @@ const OrderHistory = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Order Action Buttons */}
+                  <div className="mt-4 flex justify-end">
+                    {canCancelOrder(order) && (
+                      <button
+                        className="ml-2 px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200 disabled:opacity-50"
+                        onClick={() => handleCancelOrder(order.orderId)}
+                        disabled={cancelLoading}
+                      >
+                        {cancelLoading ? 'Đang hủy...' : 'Hủy đơn hàng'}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
