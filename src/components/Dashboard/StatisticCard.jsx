@@ -2,18 +2,37 @@ import { Card, Statistic } from 'antd';
 import { 
   CheckCircleOutlined, 
   SyncOutlined, 
-  ClockCircleOutlined 
+  ClockCircleOutlined,
+  StopOutlined
 } from '@ant-design/icons';
 
-const StatisticCard = ({ title, value, prefix, loading }) => {
+const StatisticCard = ({ title, value, loading, icon }) => {
   const getIcon = () => {
+    if (icon) {
+      switch (icon) {
+        case 'completed':
+          return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
+        case 'inProgress':
+          return <SyncOutlined style={{ color: '#1890ff' }} />;
+        case 'pending':
+          return <ClockCircleOutlined style={{ color: '#faad14' }} />;
+        case 'cancelled':
+          return <StopOutlined style={{ color: '#ff4d4f' }} />;
+        default:
+          return null;
+      }
+    }
+    
+    // Fallback to title-based icon selection for backward compatibility
     switch (title) {
-      case 'Completed Orders':
+      case 'Số đơn hoàn thành':
         return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
-      case 'In Progress Orders':
+      case 'Số đơn đang xử lí':
         return <SyncOutlined style={{ color: '#1890ff' }} />;
-      case 'Pending Orders':
+      case 'Số đơn chờ xử lí':
         return <ClockCircleOutlined style={{ color: '#faad14' }} />;
+      case 'Số đơn đã hủy':
+        return <StopOutlined style={{ color: '#ff4d4f' }} />;
       default:
         return null;
     }
@@ -26,7 +45,7 @@ const StatisticCard = ({ title, value, prefix, loading }) => {
         value={value}
         precision={0}
         loading={loading}
-        prefix={prefix || getIcon()}
+        prefix={getIcon()}
       />
     </Card>
   );

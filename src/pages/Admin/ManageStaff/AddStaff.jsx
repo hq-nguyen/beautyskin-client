@@ -10,9 +10,7 @@ const AddStaff = ({ visible, onCancel, onSave }) => {
             // Convert date to string format
             const newStaff = {
                 ...values,
-                dob: values.dob.format('DD-MM-YYYY'),
-                dateOfJoining: values.dateOfJoining.format('DD-MM-YYYY'),
-            };
+                };
             onSave(newStaff);
             form.resetFields(); // Reset form fields after saving
         });
@@ -26,16 +24,16 @@ const AddStaff = ({ visible, onCancel, onSave }) => {
             footer={null} // Remove default OK/Cancel buttons
         >
             <Form form={form} layout="vertical">
-                <Form.Item name="name" label="Họ và tên" rules={[{ required: true }]}>
+                <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true }]}>
                     <Input />
                 </Form.Item>
-                <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+                <Form.Item name="mail" label="Email" rules={[{ required: true, type: 'email' }]}>
                     <Input />
                 </Form.Item>
-                <Form.Item name="phoneNumber" label="Số điện thoại" rules={[{ required: true }]}>
+                <Form.Item name="phone" label="Số điện thoại" rules={[{ required: true }]}>
                     <Input />
                 </Form.Item>
-                <Form.Item name="dob" label="Ngày sinh" rules={[{ required: true }]}>
+                <Form.Item name="birthday" label="Ngày sinh" rules={[{ required: true }]}>
                     <DatePicker />
                 </Form.Item>
                 <Form.Item name="gender" label="Giới tính" rules={[{ required: true }]}>
@@ -45,18 +43,18 @@ const AddStaff = ({ visible, onCancel, onSave }) => {
                         <Option value="Other">Khác</Option>
                     </Select>
                 </Form.Item>
-                <Form.Item name="status" label="Trạng thái">
+                {/* <Form.Item name="active" label="Trạng thái">
                     <Select placeholder="Chọn trạng thái">
                         <Option value="active">Hoạt động</Option>
                         <Option value="inactive">Ngừng hoạt động</Option>
                     </Select>
-                </Form.Item>
-                <Form.Item name="numberOfOrderProcessed" label="Số lượng đơn hàng đã xử lý" rules={[{ required: true }]}>
+                </Form.Item> */}
+                {/* <Form.Item name="numberOfOrderProcessed" label="Số lượng đơn hàng đã xử lý" rules={[{ required: true }]}>
                     <Input type="number" />
-                </Form.Item>
-                <Form.Item name="dateOfJoining" label="Ngày tham gia" rules={[{ required: true }]}>
+                </Form.Item> */}
+                {/* <Form.Item name="dateOfJoining" label="Ngày tham gia" rules={[{ required: true }]}>
                     <DatePicker />
-                </Form.Item>
+                </Form.Item> */}
 
                 <Button type="primary" onClick={handleOk}>
                     Thêm nhân viên
