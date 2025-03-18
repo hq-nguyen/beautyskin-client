@@ -93,6 +93,10 @@ const Navbar = () => {
           <img src={assets.logo} className='w-36' alt="" />
         </Link>
         <ul className="hidden sm:flex gap-5 text-sm text-gray-700">
+        <NavLink to='/' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
+            <p>Trang chủ</p>
+            <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
+          </NavLink>
           <NavLink to='/about' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
             <p>Giới thiệu</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
@@ -103,10 +107,6 @@ const Navbar = () => {
           </NavLink>
           <NavLink to='/blog' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
             <p>Blog</p>
-            <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
-          </NavLink>
-          <NavLink to='/news' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
-            <p>Tin tức</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
           </NavLink>
           <NavLink to='/test-skin' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>

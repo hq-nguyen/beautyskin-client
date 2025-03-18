@@ -143,7 +143,7 @@ const SkinTypeRecommendations = () => {
                             <div key={index} className="px-2 py-4 transition-transform duration-300 hover:scale-105">
                                 <ProductItem
                                     id={product.id}
-                                    image={product.images[0].url || "default-image-url"}
+                                    image={product.images[0] || "default-image-url"}
                                     promotion={product.discount || 20}
                                     name={product.name}
                                     rating={product.rating || 4.0}
