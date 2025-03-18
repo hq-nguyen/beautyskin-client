@@ -56,6 +56,7 @@ import StaffLayout from "../layout/StaffLayout";
 import Dashboard from "../pages/Staff/Dashboard";
 import OrderManagement from "../pages/Staff/OrderManagement";
 import ComparePage from "../pages/Shop/Compare";
+import DashboardMain from "../pages/Admin/Dashboard/Dashboard";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -186,7 +187,7 @@ const Routers = () => {
     {
       path: "/checkout",
       element: (
-        <ProtectedRoute allowedRoles={["USER", "MANAGER", "STAFF"]}>
+        <ProtectedRoute allowedRoles={["USER"]}>
           <CheckoutLayout />
         </ProtectedRoute>
       ),
@@ -220,6 +221,10 @@ const Routers = () => {
         {
           index: true,
           element: <ManageProduct />,
+        },
+        {
+          path: 'dashboard',
+          element: <DashboardMain />,
         },
         {
           path: 'list-products',

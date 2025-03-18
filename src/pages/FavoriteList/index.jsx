@@ -24,7 +24,7 @@ const FavoriteProducts = () => {
     try {
       setLoading(true);
       const response = await api.get('/favorites/getFavorites');
-      console.log(response);
+      // console.log(response);
 
       if (response.status !== 200) {
         throw new Error('Không thể lấy danh sách sản phẩm yêu thích');
