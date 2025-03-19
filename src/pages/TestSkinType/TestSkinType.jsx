@@ -25,6 +25,7 @@ const SkinTypeQuiz = () => {
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileSaveError, setProfileSaveError] = useState(null);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [quizStarted, setQuizStarted] = useState(false);
 
   useEffect(() => {
     const userIdFromStorage = localStorage.getItem('id');
@@ -128,6 +129,10 @@ const SkinTypeQuiz = () => {
     }
   };
 
+  const handleStartQuiz = () => {
+    setQuizStarted(true);
+  };
+
   const determineSkinType = (points) => {
     // This matches the backend logic for skin type determination
     if (points <= 11) {
@@ -173,6 +178,7 @@ const SkinTypeQuiz = () => {
     setProfileSaved(false);
     setProfileSaveError(null);
     setSavingProfile(false);
+    setQuizStarted(false);
   };
 
   const navigateToSkinTypePage = (route) => {
@@ -193,11 +199,11 @@ const SkinTypeQuiz = () => {
   if (questions.length === 0) return <EmptyQuestions />;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <QuizHeader questionsCount={questions.length} />
+        {quizStarted && !showResult && <QuizHeader questionsCount={questions.length} />}
   
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className={`bg-white ${showResult ? 'p-6' : 'p-0'}`}>
           {!showResult ? (
             <Question 
               question={questions[currentQuestion]}
@@ -206,6 +212,7 @@ const SkinTypeQuiz = () => {
               answers={answers}
               onAnswer={handleAnswer}
               onPrevious={handlePreviousQuestion}
+              onStart={handleStartQuiz}
             />
           ) : (
             <>

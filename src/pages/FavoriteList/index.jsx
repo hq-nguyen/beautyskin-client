@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { HeartOff, Trash2, X, CheckCircle } from 'lucide-react';
+import { HeartOff, X, CheckCircle } from 'lucide-react';
 import api from '../../config/axios';
 import { assets } from '../../assets/frontend_assets/assets';
-import { addToCart } from '../../redux/features/cartSlice';
-import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 
@@ -13,8 +11,6 @@ const FavoriteProducts = () => {
   const [error, setError] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
-  const dispatch = useDispatch();
-  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     fetchFavoriteProducts();
@@ -43,12 +39,6 @@ const FavoriteProducts = () => {
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-  };
-
-  const handleAddToCart = () => {
-    if (favoriteProducts) {
-      dispatch(addToCart({ ...favoriteProducts, quantity }));
-    }
   };
 
   const confirmDelete = (product) => {

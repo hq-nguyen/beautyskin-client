@@ -114,7 +114,7 @@ const ProductDetail = () => {
 
                         <div className="mt-2 flex items-center space-x-4">
                             <div className="flex">
-                                <StarRating rating={averageRating} />
+                                <StarRating rating={(averageRating).toFixed(1)} />
                                 <span className="ml-2 text-sm text-gray-500">({feedbackData.length} đánh giá)</span>
                             </div>
                             {product.stock > 0 ? (
