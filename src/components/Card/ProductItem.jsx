@@ -1,10 +1,10 @@
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { FaEye, FaHeart } from 'react-icons/fa';
 import StarRating from '../utils/StarRating';
 import { assets } from '../../assets/frontend_assets/assets';
 import api from '../../config/axios';
 import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
 import { fetchProductFeedbacks } from '../../apis/feedback';
 
 const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
@@ -14,13 +14,10 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
     const [favoriteMessage, setFavoriteMessage] = useState(null);
     const [feedbackSummary, setFeedbackSummary] = useState({ count: 0, averageRating: 0 });
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-
     const formattedOldPrice = oldPrice ? oldPrice.toLocaleString() : '0';
     const formattedNewPrice = newPrice ? newPrice.toLocaleString() : '0';
-
     const displayPromotion = promotion && promotion > 0;
 
-    // Check if user is logged in when component mounts
     useEffect(() => {
         const checkLoginStatus = () => {
             // Check for token in localStorage or your auth storage method
@@ -34,7 +31,6 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
     // Fetch feedback summary when component mounts
     useEffect(() => {
         const getFeedbackSummary = async () => {
-            if (!isLoggedIn) return;
             try {
                 const feedbacks = await fetchProductFeedbacks(id);
 
@@ -63,11 +59,10 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
         getFeedbackSummary();
     }, [id]);
 
-    // Check if product is already in favorites only if user is logged in
+    // Check if product is already in favorites
     useEffect(() => {
+        if (!isLoggedIn) return;
         const checkFavoriteStatus = async () => {
-            if (!isLoggedIn) return;
-
             try {
                 const response = await api.get('favorites/getFavorites');
                 if (response.data && Array.isArray(response.data.products)) {
@@ -76,14 +71,14 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
                 }
             } catch (error) {
                 console.error("Error checking favorite status:", error);
-                // Do not display the error to users - it's likely due to auth issues
             }
         };
 
         checkFavoriteStatus();
-    }, [id, isLoggedIn]);
+    }, [id]);
 
     const handleAddFavorites = async () => {
+
         if (!isLoggedIn) {
             // Redirect to login or show login message
             setFavoriteMessage('Vui lòng đăng nhập để thêm sản phẩm vào yêu thích');
@@ -118,7 +113,6 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
             setFavoriteMessage('Sản phẩm đã tồn tại trong danh sách yêu thích');
             setTimeout(() => setFavoriteMessage(null), 2000);
             console.error('Lỗi khi thêm vào sản phẩm yêu thích', error);
-            toast.error('Sản phẩm đã tồn tại trong danh sách yêu thích');
         } finally {
             setIsFavoriting(false);
         }
@@ -182,8 +176,8 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
 
             {/* Popup notification for favorite messages */}
             {favoriteMessage && (
-                <div className="fixed inset-0 flex items-center justify-center z-50">
-                    <div className={`p-4 rounded-md shadow-lg border ${favoriteMessage.includes('Lỗi') || favoriteMessage.includes('tồn tại') || favoriteMessage.includes('đã có') || favoriteMessage.includes('đăng nhập')
+                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+                    <div className={`p-4 rounded-md shadow-lg border max-w-xs w-full text-center ${favoriteMessage.includes('Lỗi') || favoriteMessage.includes('tồn tại') || favoriteMessage.includes('đã có') || favoriteMessage.includes('Vui lòng đăng nhập')
                             ? 'bg-red-100 border-red-300 text-red-700'
                             : 'bg-green-100 border-green-300 text-green-700'
                         }`}>
@@ -193,6 +187,15 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
             )}
         </div>
     );
+};
+
+ProductItem.propTypes = {
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    image: PropTypes.string.isRequired,
+    promotion: PropTypes.number,
+    name: PropTypes.string.isRequired,
+    oldPrice: PropTypes.number.isRequired,
+    newPrice: PropTypes.number
 };
 
 export default ProductItem;
