@@ -17,7 +17,7 @@ const Shop = () => {
 
   const [filters, setFilters] = useState({
     category: [],
-    priceRange: [0, 10000000], 
+    priceRange: [0, 10000000],
     skinType: [],
     skinConcern: [],
     texture: []
@@ -28,7 +28,7 @@ const Shop = () => {
 
   const filterMap = {
     skinType: {
-      oily: null, 
+      oily: null,
       dry: null,
       normal: null,
       combination: null
@@ -55,11 +55,11 @@ const Shop = () => {
       try {
         const storedQuery = localStorage.getItem('searchQuery');
         const storedFilteredProducts = localStorage.getItem('filteredProducts');
-        
+
         if (storedQuery) {
           setSearchQuery(storedQuery);
         }
-        
+
         if (storedFilteredProducts) {
           const filteredProducts = JSON.parse(storedFilteredProducts).filter(
             product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK' && product.stock > 0
@@ -138,14 +138,14 @@ const Shop = () => {
 
   const getFilterCounts = (filterType, options) => {
     const counts = {};
-    
+
     options.forEach(option => {
       let count = 0;
-      
+
       products.forEach(product => {
         if (filterType === 'category') {
           if (product.category && product.category.id === option.id) count++;
-        } 
+        }
         else if (filterType === 'skinType') {
           if (product.skinTypes && product.skinTypes.some(type => type.id === option.id)) count++;
         }
@@ -156,42 +156,49 @@ const Shop = () => {
           if (product.forms && product.forms.some(form => form.id === option.id)) count++;
         }
       });
-      
+
       counts[option.id] = count;
     });
-    
+
     return counts;
   };
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products.filter(product => {
       const priceInRange = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
-      const matchesCategory = filters.category.length === 0 || 
+      const matchesCategory = filters.category.length === 0 ||
         filters.category.some(catId => product.category && product.category.id === catId);
-      const matchesSkinType = filters.skinType.length === 0 || 
+      const matchesSkinType = filters.skinType.length === 0 ||
         (product.skinTypes && product.skinTypes.some(type => filters.skinType.includes(type.id)));
-      const matchesSkinConcern = filters.skinConcern.length === 0 || 
+      const matchesSkinConcern = filters.skinConcern.length === 0 ||
         (product.skinConcerns && product.skinConcerns.some(concern => filters.skinConcern.includes(concern.id)));
-      const matchesTexture = filters.texture.length === 0 || 
+      const matchesTexture = filters.texture.length === 0 ||
         (product.forms && product.forms.some(form => filters.texture.includes(form.id)));
-      const matchesSearch = !searchQuery || 
+      const matchesSearch = !searchQuery ||
         (product.name && product.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      return priceInRange && matchesCategory && matchesSkinType && 
-             matchesSkinConcern && matchesTexture && matchesSearch;
+      return priceInRange && matchesCategory && matchesSkinType &&
+        matchesSkinConcern && matchesTexture && matchesSearch;
     });
 
+    // Enhanced sorting logic with proper numeric handling
     switch (sortBy) {
       case "low-high":
         filtered.sort((a, b) => a.price - b.price);
         break;
       case "high-low":
-        filtered.sort((a, b) => b.price - b.price);
+        filtered.sort((a, b) => b.price - a.price);
         break;
       case "hot":
         filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case "newest":
+        // If you have a date field, you could sort by that here
+        filtered.sort((a, b) => {
+          const dateA = a.createDateTime ? new Date(a.createDateTime) : new Date(0);
+          const dateB = b.createDateTime ? new Date(b.createDateTime) : new Date(0);
+          return dateB - dateA;
+        });
         break;
       default:
         break;
@@ -209,11 +216,11 @@ const Shop = () => {
       if (filterType === "priceRange") {
         return { ...prev, priceRange: value };
       }
-      
+
       const updatedValues = prev[filterType].includes(value)
         ? prev[filterType].filter(item => item !== value)
         : [...prev[filterType], value];
-      
+
       return { ...prev, [filterType]: updatedValues };
     });
     setCurrentPage(1);
@@ -222,7 +229,7 @@ const Shop = () => {
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    
+
     if (query.trim()) {
       localStorage.setItem('searchQuery', query);
     } else {
@@ -240,11 +247,11 @@ const Shop = () => {
       texture: []
     });
     setSearchQuery("");
-    setSortBy("");  
-    
+    setSortBy("");
+
     localStorage.removeItem('searchQuery');
     localStorage.removeItem('filteredProducts');
-    
+
     fetchProducts().then(data => {
       const availableProducts = data.filter(
         product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
@@ -255,7 +262,7 @@ const Shop = () => {
 
   const FilterSection = ({ title, options, filterType }) => {
     const counts = getFilterCounts(filterType, options);
-    
+
     return (
       <div className="mb-6">
         <h3 className="text-md font-semibold mb-2">{title}</h3>
@@ -281,14 +288,14 @@ const Shop = () => {
 
   const getPromotionPercentage = (product) => {
     if (product.promotions && product.promotions.length > 0) {
-      return 20; 
+      return 20;
     }
     return 20;
   };
 
   const getDiscountedPrice = (product) => {
     if (product.promotions && product.promotions.length > 0) {
-      return product.price - (product.price * 0.2); 
+      return product.price - (product.price * 0.2);
     }
     return product.price;
   };
