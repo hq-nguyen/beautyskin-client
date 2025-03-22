@@ -220,7 +220,7 @@ const Routers = () => {
       children: [
         {
           index: true,
-          element: <ManageProduct />,
+          element: <DashboardMain />,
         },
         {
           path: 'dashboard',
