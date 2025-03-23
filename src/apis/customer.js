@@ -62,7 +62,8 @@ export const createSkinProfile = async (skinPoint) => {
     }
 };
 
-export const getSkinProfile = async (id) => {
+export const getSkinProfile = async (e, id) => {
+    e.preventDefault()
     try {
         const response = await api.get(`/skin-profile/get-by-user/${id}`);
         return response.data;

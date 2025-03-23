@@ -96,6 +96,7 @@ const Login = () => {
   
     try {
       const result = await signInWithPopup(auth, provider);
+      console.log(result);
       const idToken = await result.user.getIdToken();
 
       if (!idToken) {

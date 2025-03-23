@@ -30,7 +30,8 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
 
     // Fetch feedback summary when component mounts
     useEffect(() => {
-        const getFeedbackSummary = async () => {
+        const getFeedbackSummary = async (e) => {
+            e.preventDefault();
             try {
                 const feedbacks = await fetchProductFeedbacks(id);
 
@@ -62,7 +63,8 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
     // Check if product is already in favorites
     useEffect(() => {
         if (!isLoggedIn) return;
-        const checkFavoriteStatus = async () => {
+        const checkFavoriteStatus = async (e) => {
+            e.preventDefault()
             try {
                 const response = await api.get('favorites/getFavorites');
                 if (response.data && Array.isArray(response.data.products)) {
