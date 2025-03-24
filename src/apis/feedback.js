@@ -12,7 +12,7 @@ export const createFeedback = async (feedbackData) => {
 
 export const fetchFeedbacks = async () => {
   try {
-    const response = await api.get(`/feedback/getAll`);
+    const response = await api.get(`/feedback/getDeleteIsFalse`);
     return response.data;
   } catch (error) {
     message.error(error.response.data);

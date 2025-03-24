@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { formatDate } from '../../utils/format';
+import { assets } from '../../assets/frontend_assets/assets';
 
 const BlogCard = ({ id, image, title, publish, slug, content }) => {
     return (
@@ -12,7 +13,7 @@ const BlogCard = ({ id, image, title, publish, slug, content }) => {
                     {/* Image Container */}
                     <Link to={`/blog/${slug}`} className="relative overflow-hidden w-1/3 aspect-video">
                         <img
-                            src={image}
+                            src={image || assets.blog_2}
                             alt={title}
                             className="w-full h-full object-cover opacity-90 group-hover:opacity-100 duration-500"
                             loading="lazy"

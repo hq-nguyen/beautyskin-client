@@ -20,7 +20,7 @@ const DashboardMain = () => {
         const revenueResponse = await getRevenueByMonth();
         setMonthlyRevenue(revenueResponse.data);
         
-        console.log("Dashboard data:", summaryResponse.data);
+        console.log("Dashboard data:", summaryResponse.data.topProductsThisMonth);
         console.log("Revenue data:", revenueResponse.data);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);

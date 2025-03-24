@@ -62,11 +62,12 @@ export const createSkinProfile = async (skinPoint) => {
     }
 };
 
-export const getSkinProfile = async (e, id) => {
-    e.preventDefault()
+export const getSkinProfile = async ( id) => {
     try {
         const response = await api.get(`/skin-profile/get-by-user/${id}`);
+        console.log(response.data);
         return response.data;
+        
     } catch (error) {
         console.error('Error updating skin profile:', error);
         throw new Error("Có lỗi xảy ra khi lưu dữ liệu loại da của bạn. Xin thông cảm!");

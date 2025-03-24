@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StarRating from '../utils/StarRating';
 import { assets } from '../../assets/frontend_assets/assets';
+import { useSelector } from 'react-redux';
 
 const ProductTabs = ({ product, feedbackData }) => {
     const [selectedTab, setSelectedTab] = useState('description');
     const [currentPage, setCurrentPage] = useState(1);
+    const [sortOption, setSortOption] = useState('date'); // Default sort by date
     const feedbacksPerPage = 5;
+    
+    // Get current user from Redux store
+    const currentUser = useSelector(state => state.user);
 
     const skinTypes = product.skinTypes?.map(type => type.name).join(', ') || '';
     const skinConcerns = product.skinConcerns?.map(concern => concern.name).join(', ') || '';
@@ -32,11 +37,65 @@ const ProductTabs = ({ product, feedbackData }) => {
         totalFeedbacks > 0 ? Math.round((count / totalFeedbacks) * 100) : 0
     );
 
+    // Sort and prepare feedbacks for display
+    const getSortedFeedbacks = () => {
+        if (!feedbackData || feedbackData.length === 0) return [];
+        
+        // Create a copy of the data for sorting
+        let sortedData = [...feedbackData];
+        
+        // Find current user's feedback if user is logged in
+        let userFeedback = null;
+        if (currentUser) {
+            const userFeedbacks = sortedData.filter(
+                feedback => feedback.user?.id === currentUser.id
+            );
+            
+            if (userFeedbacks.length > 0) {
+                // Get the latest user feedback
+                userFeedback = userFeedbacks.sort((a, b) => 
+                    new Date(b.feedBackDate) - new Date(a.feedBackDate)
+                )[0];
+                
+                // Remove user feedback from the main list to avoid duplication
+                sortedData = sortedData.filter(
+                    feedback => !(feedback.user?.id === currentUser.id && 
+                                feedback.id === userFeedback.id)
+                );
+            }
+        }
+        
+        // Sort the remaining feedbacks
+        switch (sortOption) {
+            case 'date':
+                sortedData.sort((a, b) => new Date(b.feedBackDate) - new Date(a.feedBackDate));
+                break;
+            case 'highest':
+                sortedData.sort((a, b) => b.rating - a.rating);
+                break;
+            case 'lowest':
+                sortedData.sort((a, b) => a.rating - b.rating);
+                break;
+            default:
+                sortedData.sort((a, b) => new Date(b.feedBackDate) - new Date(a.feedBackDate));
+        }
+        
+        // If user feedback exists, prepend it to the sorted list
+        return userFeedback ? [userFeedback, ...sortedData] : sortedData;
+    };
+
+    const sortedFeedbacks = getSortedFeedbacks();
+    
     // Pagination logic
     const indexOfLastFeedback = currentPage * feedbacksPerPage;
     const indexOfFirstFeedback = indexOfLastFeedback - feedbacksPerPage;
-    const currentFeedbacks = feedbackData?.slice(indexOfFirstFeedback, indexOfLastFeedback) || [];
-    const totalPages = Math.ceil((feedbackData?.length || 0) / feedbacksPerPage);
+    const currentFeedbacks = sortedFeedbacks.slice(indexOfFirstFeedback, indexOfLastFeedback);
+    const totalPages = Math.ceil(sortedFeedbacks.length / feedbacksPerPage);
+
+    // Reset to first page when sort option changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [sortOption]);
 
     // Format date to Vietnamese format
     const formatDate = (dateString) => {
@@ -66,6 +125,11 @@ const ProductTabs = ({ product, feedbackData }) => {
             );
         }
         return items;
+    };
+
+    // Check if a feedback is from the current user
+    const isCurrentUserFeedback = (feedback) => {
+        return currentUser && feedback.user?.id === currentUser.id;
     };
 
     return (
@@ -169,10 +233,14 @@ const ProductTabs = ({ product, feedbackData }) => {
                         {/* Filter options */}
                         <div className="flex justify-end mb-6">
                             <div className="relative">
-                                <select className="pl-4 pr-8 py-2 border rounded-md bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-primary">
-                                    <option>Ngày đánh giá</option>
-                                    <option>Đánh giá cao nhất</option>
-                                    <option>Đánh giá thấp nhất</option>
+                                <select 
+                                    className="pl-4 pr-8 py-2 border rounded-md bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
+                                    value={sortOption}
+                                    onChange={(e) => setSortOption(e.target.value)}
+                                >
+                                    <option value="date">Ngày đánh giá</option>
+                                    <option value="highest">Đánh giá cao nhất</option>
+                                    <option value="lowest">Đánh giá thấp nhất</option>
                                 </select>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -186,16 +254,26 @@ const ProductTabs = ({ product, feedbackData }) => {
                         {currentFeedbacks.length > 0 ? (
                             <div className="mt-6 space-y-6">
                                 {currentFeedbacks.map((feedback, index) => (
-                                    <div key={`${feedback.id || index}`} className="border rounded-lg p-4">
+                                    <div 
+                                        key={`${feedback.id || index}`} 
+                                        className={`border rounded-lg p-4 ${isCurrentUserFeedback(feedback) ? 'border-primary bg-primary/5' : ''}`}
+                                    >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
-                                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                                <div className={`w-10 h-10 rounded-full ${isCurrentUserFeedback(feedback) ? 'bg-primary/20' : 'bg-primary/10'} flex items-center justify-center`}>
                                                     <span className="text-primary font-semibold">
                                                         {feedback.user?.fullName?.charAt(0) || "U"}
                                                     </span>
                                                 </div>
                                                 <div className="ml-3">
-                                                    <p className="font-medium">{feedback.user?.fullName || "Người dùng"}</p>
+                                                    <div className="flex items-center">
+                                                        <p className="font-medium">{feedback.user?.fullName || "Người dùng"}</p>
+                                                        {isCurrentUserFeedback(feedback) && (
+                                                            <span className="ml-2 text-xs bg-primary text-white px-2 py-0.5 rounded-full">
+                                                                Đánh giá của bạn
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     <div className="flex items-center mt-1">
                                                         <div className="flex">
                                                             <StarRating rating={(feedback.rating).toFixed(1)} size="w-2 h-2" />

@@ -30,6 +30,8 @@ const ProductHighlights = () => {
           ).slice(0, 7);
           
           setHotDealsProducts(sortedByStock);
+          console.log("hot deals:",sortedByStock);
+          
           setNewProducts(sortedByDate);
         }
       } catch (error) {

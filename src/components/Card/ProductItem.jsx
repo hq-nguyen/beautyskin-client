@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { FaEye, FaHeart } from 'react-icons/fa';
 import StarRating from '../utils/StarRating';
@@ -6,21 +5,36 @@ import { assets } from '../../assets/frontend_assets/assets';
 import api from '../../config/axios';
 import { useState, useEffect } from 'react';
 import { fetchProductFeedbacks } from '../../apis/feedback';
+import { createPortal } from 'react-dom';
+
+const FavoriteMessage = ({ message, type }) => {
+    return createPortal(
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+            <div className={`p-4 rounded-md shadow-lg border max-w-xs w-full text-center ${type === 'error' ? 'bg-red-100 border-red-300 text-red-700' : 'bg-green-100 border-green-300 text-green-700'
+                }`}>
+                <p className="font-medium">{message}</p>
+            </div>
+        </div>,
+        document.body
+    );
+};
 
 const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
     const [isFavoriting, setIsFavoriting] = useState(false);
     const [isInFavorites, setIsInFavorites] = useState(false);
-    const [error, setError] = useState(null);
     const [favoriteMessage, setFavoriteMessage] = useState(null);
+    const [messageType, setMessageType] = useState('success');
     const [feedbackSummary, setFeedbackSummary] = useState({ count: 0, averageRating: 0 });
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+
     const formattedOldPrice = oldPrice ? oldPrice.toLocaleString() : '0';
     const formattedNewPrice = newPrice ? newPrice.toLocaleString() : '0';
     const displayPromotion = promotion && promotion > 0;
 
+
+
     useEffect(() => {
         const checkLoginStatus = () => {
-            // Check for token in localStorage or your auth storage method
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             setIsLoggedIn(!!token);
         };
@@ -28,32 +42,35 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
         checkLoginStatus();
     }, []);
 
-    // Fetch feedback summary when component mounts
     useEffect(() => {
-        const getFeedbackSummary = async (e) => {
-            e.preventDefault();
+        const getFeedbackSummary = async () => {
+            const cachedData = sessionStorage.getItem(`product_feedback_${id}`);
+
+            if (cachedData) {
+                setFeedbackSummary(JSON.parse(cachedData));
+                return;
+            }
             try {
                 const feedbacks = await fetchProductFeedbacks(id);
-
                 if (Array.isArray(feedbacks) && feedbacks.length > 0) {
-                    // Calculate average rating from all feedbacks
                     const totalRating = feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0);
                     const avgRating = totalRating / feedbacks.length;
 
-                    setFeedbackSummary({
+                    const summaryData = {
                         count: feedbacks.length,
                         averageRating: avgRating || 0
-                    });
+                    };
+                    sessionStorage.setItem(`product_feedback_${id}`, JSON.stringify(summaryData));
+                    setFeedbackSummary(summaryData);
                 } else {
-                    // If no feedbacks or invalid data, keep default rating
                     setFeedbackSummary({
                         count: 0,
                         averageRating: 0
                     });
+                    sessionStorage.setItem(`product_feedback_${id}`, JSON.stringify({ count: 0, averageRating: 0 }));
                 }
             } catch (error) {
                 console.error("Error fetching feedback summary:", error);
-                // Keep the default rating if there's an error
             }
         };
 
@@ -63,8 +80,7 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
     // Check if product is already in favorites
     useEffect(() => {
         if (!isLoggedIn) return;
-        const checkFavoriteStatus = async (e) => {
-            e.preventDefault()
+        const checkFavoriteStatus = async () => {
             try {
                 const response = await api.get('favorites/getFavorites');
                 if (response.data && Array.isArray(response.data.products)) {
@@ -77,29 +93,28 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
         };
 
         checkFavoriteStatus();
-    }, [id]);
+    }, [id, isLoggedIn]);
+
+    const showMessage = (msg, type = 'success') => {
+        setFavoriteMessage(msg);
+        setMessageType(type);
+        setTimeout(() => setFavoriteMessage(null), 1000);
+    };
 
     const handleAddFavorites = async () => {
-
         if (!isLoggedIn) {
-            // Redirect to login or show login message
-            setFavoriteMessage('Vui lòng đăng nhập để thêm sản phẩm vào yêu thích');
-            setTimeout(() => setFavoriteMessage(null), 2000);
+            showMessage('Vui lòng đăng nhập để thêm sản phẩm vào yêu thích', 'error');
             return;
         }
 
         if (isInFavorites) {
-            // If already in favorites, show a message and do nothing
-            setFavoriteMessage('Sản phẩm đã có trong danh sách yêu thích!');
-            setTimeout(() => setFavoriteMessage(null), 2000);
+            showMessage('Sản phẩm đã có trong danh sách yêu thích!', 'error');
             return;
         }
 
         try {
             setIsFavoriting(true);
-            setError(null);
-            setFavoriteMessage(null);
-
+            
             const response = await api.post(`favorites/addToFavorites/${id}`);
 
             if (response.status !== 200 && response.status !== 201) {
@@ -107,19 +122,15 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
             }
 
             setIsInFavorites(true);
-            setFavoriteMessage('Đã thêm vào danh sách yêu thích thành công!');
-            setTimeout(() => setFavoriteMessage(null), 2000);
-
+            showMessage('Đã thêm vào danh sách yêu thích thành công!');
             console.log('Đã thêm vào danh sách yêu thích:', response.data);
         } catch (error) {
-            setFavoriteMessage('Sản phẩm đã tồn tại trong danh sách yêu thích');
-            setTimeout(() => setFavoriteMessage(null), 2000);
+            showMessage('Sản phẩm đã tồn tại trong danh sách yêu thích', 'error');
             console.error('Lỗi khi thêm vào sản phẩm yêu thích', error);
         } finally {
             setIsFavoriting(false);
         }
     };
-
     return (
         <div className="relative flex flex-col bg-white p-2 pb-8 hover:border hover:border-rose-500 transition-transform duration-150">
             <Link
@@ -171,33 +182,14 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
                         <FaHeart className={`w-4 h-4 ${isInFavorites ? "text-red-500" : "text-gray-500 hover:text-red-500"}`} />
                     </button>
                 </div>
-                {error && (
-                    <div className="text-xs text-red-500 mt-1">{error}</div>
-                )}
             </div>
 
             {/* Popup notification for favorite messages */}
             {favoriteMessage && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
-                    <div className={`p-4 rounded-md shadow-lg border max-w-xs w-full text-center ${favoriteMessage.includes('Lỗi') || favoriteMessage.includes('tồn tại') || favoriteMessage.includes('đã có') || favoriteMessage.includes('Vui lòng đăng nhập')
-                            ? 'bg-red-100 border-red-300 text-red-700'
-                            : 'bg-green-100 border-green-300 text-green-700'
-                        }`}>
-                        <p className="font-medium">{favoriteMessage}</p>
-                    </div>
-                </div>
+                <FavoriteMessage message={favoriteMessage} type={messageType} />
             )}
         </div>
     );
-};
-
-ProductItem.propTypes = {
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    image: PropTypes.string.isRequired,
-    promotion: PropTypes.number,
-    name: PropTypes.string.isRequired,
-    oldPrice: PropTypes.number.isRequired,
-    newPrice: PropTypes.number
 };
 
 export default ProductItem;
