@@ -1,45 +1,27 @@
 import { useState, useEffect } from 'react';
 import { BarChart, LineChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Wallet, Users, Package, ShoppingCart, Star } from 'lucide-react';
-import { getDashboardSummary } from '../../../apis/dashboard';
+import { Wallet, Users, Package, ShoppingCart, TrendingUp } from 'lucide-react';
+import { getDashboardSummary, getRevenueByMonth } from '../../../apis/dashboard';
 import { formatCurrency } from '../../../utils/format';
 
 const DashboardMain = () => {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [monthlyRevenue, setMonthlyRevenue] = useState([]);
-  const [topCustomers, setTopCustomers] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getDashboardSummary();
-        setSummary(response.data);
+        // Fetch dashboard summary data
+        const summaryResponse = await getDashboardSummary();
+        setSummary(summaryResponse.data);
         
-        // Set the actual monthly revenue data from API
-        setMonthlyRevenue([
-          {
-            month: 2,
-            year: 2025,
-            totalRevenue: 3530000
-          },
-          {
-            month: 3,
-            year: 2025,
-            totalRevenue: 13145000
-          }
-        ]);
+        // Fetch monthly revenue data
+        const revenueResponse = await getRevenueByMonth();
+        setMonthlyRevenue(revenueResponse.data);
         
-        // Fake top customers data
-        setTopCustomers([
-          { id: 1, name: 'Nguyễn Thị Mai', totalSpent: 2450000, orders: 5 },
-          { id: 2, name: 'Trần Văn Hùng', totalSpent: 1980000, orders: 3 },
-          { id: 3, name: 'Lê Minh Tú', totalSpent: 1750000, orders: 4 },
-          { id: 4, name: 'Phạm Thanh Hà', totalSpent: 1650000, orders: 2 },
-          { id: 5, name: 'Hoàng Anh Dũng', totalSpent: 1350000, orders: 3 }
-        ]);
-        
-        console.log("Dashboard data:", response.data);
+        console.log("Dashboard data:", summaryResponse.data);
+        console.log("Revenue data:", revenueResponse.data);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -51,8 +33,8 @@ const DashboardMain = () => {
   }, []);
 
   const shortenProductName = (name) => {
-    if (name.length > 30) {
-      return name.substring(0, 30) + '...';
+    if (name.length > 25) {
+      return name.substring(0, 25) + '...';
     }
     return name;
   };
@@ -71,7 +53,7 @@ const DashboardMain = () => {
   }
 
   // Prepare data for the products chart
-  const productChartData = summary?.topProducts.map(product => ({
+  const productChartData = summary?.topProductsThisMonth.map(product => ({
     name: shortenProductName(product.productName),
     sales: product.totalSold
   }));
@@ -83,221 +65,283 @@ const DashboardMain = () => {
     revenue: item.totalRevenue
   })).sort((a, b) => {
     if (a.year !== b.year) return a.year - b.year;
-    return a.month.localeCompare(b.month);
+    const monthIndex1 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(a.month);
+    const monthIndex2 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(b.month);
+    return monthIndex1 - monthIndex2;
   });
 
+  // Calculate growth rate between months
+  const calculateGrowthRate = (current, previous) => {
+    if (!previous) return null;
+    return ((current - previous) / previous * 100).toFixed(1);
+  };
+
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-      
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm font-medium">Tổng doanh thu</p>
-              <p className="text-xl font-bold">{formatCurrency(summary?.revenue)}</p>
+    <div className="bg-gray-50 min-h-screen p-6">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-gray-800">Dashboard</h1>
+        
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm font-medium">Tổng doanh thu</p>
+                <p className="text-2xl font-bold mt-2 text-gray-800">{formatCurrency(summary?.revenue)}</p>
+              </div>
+              <div className="bg-blue-100 p-3 rounded-full">
+                <Wallet className="h-6 w-6 text-blue-600" />
+              </div>
             </div>
-            <div className="bg-blue-100 p-3 rounded-full">
-              <Wallet className="h-6 w-6 text-blue-600" />
+          </div>
+          
+          <div className="bg-white p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm font-medium">Tổng số sản phẩm</p>
+                <p className="text-2xl font-bold mt-2 text-gray-800">{summary?.products}</p>
+              </div>
+              <div className="bg-purple-100 p-3 rounded-full">
+                <Package className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm font-medium">Tổng đơn hàng</p>
+                <p className="text-2xl font-bold mt-2 text-gray-800">{summary?.completedOrders}</p>
+              </div>
+              <div className="bg-yellow-100 p-3 rounded-full">
+                <ShoppingCart className="h-6 w-6 text-yellow-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm font-medium">Top khách hàng trong tháng</p>
+                <p className="text-2xl font-bold mt-2 text-gray-800">{formatCurrency(summary?.topCustomers[0]?.totalSpent || 0)}</p>
+              </div>
+              <div className="bg-green-100 p-3 rounded-full">
+                <Users className="h-6 w-6 text-green-600" />
+              </div>
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm font-medium">Tổng khách hàng</p>
-              <p className="text-xl font-bold">{summary?.customers}</p>
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Revenue Trend */}
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Doanh thu theo tháng</h2>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={monthlyRevenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="month" 
+                    stroke="#6b7280"
+                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                  />
+                  <YAxis 
+                    tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
+                    stroke="#6b7280"
+                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                  />
+                  <Tooltip 
+                    formatter={(value) => [formatCurrency(value), "Doanh thu"]}
+                    labelFormatter={(label) => `Tháng ${label}`}
+                    contentStyle={{ backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e5e7eb' }}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: 10 }} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="revenue" 
+                    stroke="#4f46e5" 
+                    strokeWidth={3}
+                    name="Doanh thu"
+                    dot={{ r: 6, fill: '#4f46e5', strokeWidth: 2 }}
+                    activeDot={{ r: 8, fill: '#4f46e5' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-            <div className="bg-green-100 p-3 rounded-full">
-              <Users className="h-6 w-6 text-green-600" />
+          </div>
+          
+          {/* Top Products */}
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Top 5 sản phẩm bán chạy trong tháng</h2>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={productChartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis type="number" stroke="#6b7280" />
+                  <YAxis 
+                    dataKey="name" 
+                    type="category" 
+                    width={150}
+                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                    stroke="#6b7280"
+                  />
+                  <Tooltip 
+                    formatter={(value) => [`${value} sản phẩm`, "Số lượng"]}
+                    contentStyle={{ backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e5e7eb' }}
+                  />
+                  <Bar 
+                    dataKey="sales" 
+                    fill="#8b5cf6" 
+                    radius={[0, 4, 4, 0]}
+                    name="Số lượng bán ra" 
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm font-medium">Tổng số sản phẩm</p>
-              <p className="text-xl font-bold">{summary?.products}</p>
+        {/* Tables Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Top Products Table */}
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Chi tiết sản phẩm bán chạy</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">Thứ hạng</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên sản phẩm</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">Số lượng</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {summary?.topProductsThisMonth.map((product, index) => (
+                    <tr key={index} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                            index === 0 ? 'bg-yellow-100 text-yellow-600' : 
+                            index === 1 ? 'bg-gray-100 text-gray-600' : 
+                            index === 2 ? 'bg-amber-100 text-amber-600' : 
+                            'bg-blue-100 text-blue-600'
+                          }`}>
+                            <span className="text-sm font-bold">{index + 1}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">{product.productName}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{product.totalSold} sản phẩm</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="bg-purple-100 p-3 rounded-full">
-              <Package className="h-6 w-6 text-purple-600" />
+          </div>
+          
+          {/* Top Customers Table */}
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Top khách hàng</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">Thứ hạng</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên khách hàng</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">Tổng chi tiêu</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {summary?.topCustomers.map((customer, index) => (
+                    <tr key={index} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                            index === 0 ? 'bg-yellow-100 text-yellow-600' : 
+                            index === 1 ? 'bg-gray-100 text-gray-600' : 
+                            index === 2 ? 'bg-amber-100 text-amber-600' : 
+                            'bg-blue-100 text-blue-600'
+                          }`}>
+                            <span className="text-sm font-bold">{index + 1}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">{customer.customerName}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{formatCurrency(customer.totalSpent)}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm font-medium">Tổng đơn hàng</p>
-              <p className="text-xl font-bold">{summary?.completedOrders}</p>
-            </div>
-            <div className="bg-yellow-100 p-3 rounded-full">
-              <ShoppingCart className="h-6 w-6 text-yellow-600" />
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Revenue Trend */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Doanh thu theo tháng</h2>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyRevenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis 
-                  tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
-                />
-                <Tooltip 
-                  formatter={(value) => [formatCurrency(value), "Doanh thu"]}
-                  labelFormatter={(label) => `Tháng ${label}`}
-                />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#3b82f6" 
-                  strokeWidth={2}
-                  name="Doanh thu"
-                  activeDot={{ r: 8 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-        
-        {/* Top Products */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Top sản phẩm bán chạy</h2>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={productChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-30} textAnchor="end" height={80} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="sales" fill="#8884d8" name="Số lượng bán ra" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-      
-      {/* Tables Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Top Products Table */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Top 5 sản phẩm bán chạy</h2>
+        {/* Revenue by Month Table */}
+        <div className="bg-white p-6 rounded-xl shadow-md mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Chi tiết doanh thu theo tháng</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thứ hạng</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên sản phẩm</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng số lượng bán ra</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">Tháng</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Năm</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doanh thu</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">% Tăng trưởng</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {summary?.topProducts.map((product, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">#{index + 1}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{product.productName}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{product.totalSold} sản phẩm</div>
-                    </td>
-                  </tr>
-                ))}
+                {monthlyRevenue.sort((a, b) => {
+                  if (a.year !== b.year) return b.year - a.year;
+                  return b.month - a.month;
+                }).map((item, index, array) => {
+                  const prevMonth = index < array.length - 1 ? array[index + 1].totalRevenue : null;
+                  const growthRate = calculateGrowthRate(item.totalRevenue, prevMonth);
+                  
+                  return (
+                    <tr key={`${item.month}-${item.year}`} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">Tháng {item.month}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{item.year}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{formatCurrency(item.totalRevenue)}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {growthRate !== null ? (
+                          <div className="flex items-center">
+                            {parseFloat(growthRate) > 0 ? (
+                              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+                            ) : parseFloat(growthRate) < 0 ? (
+                              <TrendingUp className="h-4 w-4 text-red-500 mr-1 transform rotate-180" />
+                            ) : null}
+                            <span className={`text-sm font-medium ${
+                              parseFloat(growthRate) > 0 ? 'text-green-500' : 
+                              parseFloat(growthRate) < 0 ? 'text-red-500' : 'text-gray-500'
+                            }`}>
+                              {parseFloat(growthRate) > 0 ? '+' : ''}{growthRate}%
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-500">-</div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
-        </div>
-        
-        {/* Top Customers Table */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Top 5 khách hàng</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thứ hạng</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên khách hàng</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng chi tiêu</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số đơn hàng</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {topCustomers.map((customer, index) => (
-                  <tr key={customer.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">#{index + 1}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 font-medium">{customer.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{formatCurrency(customer.totalSpent)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{customer.orders} đơn</div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      
-      {/* Revenue by Month Table */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Chi tiết doanh thu theo tháng</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tháng</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Năm</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doanh thu</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% Tăng trưởng</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {monthlyRevenue.map((item, index) => {
-                const prevMonth = index > 0 ? monthlyRevenue[index - 1].totalRevenue : null;
-                const growthRate = prevMonth ? ((item.totalRevenue - prevMonth) / prevMonth * 100).toFixed(1) : '-';
-                
-                return (
-                  <tr key={`${item.month}-${item.year}`}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">Tháng {item.month}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{item.year}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{formatCurrency(item.totalRevenue)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`text-sm ${growthRate > 0 ? 'text-green-600' : growthRate < 0 ? 'text-red-600' : 'text-gray-500'}`}>
-                        {growthRate !== '-' ? `${growthRate}%` : '-'}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
