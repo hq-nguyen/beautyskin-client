@@ -13,9 +13,8 @@ const Question = ({
 }) => {
   const [showIntro, setShowIntro] = useState(true);
   const [loaded, setLoaded] = useState(false);
-  
+
   useEffect(() => {
-    // Subtle entrance effect after component mount
     const timer = setTimeout(() => {
       setLoaded(true);
     }, 100);
@@ -46,11 +45,23 @@ const Question = ({
                 className="w-full max-w-md h-64 object-cover rounded-lg shadow-sm"
               />
             </div>
-            <p className="text-gray-700 mb-8 leading-relaxed content-around"> 
+            <p className="text-gray-700 mb-6 leading-relaxed">
               Chào mừng bạn đến với bộ công cụ phân tích da chuyên nghiệp của chúng tôi. Thông qua {totalQuestions} câu hỏi 
               được thiết kế bởi các chuyên gia da liễu, chúng tôi sẽ xác định chính xác loại da của bạn và 
               đưa ra phương pháp chăm sóc phù hợp nhất.
             </p>
+            {/* Scoring Range Information */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Cách tính điểm và loại da</h3>
+              <p className="text-gray-600 mb-4">Tổng điểm của bạn sẽ quyết định loại da dựa trên khung sau:</p>
+              <ul className="text-left text-gray-700 space-y-2">
+                <li><span className="font-medium">Điểm ≤ 11:</span> Da dầu</li>
+                <li><span className="font-medium">Điểm 12 - 20:</span> Da hỗn hợp</li>
+                <li><span className="font-medium">Điểm 21 - 26:</span> Da thường</li>
+                <li><span className="font-medium">Điểm 27 - 35:</span> Da nhạy cảm</li>
+                <li><span className="font-medium">Điểm > 35:</span> Da khô</li>
+              </ul>
+            </div>
             <div className="space-y-5 text-left mb-8">
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mr-4 shadow-sm">1</div>
@@ -102,7 +113,6 @@ const Question = ({
       <div className="space-y-4">
         {question.options && question.options.length > 0 ? (
           question.options.map((option) => {
-            // Check if this option was previously selected
             const isSelected = answers.some(
               a => a.questionId === question.id && a.optionId === option.id
             );
