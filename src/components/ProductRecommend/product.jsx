@@ -17,8 +17,6 @@ const ProductRecommendations = ({ skinType }) => {
         
         const data = await getProductBySkinType(skinTypeId);
         
-        // Get only the latest product (assuming the API returns sorted data)
-        // If not sorted, we can sort by createDateTime
         const latestProduct = data && data.length > 0 
           ? data.sort((a, b) => new Date(b.createDateTime) - new Date(a.createDateTime))[0]
           : null;
@@ -62,24 +60,20 @@ const ProductRecommendations = ({ skinType }) => {
     </div>
   );
 
-  // Get the first image URL if available
   const productImage = product.images && product.images.length > 0 
     ? product.images[0].url 
     : '/images/products/placeholder.jpg';
 
-  // Format price with Vietnamese currency
   const formattedPrice = new Intl.NumberFormat('vi-VN', { 
     style: 'currency', 
     currency: 'VND' 
   }).format(product.price);
 
-  // Extract plain text from HTML description if needed
   const getPlainTextFromHTML = (html) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     return doc.body.textContent || '';
   };
 
-  // Get a short description
   const shortDescription = product.description ? 
     getPlainTextFromHTML(product.description).substring(0, 120) + '...' : 
     'Không có mô tả.';
@@ -140,7 +134,10 @@ const ProductRecommendations = ({ skinType }) => {
       
       <div className="text-center mt-6">
         <Link 
-          to={'/shop'}
+          to={{
+            pathname: '/shop',
+            search: `?skinType=${encodeURIComponent(skinType)}`
+          }}
           className="inline-block bg-white text-indigo-600 border border-indigo-600 px-6 py-2 rounded-md hover:bg-indigo-50 transition-colors font-medium"
         >
           Khám phá thêm các sản phẩm khác

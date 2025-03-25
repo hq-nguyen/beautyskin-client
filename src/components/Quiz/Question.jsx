@@ -59,7 +59,7 @@ const Question = ({
                 <li><span className="font-medium">Điểm 12 - 20:</span> Da hỗn hợp</li>
                 <li><span className="font-medium">Điểm 21 - 26:</span> Da thường</li>
                 <li><span className="font-medium">Điểm 27 - 35:</span> Da nhạy cảm</li>
-                <li><span className="font-medium">Điểm > 35:</span> Da khô</li>
+                <li><span className="font-medium">Điểm {'>'} 35:</span> Da khô</li>
               </ul>
             </div>
             <div className="space-y-5 text-left mb-8">

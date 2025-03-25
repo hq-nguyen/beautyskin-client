@@ -4,16 +4,15 @@ import { assets } from "../../assets/frontend_assets/assets";
 import { fetchProducts } from '../../apis/product';
 import { ProductAttributeService } from "../../apis/productAttribute";
 import ProductItem from "../../components/Card/ProductItem";
-import { useLocation } from "react-router-dom"; // Import useLocation
+import { useLocation } from "react-router-dom";
 
 const Shop = () => {
-  const location = useLocation(); //dùng useLocation để lấy category và giá trị lọc
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [skinTypes, setSkinTypes] = useState([]);
   const [skinConcerns, setSkinConcerns] = useState([]);
   const [textures, setTextures] = useState([]);
-  const [feedbackData, setFeedbackData] = useState(null);
 
   const [filters, setFilters] = useState({
     category: [],
@@ -28,10 +27,11 @@ const Shop = () => {
 
   const filterMap = {
     skinType: {
-      oily: null,
-      dry: null,
-      normal: null,
-      combination: null
+      "da dầu": null,
+      "da khô": null,
+      "da thường": null,
+      "da hỗn hợp": null,
+      "da nhạy cảm": null
     },
     skinConcern: {
       dehydrated: null,
@@ -94,38 +94,41 @@ const Shop = () => {
         setSkinTypes(skinType);
         setSkinConcerns(concerns);
 
-        // Dùng filterMap để ánh xạ giá trị của filter từ product classification sang id từ api
+        // Map filter values to IDs from API
         skinType.forEach(type => {
-          if (type.name.toLowerCase().includes("dầu")) filterMap.skinType.oily = type.id;
-          if (type.name.toLowerCase().includes("khô")) filterMap.skinType.dry = type.id;
-          if (type.name.toLowerCase().includes("thường")) filterMap.skinType.normal = type.id;
-          if (type.name.toLowerCase().includes("hỗn hợp")) filterMap.skinType.combination = type.id;
+          const lowerName = type.name.toLowerCase();
+          if (lowerName.includes("dầu")) filterMap.skinType["da dầu"] = type.id;
+          if (lowerName.includes("khô")) filterMap.skinType["da khô"] = type.id;
+          if (lowerName.includes("thường")) filterMap.skinType["da thường"] = type.id;
+          if (lowerName.includes("hỗn hợp")) filterMap.skinType["da hỗn hợp"] = type.id;
+          if (lowerName.includes("nhạy cảm")) filterMap.skinType["da nhạy cảm"] = type.id;
         });
         concerns.forEach(concern => {
-          if (concern.name.toLowerCase().includes("mất nước")) filterMap.skinConcern.dehydrated = concern.id;
-          if (concern.name.toLowerCase().includes("đều màu")) filterMap.skinConcern.uneven = concern.id;
-          if (concern.name.toLowerCase().includes("lão hóa")) filterMap.skinConcern.aging = concern.id;
-          if (concern.name.toLowerCase().includes("lỗ chân lông")) filterMap.skinConcern.pores = concern.id;
-          if (concern.name.toLowerCase().includes("mụn")) filterMap.skinConcern.acne = concern.id;
-          if (concern.name.toLowerCase().includes("đàn hồi")) filterMap.skinConcern.elasticity = concern.id;
+          const lowerName = concern.name.toLowerCase();
+          if (lowerName.includes("mất nước")) filterMap.skinConcern.dehydrated = concern.id;
+          if (lowerName.includes("đều màu")) filterMap.skinConcern.uneven = concern.id;
+          if (lowerName.includes("lão hóa")) filterMap.skinConcern.aging = concern.id;
+          if (lowerName.includes("lỗ chân lông")) filterMap.skinConcern.pores = concern.id;
+          if (lowerName.includes("mụn")) filterMap.skinConcern.acne = concern.id;
+          if (lowerName.includes("đàn hồi")) filterMap.skinConcern.elasticity = concern.id;
         });
         text.forEach(form => {
-          if (form.name.toLowerCase().includes("kem")) filterMap.texture.cream = form.id;
-          if (form.name.toLowerCase().includes("gel")) filterMap.texture.gel = form.id;
-          if (form.name.toLowerCase().includes("sữa")) filterMap.texture.foam = form.id;
-          if (form.name.toLowerCase().includes("dung dịch")) filterMap.texture.cleanser = form.id;
-          if (form.name.toLowerCase().includes("serum")) filterMap.texture.serum = form.id;
+          const lowerName = form.name.toLowerCase();
+          if (lowerName.includes("kem")) filterMap.texture.cream = form.id;
+          if (lowerName.includes("gel")) filterMap.texture.gel = form.id;
+          if (lowerName.includes("sữa")) filterMap.texture.foam = form.id;
+          if (lowerName.includes("dung dịch")) filterMap.texture.cleanser = form.id;
+          if (lowerName.includes("serum")) filterMap.texture.serum = form.id;
         });
 
-        // Apply query parameters from URL
+        // Apply skinType filter from URL query parameter
         const queryParams = new URLSearchParams(location.search);
-        const category = queryParams.get("category");
-        const filterValue = queryParams.get("filter");
+        const skinTypeFromUrl = queryParams.get("skinType");
 
-        if (category && filterValue && filterMap[category]?.[filterValue]) {
+        if (skinTypeFromUrl && filterMap.skinType[skinTypeFromUrl.toLowerCase()]) {
           setFilters(prev => ({
             ...prev,
-            [category]: [filterMap[category][filterValue]]
+            skinType: [filterMap.skinType[skinTypeFromUrl.toLowerCase()]]
           }));
         }
       } catch (error) {
@@ -134,32 +137,25 @@ const Shop = () => {
     };
 
     fetchAttributes();
-  }, [location.search]); // Re-run when URL changes
+  }, [location.search]);
 
   const getFilterCounts = (filterType, options) => {
     const counts = {};
-
     options.forEach(option => {
       let count = 0;
-
       products.forEach(product => {
         if (filterType === 'category') {
           if (product.category && product.category.id === option.id) count++;
-        }
-        else if (filterType === 'skinType') {
+        } else if (filterType === 'skinType') {
           if (product.skinTypes && product.skinTypes.some(type => type.id === option.id)) count++;
-        }
-        else if (filterType === 'skinConcern') {
+        } else if (filterType === 'skinConcern') {
           if (product.skinConcerns && product.skinConcerns.some(concern => concern.id === option.id)) count++;
-        }
-        else if (filterType === 'texture') {
+        } else if (filterType === 'texture') {
           if (product.forms && product.forms.some(form => form.id === option.id)) count++;
         }
       });
-
       counts[option.id] = count;
     });
-
     return counts;
   };
 
@@ -181,19 +177,17 @@ const Shop = () => {
         matchesSkinConcern && matchesTexture && matchesSearch;
     });
 
-    // Enhanced sorting logic with proper numeric handling
     switch (sortBy) {
       case "low-high":
         filtered.sort((a, b) => a.price - b.price);
         break;
       case "high-low":
-        filtered.sort((a, b) => b.price - a.price);
+        filtered.sort((a, b) => b.price - b.price);
         break;
       case "hot":
         filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case "newest":
-        // If you have a date field, you could sort by that here
         filtered.sort((a, b) => {
           const dateA = a.createDateTime ? new Date(a.createDateTime) : new Date(0);
           const dateB = b.createDateTime ? new Date(b.createDateTime) : new Date(0);
