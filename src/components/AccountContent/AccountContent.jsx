@@ -1,8 +1,7 @@
 /* eslint-disable react/prop-types */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faEnvelope, faLock, faMapMarkerAlt, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faEnvelope, faLock, faMapMarkerAlt, faTimes, faPalette } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import api from "../../config/axios";
 
@@ -43,42 +42,74 @@ const AccountContent = () => {
     const [user, setUser] = useState({
         fullName: '',
         mail: '',
+        skin: '' // Added skin field
     });
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserData = async () => {
-          try {
-            const response = await api.get("get");
-            //Lấy dữ liệu user từ localStorage với id
-            const userData = response.data.find(item => item.id == localStorage.getItem('id'));
-    
-            if (userData) {
-              const { fullName, mail } = userData;
+            try {
+                const response = await api.get("get");
+                // Lấy dữ liệu user từ localStorage với id
+                const userData = response.data.find(item => item.id == localStorage.getItem('id'));
 
-              setUser({
-                fullName,
-                mail
-              });
-              
-              setTempName(fullName);
-            } else {
-              console.log("User not found!");
-              setError("User not found!");
+                if (userData) {
+                    const { fullName, mail } = userData;
+
+                    setUser(prevUser => ({
+                        ...prevUser,
+                        fullName,
+                        mail
+                    }));
+                    
+                    setTempName(fullName);
+                } else {
+                    console.log("User not found!");
+                    setError("User not found!");
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy dữ liệu người dùng:", error);
+                setError("Error fetching user data");
             }
-    
-          } catch (error) {
-            console.error("Lỗi khi lấy dữ liệu người dùng:", error);
-            setError("Error fetching user data");
-          }
         };
+
+        const fetchUserSkinProfile = async () => {
+            try {
+                const userId = localStorage.getItem('id');
+                if (!userId) {
+                    throw new Error('User ID not found');
+                }
+                const response = await api.get(`skin-profile/get-by-user/${userId}`);
+                const skinData = response.data;
+        
+                if (skinData) {
+                    const skinName = skinData.skinType.name   || 'Không xác định';
+                    setUser(prevUser => ({ 
+                        ...prevUser,
+                        skin: skinName
+                    }));
+                } else {
+                    setUser(prevUser => ({
+                        ...prevUser,
+                        skin: 'Chưa có thông tin về da'
+                    }));
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy thông tin da người dùng:", error);
+                setUser(prevUser => ({
+                    ...prevUser,
+                    skin: 'Chưa có thông tin về da'
+                }));
+            }
+        };  
         fetchUserData();
+        fetchUserSkinProfile();
     }, []);
 
     useEffect(() => {
         const fetchDefaultAddress = async () => {
             try {
-                const userId = localStorage.getItem('id')
+                const userId = localStorage.getItem('id');
                 const response = await api.get(`address/getByUser/${userId}`);
                 const defaultAddr = response.data.find(addr => addr.isDefault);
                 setDefaultAddress(defaultAddr || null);
@@ -101,12 +132,11 @@ const AccountContent = () => {
         setSuccessMessage('');
 
         try {
-            //lấy userId từ localStorage
             const userId = localStorage.getItem('id');
             if (!userId) {
                 throw new Error('User ID not found');
             }
-            const token = localStorage.getItem('token')
+            const token = localStorage.getItem('token');
             const response = await api.put(`user/update/${userId}`, {
                 fullName: tempName
             }, {
@@ -222,7 +252,7 @@ const AccountContent = () => {
     };
 
     return (
-        <div className="flex-1  p-5 rounded-[10px] ">
+        <div className="flex-1 p-5 rounded-[10px]">
             <h2 className="text-xl font-bold text-gray-900">Quản lý tài khoản</h2>
             <hr className="my-2" />
             <div className="mb-5 pb-[10px] border-b border-gray-300">
@@ -231,14 +261,18 @@ const AccountContent = () => {
                     <FontAwesomeIcon icon={faUser} />
                     <p className="flex-1">{user.fullName || 'Chưa có tên'}</p>
                 </div>
-                <div className="flex items-center gap-[15px] text-sm">
+                <div className="flex items-center gap-[15px] text-sm pb-4">
                     <FontAwesomeIcon icon={faEnvelope} />
                     <p className="flex-1">{user.mail}</p>
+                </div>
+                <div className="flex items-center gap-[15px] text-sm">
+                    <FontAwesomeIcon icon={faPalette} />
+                    <p className="flex-1">{user.skin || 'Chưa có thông tin về da'}</p>
                 </div>
             </div>
 
             <div className="mb-5 pb-[10px] border-b border-gray-300">
-                <h3 className="text-[16px] font-semibold  mb-[10px]">Bảo mật</h3>
+                <h3 className="text-[16px] font-semibold mb-[10px]">Bảo mật</h3>
                 <div className="flex items-center gap-[15px] text-sm">
                     <FontAwesomeIcon icon={faLock} />
                     <p className="flex-1">Mật khẩu</p>
@@ -260,7 +294,7 @@ const AccountContent = () => {
             </div>
 
             <div>
-                <h3 className="text-[16px] font-semibold d mb-[10px]">Địa chỉ mặc định</h3>
+                <h3 className="text-[16px] font-semibold mb-[10px]">Địa chỉ mặc định</h3>
                 <div className="flex items-center gap-[15px] text-sm">
                     <FontAwesomeIcon icon={faMapMarkerAlt} />
                     {defaultAddress ? (
@@ -299,7 +333,7 @@ const AccountContent = () => {
                         disabled={isLoading}
                     />
                     {error && (
-                        <p className="text-red-500 text-sm- mb-4">{error}</p>
+                        <p className="text-red-500 text-sm mb-4">{error}</p>
                     )}
                     {successMessage && (
                         <p className="text-green-500 text-sm mb-4">{successMessage}</p>
@@ -317,8 +351,7 @@ const AccountContent = () => {
                         </button>
                         <button
                             onClick={handleNameSubmit}
-                            className={`px-4 py-2 bg-[#d90429] text-white rounded-lg hover:bg-[#ef233c] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                            className={`px-4 py-2 bg-[#d90429] text-white rounded-lg hover:bg-[#ef233c] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             disabled={isLoading}
                         >
                             {isLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
