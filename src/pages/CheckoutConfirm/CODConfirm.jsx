@@ -4,7 +4,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { toast } from "react-toastify";
 import api from '../../config/axios';
 
-const CODPage = () => {
+const CODConfirmationPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [orderData, setOrderData] = useState(null);
@@ -17,23 +17,6 @@ const CODPage = () => {
                     throw new Error('No authentication token found');
                 }
 
-                const defaultAddress = JSON.parse(localStorage.getItem('defaultAddress')) || 
-                                    (location.state?.orderData?.shippingAddress);
-
-                let shippingAddr = defaultAddress;
-
-                if (!defaultAddress) {
-                    const userId = localStorage.getItem('id');
-                    const response = await api.get(`address/getByUser/${userId}`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    });
-                    const defaultAddr = response.data.find(addr => addr.isDefault);
-                    localStorage.setItem('defaultAddress', JSON.stringify(defaultAddr));
-                    shippingAddr = defaultAddr;
-                }
-
                 const orderResponse = await api.get('order/getLastedOrder', {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -41,6 +24,43 @@ const CODPage = () => {
                 });
 
                 const order = orderResponse.data;
+
+                let shippingAddr = order.shippingAddress;
+
+                if (!shippingAddr) {
+                    const userId = localStorage.getItem('id');
+                    const addressResponse = await api.get(`address/getByUser/${userId}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    const defaultAddr = addressResponse.data.find(addr => addr.isDefault);
+                    shippingAddr = defaultAddr || addressResponse.data[0];
+                    localStorage.setItem('defaultAddress', JSON.stringify(shippingAddr)); 
+                }
+
+                const calculateEstimatedDelivery = (address) => {
+                    const currentDate = new Date();
+                    let deliveryDays = 3;
+                
+                    const province = address?.province?.toLowerCase();
+                    if (province && (
+                        province.includes('thành phố hồ chí minh') || 
+                        province.includes('tp.hcm') || 
+                        province.includes('hồ chí minh')
+                    )) {
+                        deliveryDays = 1;
+                    }
+                
+                    const estimatedDate = new Date(currentDate);
+                    estimatedDate.setDate(currentDate.getDate() + deliveryDays);
+                
+                    return estimatedDate.toLocaleDateString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                };
 
                 setOrderData({
                     orderId: order.id.toString(),
@@ -52,7 +72,7 @@ const CODPage = () => {
                         quantity: detail.quantity,
                     })),
                     shippingAddress: shippingAddr,
-                    estimatedDelivery: '15-03-2025'
+                    estimatedDelivery: calculateEstimatedDelivery(shippingAddr)
                 });
             } catch (error) {
                 console.error("Error fetching order data:", error);
@@ -64,7 +84,23 @@ const CODPage = () => {
     }, [location.state]);
 
     const handleContinueShopping = () => {
-        navigate('/shop');
+        toast.success('Đơn hàng đã được đặt thành công!');
+        navigate('/');
+    };
+
+    const getFullAddress = (address) => {
+        if (!address) return 'Chưa có thông tin';
+
+        const addressParts = [
+            address.address,
+            address.ward,
+            address.district,
+            address.province
+        ];
+
+        const filteredAddress = addressParts.filter(part => part && part.trim() !== '');
+
+        return filteredAddress.join(', ');
     };
 
     if (!orderData) {
@@ -142,7 +178,7 @@ const CODPage = () => {
                         <span className="font-medium">Số điện thoại:</span> {orderData.shippingAddress?.phone || 'Chưa có thông tin'}
                     </p>
                     <p className="text-gray-800">
-                        <span className="font-medium">Địa chỉ:</span> {orderData.shippingAddress?.address || 'Chưa có thông tin'}
+                        <span className="font-medium">Địa chỉ:</span> {getFullAddress(orderData.shippingAddress)}
                     </p>
                     <p className="text-gray-800">
                         <span className="font-medium">Phương thức thanh toán:</span> Thanh toán khi nhận hàng (COD)
@@ -168,6 +204,12 @@ const CODPage = () => {
 
             {/* Actions */}
             <div className="flex justify-center gap-4">
+                <Link
+                    to="/user/orders"
+                    className="bg-gray-200 text-gray-800 py-3 px-6 rounded text-sm font-medium hover:bg-gray-300"
+                >
+                    Xem đơn hàng
+                </Link>
                 <button
                     onClick={handleContinueShopping}
                     className="bg-[#EE1F5B] text-white py-3 px-6 rounded text-sm font-medium hover:bg-[#d90429]"
@@ -179,4 +221,4 @@ const CODPage = () => {
     );
 };
 
-export default CODPage;
+export default CODConfirmationPage;
