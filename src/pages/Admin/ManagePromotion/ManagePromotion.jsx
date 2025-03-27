@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Table, Button, Space, Modal, Form, Input, DatePicker, 
-  Select, InputNumber, Switch, message, Popconfirm, Typography, Row, Col, Upload
+  Select, InputNumber, Switch, message, Popconfirm, Row, Col
 } from 'antd';
 import { 
   PlusOutlined, EditOutlined, DeleteOutlined, 
@@ -12,10 +12,10 @@ import {
   getAllPromotions, 
   createPromotion, 
   updatePromotion, 
-  deletePromotion 
+  deletePromotion,
+  fetchRanking
 } from '../../../apis/promotion';
-import uploadFile from '../../../utils/upload';
-import { ProductAttributeService } from '../../../apis/productAttribute';
+import { formatCurrency } from '../../../utils/format';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -26,18 +26,26 @@ const DISPLAY_DATE_FORMAT = 'DD/MM/YYYY';
 
 const ManagePromotion = () => {
   const [promotions, setPromotions] = useState([]);
+  const [ranks, setRanks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalType, setModalType] = useState('create'); 
   const [currentPromotion, setCurrentPromotion] = useState(null);
   const [form] = Form.useForm();
-  const [fileList, setFileList] = useState([]);
-  const [previewImage, setPreviewImage] = useState('');
-  const [previewVisible, setPreviewVisible] = useState(false);
 
   useEffect(() => {
     fetchPromotions();
+    loadRanks();
   }, []);
+
+  const loadRanks = async () => {
+    try {
+      const ranksData = await fetchRanking();
+      setRanks(ranksData);
+    } catch (error) {
+      message.error('Failed to fetch ranks');
+    }
+  };
 
   const fetchPromotions = async () => {
     setLoading(true);
@@ -63,17 +71,22 @@ const ManagePromotion = () => {
     setCurrentPromotion(record);
     
     // Parse dates correctly and set form values
-    const startDate = moment(record.startDate, DISPLAY_DATE_FORMAT);
-    const endDate = moment(record.endDate, DISPLAY_DATE_FORMAT);
+    const startDate = moment(record.startDate);
+    const endDate = moment(record.endDate);
     
     form.setFieldsValue({
+      id: record.id,
       name: record.name,
       description: record.description,
       startDate: startDate,
       endDate: endDate,
-      type: record.type,
+      rank: record.rank,
       promoAmount: record.promoAmount,
+      orderPrice: record.orderPrice,
+      numOfPromo: record.numOfPromo,
       deleted: record.deleted,
+      outDate: record.outDate,
+      endDateAfterStartDate: record.endDateAfterStartDate
     });
     setIsModalVisible(true);
   };
@@ -82,62 +95,43 @@ const ManagePromotion = () => {
     setIsModalVisible(false);
   };
 
-  const getBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
-
-  const handlePreview = async (file) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
-    }
-    setPreviewImage(file.url || file.preview);
-    setPreviewVisible(true);
-  };
-
-  const handleChange = ({ fileList: newFileList }) => {
-    setFileList(newFileList);
-  };
-
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       setLoading(true);
       
-      let imageUrl = null;
-      let imageId = null;
-      
-      if (fileList.length > 0 && fileList[0].originFileObj) {
-        try {
-          imageUrl = await uploadFile(fileList[0].originFileObj);
-          
-          const imageResponse = await ProductAttributeService.uploadImage({ url: imageUrl });
-          imageId = imageResponse.id;
-        } catch (error) {
-          console.error('Error uploading image:', error);
-          message.error('Lỗi khi tải ảnh lên: ' + (error.message || 'Lỗi không xác định'));
-        }
-      }
-      
-      const promotionData = {
-        name: values.name,
-        description: values.description,
-        startDate: values.startDate.format(DISPLAY_DATE_FORMAT),
-        endDate: values.endDate.format(DISPLAY_DATE_FORMAT),
-        type: values.type,
-        promoAmount: Math.min(Math.max(values.promoAmount, 0), 100),
-        deleted: values.deleted || false,
-        imageId: imageId,
-      };
+      const promotionData = modalType === 'create' 
+        ? {
+            name: values.name,
+            description: values.description,
+            startDate: values.startDate.toISOString(),
+            endDate: values.endDate.toISOString(),
+            promoAmount: values.promoAmount,
+            numOfPromo: values.numOfPromo || 1073741824,
+            orderPrice: values.orderPrice,
+            rank: values.rank || 1, // Default to rank 1 (everybody)
+            rate: 9007199254740991
+          }
+        : {
+            id: values.id,
+            name: values.name,
+            description: values.description,
+            startDate: values.startDate.toISOString(),
+            endDate: values.endDate.toISOString(),
+            promoAmount: values.promoAmount,
+            orderPrice: values.orderPrice,
+            numOfPromo: values.numOfPromo || 1073741824,
+            rank: values.rank || 1,
+            deleted: values.deleted,
+            outDate: values.outDate,
+            endDateAfterStartDate: values.endDateAfterStartDate
+          };
 
       if (modalType === 'create') {
         await createPromotion(promotionData);
         message.success('Tạo voucher thành công!');
       } else {
-        await updatePromotion(currentPromotion.id, promotionData);
+        await updatePromotion(promotionData.id, promotionData);
         message.success('Cập nhật voucher thành công!');
       }
 
@@ -171,90 +165,76 @@ const ManagePromotion = () => {
       fixed: 'left'
     },
     {
-      title: 'Tên voucher',
+      title: 'Mã giảm giá',
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
+    },
+    {
+      title: 'Hạng áp dụng',
+      dataIndex: 'rank',
+      key: 'rank',
+      render: (rank) => {
+        const rankObj = ranks.find(r => r.id === rank);
+        return rankObj ? rankObj.rankName : 'Tất cả';
+      },
+      sorter: (a, b) => a.rank - b.rank,
     },
     {
       title: 'Ngày bắt đầu',
       dataIndex: 'startDate',
       key: 'startDate',
       render: (text) => {
-        // Safely parse and format the date
-        const date = moment(text, DISPLAY_DATE_FORMAT);
+        const date = moment(text);
         return date.isValid() ? date.format(DISPLAY_DATE_FORMAT) : text;
       },
-      sorter: (a, b) => {
-        const dateA = moment(a.startDate, DISPLAY_DATE_FORMAT);
-        const dateB = moment(b.startDate, DISPLAY_DATE_FORMAT);
-        return dateA.unix() - dateB.unix();
-      },
+      sorter: (a, b) => moment(a.startDate).unix() - moment(b.startDate).unix(),
     },
     {
       title: 'Ngày kết thúc',
       dataIndex: 'endDate',
       key: 'endDate',
       render: (text) => {
-        // Safely parse and format the date
-        const date = moment(text, DISPLAY_DATE_FORMAT);
+        const date = moment(text);
         return date.isValid() ? date.format(DISPLAY_DATE_FORMAT) : text;
       },
-      sorter: (a, b) => {
-        const dateA = moment(a.endDate, DISPLAY_DATE_FORMAT);
-        const dateB = moment(b.endDate, DISPLAY_DATE_FORMAT);
-        return dateA.unix() - dateB.unix();
-      },
+      sorter: (a, b) => moment(a.endDate).unix() - moment(b.endDate).unix(),
     },
     {
-      title: 'Loại voucher',
-      dataIndex: 'type',
-      key: 'type',
-      filters: [
-        { text: 'Giảm theo phần trăm', value: 'DISCOUNT_BY_PERCENT' },
-        { text: 'Giảm theo số tiền', value: 'DISCOUNT_BY_AMOUNT' },
-        { text: 'Áp dụng cho đơn hàng', value: 'APPLY_FOR_ORDER' },
-        { text: 'Áp dụng cho sản phẩm', value: 'APPLY_FOR_PRODUCT' },
-      ],
-      onFilter: (value, record) => record.type === value,
-      render: (type) => {
-        const typeMap = {
-          DISCOUNT_BY_PERCENT: 'Giảm theo phần trăm',
-          DISCOUNT_BY_AMOUNT: 'Giảm theo số tiền',
-          APPLY_FOR_ORDER: 'Áp dụng cho đơn hàng',
-          APPLY_FOR_PRODUCT: 'Áp dụng cho sản phẩm',
-        };
-        return typeMap[type] || type;
-      },
-    },
-    {
-      title: 'Số tiền(hoặc %) giảm',
+      title: 'Giá trị voucher',
       dataIndex: 'promoAmount',
       key: 'promoAmount',
-      render: (text, record) => {
-        if (record.type === 'DISCOUNT_BY_PERCENT') {
-          return `${text}%`;
-        }
-        return `${text}đ`;
-      },
+      render: (text) => `${formatCurrency(text)}`,
       sorter: (a, b) => a.promoAmount - b.promoAmount,
+    },
+    {
+      title: 'Giá trị đơn tối thiểu',
+      dataIndex: 'orderPrice',
+      key: 'orderPrice',
+      render: (text) => `${formatCurrency(text)}`,
+      sorter: (a, b) => a.orderPrice - b.orderPrice,
+    },
+    {
+      title: 'Số lượng voucher',
+      dataIndex: 'numOfPromo',
+      key: 'numOfPromo',
+      render: (text) => text === 1073741824 ? 'Không giới hạn' : text,
+      sorter: (a, b) => a.numOfPromo - b.numOfPromo,
     },
     {
       title: 'Trạng thái',
       key: 'status',
       render: (_, record) => {
-        const now = moment();
-        const startDate = moment(record.startDate, DISPLAY_DATE_FORMAT);
-        const endDate = moment(record.endDate, DISPLAY_DATE_FORMAT);
-        const currentTime = now.format('HH:mm:ss');
-        const startTime = moment(record.startTime, 'HH:mm:ss').format('HH:mm:ss');
-        const endTime = moment(record.endTime, 'HH:mm:ss').format('HH:mm:ss');
-        
         if (record.deleted) {
           return <span style={{ color: 'red' }}>Đã xóa</span>;
-        } else if (now.isBefore(startDate) || (now.isSame(startDate, 'day') && currentTime < startTime)) {
+        }
+        const now = moment();
+        const startDate = moment(record.startDate);
+        const endDate = moment(record.endDate);
+        
+        if (now.isBefore(startDate)) {
           return <span style={{ color: 'orange' }}>Chưa bắt đầu</span>;
-        } else if (now.isAfter(endDate) || (now.isSame(endDate, 'day') && currentTime > endTime)) {
+        } else if (now.isAfter(endDate)) {
           return <span style={{ color: 'gray' }}>Hết hạn</span>;
         } else {
           return <span style={{ color: 'green' }}>Đang áp dụng</span>;
@@ -306,7 +286,7 @@ const ManagePromotion = () => {
         rowKey="id" 
         loading={loading}
         pagination={{ pageSize: 10 }}
-        scroll={{ x: 1200 }}
+        scroll={{ x: 1400 }}
       />
 
       <Modal
@@ -322,13 +302,42 @@ const ManagePromotion = () => {
           layout="vertical"
           name="promotionForm"
         >
-          <Form.Item
-            name="name"
-            label="Tên Voucher"
-            rules={[{ required: true, message: 'Vui lòng nhập tên voucher' }]}
-          >
-            <Input placeholder="Nhập tên voucher" />
-          </Form.Item>
+          {modalType === 'update' && (
+            <Form.Item name="id" hidden>
+              <Input />
+            </Form.Item>
+          )}
+
+          <Row gutter={16} align="middle">
+            <Col span={16}>
+              <Form.Item
+                name="name"
+                label="Tên Voucher"
+                rules={[{ required: true, message: 'Vui lòng nhập tên voucher' }]}
+              >
+                <Input placeholder="Nhập tên voucher" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="rank"
+                label="Hạng áp dụng"
+                rules={[{ required: true, message: 'Vui lòng chọn hạng' }]}
+              >
+                <Select 
+                  placeholder="Chọn hạng"
+                  style={{ width: '100%' }}
+                >
+                  {ranks.map(rank => (
+                    <Option key={rank.id} value={rank.id}>
+                      {rank.rankName}
+                    </Option>
+                  ))}
+                  <Option value={1}>Tất cả</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Form.Item
             name="description"
@@ -347,9 +356,8 @@ const ManagePromotion = () => {
               >
                 <DatePicker 
                   style={{ width: '100%' }} 
-                  disabledDate={(current) => current && current < moment().startOf('day')}
                   format={DISPLAY_DATE_FORMAT}
-                  showTime={{ format: 'HH:mm' }}
+                  showTime
                   placeholder="Chọn ngày bắt đầu"
                 />
               </Form.Item>
@@ -372,64 +380,94 @@ const ManagePromotion = () => {
               >
                 <DatePicker 
                   style={{ width: '100%' }} 
-                  disabledDate={(current) => {
-                    const startDate = form.getFieldValue('startDate');
-                    return (current && current < moment().startOf('day')) || 
-                           (startDate && current && current.isBefore(startDate, 'day'));
-                  }}
                   format={DISPLAY_DATE_FORMAT}
-                  showTime={{ format: 'HH:mm' }}
+                  showTime
                   placeholder="Chọn ngày kết thúc"
                 />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item
-            name="type"
-            label="Loại Voucher"
-            rules={[{ required: true, message: 'Vui lòng chọn loại voucher' }]}
-          >
-            <Select placeholder="Chọn loại voucher">
-              <Option value="DISCOUNT_BY_PERCENT">Giảm theo phần trăm</Option>
-              <Option value="DISCOUNT_BY_AMOUNT">Giảm theo số tiền</Option>
-              <Option value="APPLY_FOR_ORDER">Áp dụng cho đơn hàng</Option>
-              <Option value="APPLY_FOR_PRODUCT">Áp dụng cho sản phẩm</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="promoAmount"
-            label="Giá trị voucher"
-            rules={[{ required: true, message: 'Vui lòng nhập giá trị voucher' }]}
-          >
-            <InputNumber 
-              style={{ width: '100%' }} 
-              min={0}
-              max={100}
-              placeholder="Nhập giá trị voucher" 
-            />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="promoAmount"
+                label="Giá trị voucher"
+                rules={[{ required: true, message: 'Vui lòng nhập giá trị voucher' }]}
+              >
+                <InputNumber 
+                  style={{ width: '100%' }} 
+                  min={0}
+                  placeholder="Nhập giá trị voucher" 
+                  formatter={value => `${value}`}
+                  parser={value => value.replace('đ', '')}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="orderPrice"
+                label="Giá trị đơn tối thiểu"
+                rules={[{ required: true, message: 'Vui lòng nhập giá trị đơn tối thiểu' }]}
+              >
+                <InputNumber 
+                  style={{ width: '100%' }} 
+                  min={0}
+                  placeholder="Nhập giá trị đơn tối thiểu" 
+                  formatter={value => `${value}`}
+                  parser={value => value.replace('đ', '')}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="numOfPromo"
+                label="Số lượng voucher"
+                rules={[{ required: true, message: 'Vui lòng nhập số lượng voucher' }]}
+              >
+                <InputNumber 
+                  style={{ width: '100%' }} 
+                  min={1}
+                  placeholder="Nhập số lượng voucher" 
+                  formatter={value => value === 1073741824 ? 'Không giới hạn' : value}
+                  parser={value => value === 'Không giới hạn' ? 1073741824 : value}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
           {modalType === 'update' && (
-            <Form.Item
-              name="deleted"
-              label="Đã xóa"
-              valuePropName="checked"
-            >
-              <Switch />
-            </Form.Item>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Form.Item
+                  name="deleted"
+                  label="Đã xóa"
+                  valuePropName="checked"
+                >
+                  <Switch />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  name="outDate"
+                  label="Hết hạn"
+                  valuePropName="checked"
+                >
+                  <Switch />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  name="endDateAfterStartDate"
+                  label="Ngày kết thúc sau ngày bắt đầu"
+                  valuePropName="checked"
+                >
+                  <Switch />
+                </Form.Item>
+              </Col>
+            </Row>
           )}
         </Form>
-      </Modal>
-
-      <Modal
-        visible={previewVisible}
-        title="Xem trước hình ảnh"
-        footer={null}
-        onCancel={() => setPreviewVisible(false)}
-      >
-        <img alt="preview" style={{ width: '100%' }} src={previewImage} />
       </Modal>
     </div>
   );

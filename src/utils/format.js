@@ -15,8 +15,8 @@ export const formatCurrency = (amount, symbol = true) => {
 
     // Format with commas as thousand separators and periods for decimals
     const formattedAmount = Number(amount).toLocaleString('en-US', { 
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
     });
 
     // Return with currency symbol if requested

@@ -205,7 +205,7 @@ const CODConfirmationPage = () => {
             {/* Actions */}
             <div className="flex justify-center gap-4">
                 <Link
-                    to="/user/orders"
+                    to="/user/manage-order"
                     className="bg-gray-200 text-gray-800 py-3 px-6 rounded text-sm font-medium hover:bg-gray-300"
                 >
                     Xem đơn hàng
