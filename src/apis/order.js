@@ -99,4 +99,14 @@ export const cancelOrder = async (id) => {
     } catch (error) {
         message.error(error.response.data);
     }
+};
+
+export const makeReport = async (data) => {
+    try {
+        const response = await api.post("/report", data);
+        return response.data;
+    }
+    catch (error) {
+        return error.response.data;
+    }
 }

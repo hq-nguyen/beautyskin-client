@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { message, Pagination, Modal } from 'antd';
 import { formatDate, formatCurrency } from '../../utils/format';
-import { fetchOrderHistory, cancelOrder } from '../../apis/order';
-import { FaSearch, FaSpinner } from 'react-icons/fa';
+import { fetchOrderHistory, cancelOrder, makeReport } from '../../apis/order';
+import { FaSearch, FaSpinner, FaEye } from 'react-icons/fa';
 import { CheckCircleTwoTone, ExclamationCircleOutlined } from '@ant-design/icons';
 import { assets } from '../../assets/frontend_assets/assets';
 import { Link } from 'react-router-dom';
@@ -22,10 +22,11 @@ const OrderHistory = () => {
   const [total, setTotal] = useState(0);
   const [cancelLoading, setCancelLoading] = useState(false);
 
-  // Feedback state
+  // Feedback and Report state
   const [popupMode, setPopupMode] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedOrderDetail, setSelectedOrderDetail] = useState(null);
+  const [selectedOrderToView, setSelectedOrderToView] = useState(null);
 
   const statusTabs = [
     { key: 'all', label: 'Tất cả' },
@@ -185,29 +186,89 @@ const OrderHistory = () => {
   };
 
   const handleSubmitFeedback = async (data) => {
-    if (popupMode == 'feedback') {
+    if (popupMode === 'feedback') {
       try {
-        // Transform the images array to match API expectation
         const formattedImages = data.images.map(url => ({ url }));
 
         const newData = {
           ...data,
           orderDetailId: selectedOrderDetail.orderDetailId,
-          image: formattedImages,  // Use the formatted images array with the key "image"
-          images: undefined  // Remove the original images array
+          image: formattedImages,
+          images: undefined
         };
 
-        const response = await createFeedback(newData);
+        await createFeedback(newData);
         fetchOrders();
       } catch (error) {
         console.error(error);
       }
-    } else {
-      // Your existing report code
-      const newData = { ...data, orderId: selectedOrder.id, image: "" };
-      console.log(newData);
+    } else if (popupMode === 'report') {
+      try {
+        const newData = {
+          ...data,
+          orderId: selectedOrder.orderId,
+          image: data.images ? data.images[0] : ""
+        };
+
+        const response = await makeReport(newData);
+        message.success('Báo cáo đơn hàng thành công');
+        fetchOrders();
+      } catch (error) {
+        console.error(error);
+        message.error('Có lỗi xảy ra khi báo cáo đơn hàng');
+      }
     }
     handleClosePopup();
+  };
+
+  const canReportOrder = (order) => {
+    return order.status === 'DELIVERED';
+  };
+
+  const renderOrderDetailsModal = () => {
+    if (!selectedOrderToView) return null;
+
+    return (
+      <Modal
+        title={`Chi tiết đơn hàng #${selectedOrderToView.orderId}`}
+        open={!!selectedOrderToView}
+        onCancel={() => setSelectedOrderToView(null)}
+        footer={null}
+        width={600}
+      >
+        <div className="p-4">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold">Thông tin đơn hàng</h3>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <p><strong>Mã đơn:</strong> #{selectedOrderToView.orderId}</p>
+              <p><strong>Ngày đặt:</strong> {formatDate(selectedOrderToView.createdAt, "dd/MM/yyyy HH:mm")}</p>
+              <p><strong>Trạng thái:</strong> {getDisplayStatus(selectedOrderToView.status)}</p>
+              <p><strong>Tổng tiền:</strong> {formatCurrency(selectedOrderToView.totalAmount)}</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Sản phẩm</h3>
+            {selectedOrderToView.orderDetails.map((detail) => (
+              <div key={detail.orderDetailId} className="flex items-center mb-2 border-b pb-2">
+                <img
+                  src={detail.product.images[0]?.url || assets.da_thuong}
+                  alt={detail.product.name}
+                  className="w-16 h-16 object-cover rounded mr-4"
+                />
+                <div>
+                  <p className="font-medium">{detail.product.name}</p>
+                  <div className="text-sm text-gray-600">
+                    <span>Số lượng: {detail.quantity}</span>
+                    <span className="ml-4">Giá: {formatCurrency(detail.price)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Modal>
+    );
   };
 
   // New cancel order function
@@ -326,6 +387,12 @@ const OrderHistory = () => {
                       <span className="font-semibold text-sm text-gray-900">
                         {formatCurrency(order.totalAmount)}
                       </span>
+                      <button
+                        className="text-gray-600 hover:text-blue-600"
+                        onClick={() => setSelectedOrderToView(order)}
+                      >
+                        <FaEye />
+                      </button>
                     </div>
                   </div>
 
@@ -385,6 +452,18 @@ const OrderHistory = () => {
 
                   {/* Order Action Buttons */}
                   <div className="mt-4 flex justify-end">
+                    {canReportOrder(order) && (
+                      <button
+                        className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors duration-200"
+                        onClick={() => {
+                          handleOpenPopup("report");
+                          setSelectedOrder(order);
+                        }}
+                      >
+                        Báo cáo đơn hàng
+                      </button>
+                    )}
+
                     {canCancelOrder(order) && (
                       <button
                         className="ml-2 px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200 disabled:opacity-50"
@@ -423,6 +502,8 @@ const OrderHistory = () => {
           close={handleClosePopup}
           submit={handleSubmitFeedback}
         />
+
+        {renderOrderDetailsModal()}
       </div>
     </div>
   );
