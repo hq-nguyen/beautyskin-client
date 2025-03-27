@@ -4,6 +4,9 @@ const initialState = {
   listItem: [],
   totalQuantity: 0,
   totalPrice: 0,
+  originalTotalPrice: 0,
+  appliedPromotion: null,
+  totalDiscount: 0
 };
 
 export const cartSlice = createSlice({
@@ -21,6 +24,7 @@ export const cartSlice = createSlice({
       }
       state.totalQuantity += 1;
       state.totalPrice += product.price;
+      state.originalTotalPrice += product.price;
     },
 
     addToCartWithQuantity: (state, action) => {
@@ -32,10 +36,11 @@ export const cartSlice = createSlice({
       if (existingProduct) {
         existingProduct.quantity += quantityToAdd;
       } else {
-        state.listItem.push({ ...product});
+        state.listItem.push({ ...product, quantity: quantityToAdd });
       }
       state.totalQuantity += quantityToAdd;
       state.totalPrice += product.price * quantityToAdd;
+      state.originalTotalPrice += product.price * quantityToAdd;
     },
 
     reducerCart: (state, action) => {
@@ -52,6 +57,7 @@ export const cartSlice = createSlice({
       
       state.totalQuantity -= 1;
       state.totalPrice -= product.price;
+      state.originalTotalPrice -= product.price;
     },
 
     removeFromCart: (state, action) => {
@@ -59,6 +65,8 @@ export const cartSlice = createSlice({
         state.listItem = [];
         state.totalQuantity = 0;
         state.totalPrice = 0;
+        state.originalTotalPrice = 0;
+        state.totalDiscount = 0;
         return;
       }
       
@@ -69,6 +77,7 @@ export const cartSlice = createSlice({
         const product = state.listItem[productIndex];
         state.totalQuantity -= product.quantity || 1;
         state.totalPrice -= product.price * (product.quantity || 1);
+        state.originalTotalPrice -= product.price * (product.quantity || 1);
         state.listItem.splice(productIndex, 1);
       }
     },
@@ -77,10 +86,32 @@ export const cartSlice = createSlice({
       state.listItem = [];
       state.totalQuantity = 0;
       state.totalPrice = 0;
+      state.originalTotalPrice = 0;
+      state.appliedPromotion = null;
+      state.totalDiscount = 0;
     },
+
+    applyPromotion: (state, action) => {
+      if (action.payload) {
+        state.appliedPromotion = action.payload;
+        state.totalDiscount = action.payload.amount;
+        state.totalPrice = state.originalTotalPrice - state.totalDiscount;
+      } else {
+        state.appliedPromotion = null;
+        state.totalDiscount = 0;
+        state.totalPrice = state.originalTotalPrice;
+      }
+    }
   },
 });
 
-export const { addToCart, addToCartWithQuantity, removeFromCart, reducerCart, clearCart } = cartSlice.actions;
+export const { 
+  addToCart, 
+  addToCartWithQuantity, 
+  removeFromCart, 
+  reducerCart, 
+  clearCart, 
+  applyPromotion 
+} = cartSlice.actions;
 
 export default cartSlice.reducer;

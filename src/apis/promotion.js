@@ -1,10 +1,8 @@
-import axios from 'axios';
-
-const BASE_URL = 'https://67bc0cf4ed4861e07b38fca1.mockapi.io/promotion';
+import api from '../config/axios';
 
 export const getAllPromotions = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}`);
+    const response = await api.get('/promotion/getValid');
     return response.data;
   } catch (error) {
     console.error('Error fetching promotions:', error);
@@ -12,19 +10,9 @@ export const getAllPromotions = async () => {
   }
 };
 
-export const getPromotionById = async (id) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching promotion with id ${id}:`, error);
-    throw error;
-  }
-};
-
 export const createPromotion = async (promotionData) => {
   try {
-    const response = await axios.post(`${BASE_URL}`, promotionData);
+    const response = await api.post('promotion/create', promotionData);
     return response.data;
   } catch (error) {
     console.error('Error creating promotion:', error);
@@ -34,7 +22,7 @@ export const createPromotion = async (promotionData) => {
 
 export const updatePromotion = async (id, promotionData) => {
   try {
-    const response = await axios.put(`${BASE_URL}/${id}`, promotionData);
+    const response = await api.put(`promotion/update/${id}`, promotionData);
     return response.data;
   } catch (error) {
     console.error(`Error updating promotion with id ${id}:`, error);
@@ -44,7 +32,7 @@ export const updatePromotion = async (id, promotionData) => {
 
 export const deletePromotion = async (id) => {
   try {
-    const response = await axios.delete(`${BASE_URL}/${id}`);
+    const response = await api.delete(`promotion/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error deleting promotion with id ${id}:`, error);
@@ -68,12 +56,22 @@ export const getActivePromotions = async () => {
   }
 };
 
-export const getPromotionsByType = async (type) => {
+// export const getPromotionsByType = async (type) => {
+//   try {
+//     const response = await api.get(`${BASE_URL}?type=${type}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error(`Error fetching promotions of type ${type}:`, error);
+//     throw error;
+//   }
+// };
+
+export const fetchRanking = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}?type=${type}`);
+    const response = await api.get('loyalty-point/gets');
     return response.data;
   } catch (error) {
-    console.error(`Error fetching promotions of type ${type}:`, error);
+    console.error('Error fetching ranking:', error);
     throw error;
   }
-};
+}
