@@ -22,12 +22,14 @@ const OrderList = () => {
     { key: 'pending', label: 'Đơn mới' },
     { key: 'processing', label: 'Đang xử lý' },
     { key: 'shipped', label: 'Đang giao hàng' },
+    { key: 'delivered', label: 'Đã giao hàng' },
   ];
 
-  // Limited status options for staff
+  // Status options for updating order status
   const statusOptions = [
     { key: 'IN_PROGRESS', label: 'Xác nhận đơn' },
     { key: 'SHIPPED', label: 'Giao hàng' },
+    { key: 'DELIVERED', label: 'Hoàn tất giao hàng' },
   ];
 
   useEffect(() => {
@@ -48,7 +50,7 @@ const OrderList = () => {
         dayjs(b.orderDate).valueOf() - dayjs(a.orderDate).valueOf()
       );
 
-      // Filter out completed, cancelled or returned orders - staff only sees active orders
+      // Filter out cancelled or returned orders - staff only sees active orders
       const filteredOrders = sortedOrders.filter(order => {
         const status = order.orderStatus.toUpperCase();
         return ['PENDING', 'IN_PROGRESS', 'SHIPPED', 'DELIVERED'].includes(status);
@@ -80,6 +82,8 @@ const OrderList = () => {
           return status === 'IN_PROGRESS';
         case 'shipped':
           return status === 'SHIPPED';
+        case 'delivered':
+          return status === 'DELIVERED';
         default:
           return true;
       }
@@ -149,7 +153,18 @@ const OrderList = () => {
       if (result) {
         const updatedOrders = orders.map(order => {
           if (order.id === orderId) {
-            return { ...order, orderStatus: newStatus };
+            // If status is changed to DELIVERED and it's a COD order, update payment status to PAID
+            const updatedOrder = { 
+              ...order, 
+              orderStatus: newStatus 
+            };
+
+            // Check if it's a COD order and status is DELIVERED
+            if (newStatus === 'DELIVERED' && order.paymentMethod === 'COD') {
+              updatedOrder.paymentStatus = 'PAID';
+            }
+
+            return updatedOrder;
           }
           return order;
         });
@@ -228,6 +243,9 @@ const OrderList = () => {
       case 'IN_PROGRESS':
         availableOptions = [{ key: 'SHIPPED', label: 'Giao hàng' }];
         break;
+      case 'SHIPPED':
+        availableOptions = [{ key: 'DELIVERED', label: 'Hoàn tất giao hàng' }];
+        break;
       default:
         availableOptions = [];
     }
@@ -256,16 +274,6 @@ const OrderList = () => {
       key: 'id',
     },
     {
-      title: 'Khách hàng',
-      dataIndex: 'customerName',
-      key: 'customerName',
-      render: (name, record) => (
-        <div>
-          <div className="text-sm">{record?.userAddress?.user?.fullName}</div>
-        </div>
-      ),
-    },
-    {
       title: 'Ngày đặt',
       dataIndex: 'orderDate',
       key: 'orderDate',
@@ -280,7 +288,7 @@ const OrderList = () => {
         <div>
           {record.orderDetails.map((detail, index) => (
             <div key={detail.id} className={index > 0 ? "mt-1" : ""}>
-              {detail.product.name} x{detail.quantity}
+              {detail.product.name} x {detail.quantity}
             </div>
           ))}
         </div>
@@ -293,6 +301,16 @@ const OrderList = () => {
       sorter: (a, b) => a.totalPrice - b.totalPrice,
       sortDirections: ['descend', 'ascend'],
       render: (total) => formatCurrency(total),
+    },
+    {
+      title: 'Phương thức TT',
+      dataIndex: 'paymentMethod',
+      key: 'paymentMethod',
+      render: ( paymentMethod) => (
+        <div>
+          <div className="text-sm">{paymentMethod?.name}</div>
+        </div>
+      ),
     },
     {
       title: 'Thanh toán',
@@ -319,7 +337,7 @@ const OrderList = () => {
       key: 'actions',
       render: (_, record) => (
         // Only show actions dropdown if there are available status updates
-        record.orderStatus !== 'SHIPPED' && (
+        record.orderStatus !== 'DELIVERED' && (
           <Dropdown
             overlay={statusMenu(record)}
             trigger={['click']}
