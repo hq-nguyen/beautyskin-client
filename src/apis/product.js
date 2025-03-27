@@ -81,12 +81,12 @@ export const getProductByCategory = async (id) => {
 
 export const mapSkinTypeToId = (skinType) => {
     const skinTypeMap = {
-      'Da dầu': 1,
-      'Da hỗn hợp / tổng hợp': 2,
-      'Da thường': 3,
-      'Da nhạy cảm': 4,
+      'Da dầu': 3,
+      'Da hỗn hợp / tổng hợp': 4,
+      'Da thường': 2,
+      'Da nhạy cảm': 6,
       'Da khô': 5,
     };
     
-    return skinTypeMap[skinType] || 1; // Mặc định là Da dầu nếu không tìm thấy
+    return skinTypeMap[skinType] || 1;
   };

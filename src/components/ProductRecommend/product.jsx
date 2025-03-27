@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import { getProductBySkinType, mapSkinTypeToId } from '../../apis/product';
 
 const ProductRecommendations = ({ skinType }) => {
-  const [product, setProduct] = useState(null);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const getRecommendedProduct = async () => {
+    const getRecommendedProducts = async () => {
       if (!skinType) return;
       
       try {
@@ -17,21 +17,25 @@ const ProductRecommendations = ({ skinType }) => {
         
         const data = await getProductBySkinType(skinTypeId);
         
-        const latestProduct = data && data.length > 0 
-          ? data.sort((a, b) => new Date(b.createDateTime) - new Date(a.createDateTime))[0]
-          : null;
+        const recommendedProducts = data && data.length > 0 
+          ? data.sort((a, b) => new Date(b.createDateTime) - new Date(a.createDateTime)).slice(0, 5)
+          : [];
         
-        setProduct(latestProduct);
+        setProducts(recommendedProducts);
+        console.log('Set products:', recommendedProducts);
         setLoading(false);
       } catch (err) {
         setError('Không thể tải sản phẩm đề xuất. Vui lòng thử lại sau.');
         setLoading(false);
-        console.error('Error fetching recommended product:', err);
+        console.error('Error fetching recommended products:', err);
       }
     };
-
-    getRecommendedProduct();
+  
+    getRecommendedProducts();
   }, [skinType]);
+  
+  // Thêm log trước render
+  console.log('Products before render:', products);
 
   if (loading) return (
     <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
@@ -51,7 +55,7 @@ const ProductRecommendations = ({ skinType }) => {
     </div>
   );
   
-  if (!product) return (
+  if (!products.length) return (
     <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
       <h3 className="text-xl font-semibold mb-4 text-indigo-700">Sản phẩm đề xuất cho {skinType}</h3>
       <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-md">
@@ -60,78 +64,81 @@ const ProductRecommendations = ({ skinType }) => {
     </div>
   );
 
-  const productImage = product.images && product.images.length > 0 
-    ? product.images[0].url 
-    : '/images/products/placeholder.jpg';
-
-  const formattedPrice = new Intl.NumberFormat('vi-VN', { 
+  const formattedPrice = (price) => new Intl.NumberFormat('vi-VN', { 
     style: 'currency', 
     currency: 'VND' 
-  }).format(product.price);
+  }).format(price);
 
   const getPlainTextFromHTML = (html) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     return doc.body.textContent || '';
   };
 
-  const shortDescription = product.description ? 
-    getPlainTextFromHTML(product.description).substring(0, 120) + '...' : 
-    'Không có mô tả.';
-
   return (
     <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
-      <div className="flex items-center mb-4">
+      <div className="flex items-center mb-6">
         <h3 className="text-xl font-semibold text-indigo-700">Sản phẩm đề xuất cho {skinType}</h3>
         <div className="ml-2 bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
-          Phù hợp nhất
+          Top 5 sản phẩm phù hợp
         </div>
       </div>
-      
-      <div className="bg-white border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
-        <div className="md:flex">
-          <div className="md:w-1/3 h-64 md:h-auto bg-gray-100 flex items-center justify-center overflow-hidden">
-            <img 
-              src={productImage}
-              alt={product.name} 
-              className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
-              onError={(e) => {
-                e.target.onerror = null; 
-                e.target.src = '/images/products/placeholder.jpg';
-              }}
-            />
-          </div>
-          
-          <div className="md:w-2/3 p-6">
-            <div className="flex flex-col h-full justify-between">
-              <div>
-                <h4 className="font-semibold text-xl mb-2 text-gray-800">{product.name}</h4>
-                <p className="text-gray-600 mb-4">{shortDescription}</p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {products.map((product) => {
+          const productImage = product.images && product.images.length > 0 
+            ? product.images[0].url 
+            : '/images/products/placeholder.jpg';
+
+          const shortDescription = product.description 
+            ? getPlainTextFromHTML(product.description).substring(0, 100) + '...' 
+            : 'Không có mô tả.';
+
+          return (
+            <div 
+              key={product.id}
+              className="bg-white border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300"
+            >
+              <div className="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                <img 
+                  src={productImage}
+                  alt={product.name}
+                  className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/products/placeholder.jpg';
+                  }}
+                />
+              </div>
+              
+              <div className="p-4">
+                <h4 className="font-semibold text-lg mb-2 text-gray-800 line-clamp-1">{product.name}</h4>
+                <p className="text-gray-600 mb-3 text-sm line-clamp-2">{shortDescription}</p>
                 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {product.skinConcerns && product.skinConcerns.map(concern => (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {product.skinConcerns && product.skinConcerns.slice(0, 3).map(concern => (
                     <span key={concern.id} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                       {concern.name}
                     </span>
                   ))}
                 </div>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4">
-                <span className="font-bold text-xl text-indigo-700">
-                  {formattedPrice}
-                </span>
-                <Link 
-                  to={`/product/${product.id}`} 
-                  className="bg-indigo-600 text-white px-6 py-3 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors w-full sm:w-auto text-center"
-                >
-                  Xem chi tiết
-                </Link>
+
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-lg text-indigo-700">
+                    {formattedPrice(product.price)}
+                  </span>
+                  <Link 
+                    to={`/product/${product.id}`}
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700 transition-colors"
+                  >
+                    Xem chi tiết
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
-      
+
       <div className="text-center mt-6">
         <Link 
           to={{
