@@ -22,6 +22,7 @@ const FavoriteMessage = ({ message, type }) => {
 const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
     const [isFavoriting, setIsFavoriting] = useState(false);
     const [isInFavorites, setIsInFavorites] = useState(false);
+    const [error, setError] = useState(null);
     const [favoriteMessage, setFavoriteMessage] = useState(null);
     const [messageType, setMessageType] = useState('success');
     const [feedbackSummary, setFeedbackSummary] = useState({ count: 0, averageRating: 0 });
@@ -30,8 +31,6 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
     const formattedOldPrice = oldPrice ? oldPrice.toLocaleString() : '0';
     const formattedNewPrice = newPrice ? newPrice.toLocaleString() : '0';
     const displayPromotion = promotion && promotion > 0;
-
-
 
     useEffect(() => {
         const checkLoginStatus = () => {
@@ -42,35 +41,30 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
         checkLoginStatus();
     }, []);
 
-    useEffect(() => {
+     useEffect(() => {
         const getFeedbackSummary = async () => {
-            const cachedData = sessionStorage.getItem(`product_feedback_${id}`);
-
-            if (cachedData) {
-                setFeedbackSummary(JSON.parse(cachedData));
-                return;
-            }
             try {
                 const feedbacks = await fetchProductFeedbacks(id);
+
                 if (Array.isArray(feedbacks) && feedbacks.length > 0) {
+                    // Calculate average rating from all feedbacks
                     const totalRating = feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0);
                     const avgRating = totalRating / feedbacks.length;
 
-                    const summaryData = {
+                    setFeedbackSummary({
                         count: feedbacks.length,
                         averageRating: avgRating || 0
-                    };
-                    sessionStorage.setItem(`product_feedback_${id}`, JSON.stringify(summaryData));
-                    setFeedbackSummary(summaryData);
+                    });
                 } else {
+                    // If no feedbacks or invalid data, keep default rating
                     setFeedbackSummary({
                         count: 0,
                         averageRating: 0
                     });
-                    sessionStorage.setItem(`product_feedback_${id}`, JSON.stringify({ count: 0, averageRating: 0 }));
                 }
             } catch (error) {
                 console.error("Error fetching feedback summary:", error);
+                // Keep the default rating if there's an error
             }
         };
 
@@ -102,19 +96,24 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
     };
 
     const handleAddFavorites = async () => {
+
         if (!isLoggedIn) {
-            showMessage('Vui lòng đăng nhập để thêm sản phẩm vào yêu thích', 'error');
+            // Redirect to login or show login message
+            showMessage('Vui lòng đăng nhập để thêm sản phẩm vào yêu thích');
             return;
         }
 
         if (isInFavorites) {
-            showMessage('Sản phẩm đã có trong danh sách yêu thích!', 'error');
+            // If already in favorites, show a message and do nothing
+            showMessage('Sản phẩm đã có trong danh sách yêu thích!');
             return;
         }
 
         try {
             setIsFavoriting(true);
-            
+            setError(null);
+            setFavoriteMessage(null);
+
             const response = await api.post(`favorites/addToFavorites/${id}`);
 
             if (response.status !== 200 && response.status !== 201) {
@@ -125,12 +124,13 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
             showMessage('Đã thêm vào danh sách yêu thích thành công!');
             console.log('Đã thêm vào danh sách yêu thích:', response.data);
         } catch (error) {
-            showMessage('Sản phẩm đã tồn tại trong danh sách yêu thích', 'error');
+            showMessage('Sản phẩm đã tồn tại trong danh sách yêu thích');
             console.error('Lỗi khi thêm vào sản phẩm yêu thích', error);
         } finally {
             setIsFavoriting(false);
         }
     };
+
     return (
         <div className="relative flex flex-col bg-white p-2 pb-8 hover:border hover:border-rose-500 transition-transform duration-150">
             <Link
@@ -182,6 +182,9 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
                         <FaHeart className={`w-4 h-4 ${isInFavorites ? "text-red-500" : "text-gray-500 hover:text-red-500"}`} />
                     </button>
                 </div>
+                {error && (
+                    <div className="text-xs text-red-500 mt-1">{error}</div>
+                )}
             </div>
 
             {/* Popup notification for favorite messages */}

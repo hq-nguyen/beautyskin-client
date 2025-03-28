@@ -122,8 +122,8 @@ const DashboardMain = () => {
           <div className="bg-white p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">Top khách hàng trong tháng</p>
-                <p className="text-2xl font-bold mt-2 text-gray-800">{formatCurrency(summary?.topCustomers[0]?.totalSpent || 0)}</p>
+                <p className="text-gray-500 text-sm font-medium">Số khách hàng đã mua</p>
+                <p className="text-2xl font-bold mt-2 text-gray-800">{summary.customersWithOrders}</p>
               </div>
               <div className="bg-green-100 p-3 rounded-full">
                 <Users className="h-6 w-6 text-green-600" />

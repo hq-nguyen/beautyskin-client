@@ -22,7 +22,7 @@ export const fetchFeedbacks = async () => {
 export const fetchProductFeedbacks = async (productId) => {
   try {
     const response = await api.get(`/feedback/getFeedbackById/${productId}`);
-    return response.data;
+    return response.data || [];
   } catch (error) {
     message.error(error.response.data);
   }

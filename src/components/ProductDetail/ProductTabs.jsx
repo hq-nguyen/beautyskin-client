@@ -268,11 +268,6 @@ const ProductTabs = ({ product, feedbackData }) => {
                                                 <div className="ml-3">
                                                     <div className="flex items-center">
                                                         <p className="font-medium">{feedback.user?.fullName || "Người dùng"}</p>
-                                                        {isCurrentUserFeedback(feedback) && (
-                                                            <span className="ml-2 text-xs bg-primary text-white px-2 py-0.5 rounded-full">
-                                                                Đánh giá của bạn
-                                                            </span>
-                                                        )}
                                                     </div>
                                                     <div className="flex items-center mt-1">
                                                         <div className="flex">
@@ -312,13 +307,13 @@ const ProductTabs = ({ product, feedbackData }) => {
                                         )}
 
                                         {/* Badge for purchased products */}
-                                        {feedback.product && feedback.user && (
+                                        {isCurrentUserFeedback(feedback)&& (
                                             <div className="mt-4">
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
                                                     <svg className="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                                                     </svg>
-                                                    Đã mua hàng
+                                                    Đánh giá của bạn
                                                 </span>
                                             </div>
                                         )}
