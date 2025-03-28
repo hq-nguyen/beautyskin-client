@@ -30,7 +30,6 @@ const OrderHistory = () => {
 
   const statusTabs = [
     { key: 'all', label: 'Tất cả' },
-    { key: 'wait-payment', label: 'Chờ thanh toán' },
     { key: 'wait-product', label: 'Chờ lấy hàng' },
     { key: 'shipping', label: 'Chờ giao hàng' },
     { key: 'delivered', label: 'Hoàn thành' },
@@ -118,11 +117,6 @@ const OrderHistory = () => {
 
   const filterOrdersByTab = (orders, tab) => {
     switch (tab) {
-      case 'wait-payment':
-        return orders.filter(order =>
-          (order.paymentStatus === 'PENDING' || order.paymentStatus === null || order.paymentStatus === "CANCELLED") &&
-          order.status === 'PENDING'
-        );
       case 'wait-product':
         return orders.filter(order => order.status === 'PENDING');
       case 'shipping':
