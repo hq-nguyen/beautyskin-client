@@ -27,7 +27,8 @@ const ManageOrder = () => {
     { key: 'shipped', label: 'Đang giao hàng' },
     { key: 'delivered', label: 'Hoàn thành' },
     { key: 'cancelled', label: 'Đã hủy' },
-    { key: 'returned', label: 'Trả hàng/Hoàn tiền' },
+    { key: 'refund-request', label: 'Yêu cầu hoàn tiền' },
+    { key: 'refunded', label: 'Trả hàng/Hoàn tiền' },
   ];
   const statusOptions2 = [
     { key: 'IN_PROGRESS', label: 'Xác nhận đơn' },
@@ -83,8 +84,10 @@ const ManageOrder = () => {
           return status === 'DELIVERED';
         case 'cancelled':
           return status === 'CANCELLED';
-        case 'returned':
-          return status === 'RETURNED';
+        case 'refund-request':
+          return status === 'REFUND_REQ';
+        case 'refunded':
+          return status === 'REFUNDED';
         default:
           return true;
       }
@@ -221,6 +224,37 @@ const ManageOrder = () => {
     }
   };
 
+  const handleRefundApproval = async (orderId, approve) => {
+    try {
+      setStatusUpdateLoading(true);
+      const newStatus = approve ? 'REFUNDED' : 'DELIVERED';
+      
+      const result = await updateStatusOrder2(orderId, newStatus);
+      
+      if (result) {
+        const updatedOrders = orders.map(order => {
+          if (order.id === orderId) {
+            return { ...order, orderStatus: newStatus };
+          }
+          return order;
+        });
+
+        setOrders(updatedOrders);
+        message.success(
+          approve 
+            ? 'Yêu cầu hoàn tiền đã được chấp nhận' 
+            : 'Yêu cầu hoàn tiền đã bị từ chối'
+        );
+      }
+    } catch (error) {
+      console.error("Error processing refund request:", error);
+      message.error("Xử lý yêu cầu hoàn tiền thất bại");
+    } finally {
+      setStatusUpdateLoading(false);
+    }
+  };
+
+
   const getStatusColor = (status) => {
     switch (status.toUpperCase()) {
       case 'PENDING':
@@ -233,7 +267,7 @@ const ManageOrder = () => {
         return 'green';
       case 'CANCELLED':
         return 'red';
-      case 'RETURNED':
+      case 'REFUNDED':
         return 'volcano';
       default:
         return 'default';
@@ -264,7 +298,7 @@ const ManageOrder = () => {
       case 'SHIPPED': return 'Đang giao hàng';
       case 'DELIVERED': return 'Hoàn thành';
       case 'CANCELLED': return 'Đã hủy';
-      case 'RETURNED': return 'Trả hàng/Hoàn tiền';
+      case 'REFUNDED': return 'Trả hàng/Hoàn tiền';
       default: return status;
     }
   };
@@ -339,7 +373,7 @@ const ManageOrder = () => {
       width: 200,
       render: (_, record) => (
         <Space>
-          {/* <Dropdown
+          <Dropdown
             overlay={statusMenu(record)}
             trigger={['click']}
             disabled={statusUpdateLoading}
@@ -352,7 +386,28 @@ const ManageOrder = () => {
             >
               Cập nhật <DownOutlined />
             </Button>
-          </Dropdown> */}
+          </Dropdown>
+          {record.orderStatus === 'REFUND_REQ' && (
+            <>
+              <Button
+                type="primary"
+                size="small"
+                onClick={() => handleRefundApproval(record.id, true)}
+                loading={statusUpdateLoading}
+              >
+                Chấp nhận
+              </Button>
+              <Button
+                type="default"
+                size="small"
+                danger
+                onClick={() => handleRefundApproval(record.id, false)}
+                loading={statusUpdateLoading}
+              >
+                Từ chối
+              </Button>
+            </>
+          )}
           <Button
             icon={<DeleteOutlined />}
             type="text"

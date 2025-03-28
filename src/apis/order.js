@@ -103,7 +103,7 @@ export const cancelOrder = async (id) => {
 
 export const makeReport = async (data) => {
     try {
-        const response = await api.post("/report", data);
+        const response = await api.post("/report/create", data);
         return response.data;
     }
     catch (error) {

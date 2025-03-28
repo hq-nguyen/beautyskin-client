@@ -35,7 +35,8 @@ const OrderHistory = () => {
     { key: 'shipping', label: 'Chờ giao hàng' },
     { key: 'delivered', label: 'Hoàn thành' },
     { key: 'cancelled', label: 'Đã hủy' },
-    { key: 'returned', label: 'Trả hàng/Hoàn tiền' },
+    { key: 'complaint', label: 'Khiếu nại' },
+    { key: 'refunded', label: 'Trả hàng/Hoàn tiền' },
   ];
 
   const fetchOrders = async () => {
@@ -44,7 +45,6 @@ const OrderHistory = () => {
       const response = await fetchOrderHistory();
 
       const formattedOrders = response.map(order => {
-        // Calculate original total price before promotion
         const originalTotalPrice = order.orderDetails.reduce(
           (total, detail) => total + (detail.quantity * detail.unitPrice),
           0
@@ -95,7 +95,6 @@ const OrderHistory = () => {
     }
   };
 
-
   const getDisplayStatus = (status) => {
     switch (status) {
       case "PENDING":
@@ -108,7 +107,9 @@ const OrderHistory = () => {
         return "Đã giao hàng";
       case "CANCELLED":
         return "Đã hủy";
-      case "RETURNED":
+      case "REFUND_REQ":
+        return "Đã khiếu nại";
+      case "REFUNDED":
         return "Đã trả hàng";
       default:
         return status || "Chờ xử lý";
@@ -130,8 +131,10 @@ const OrderHistory = () => {
         return orders.filter(order => order.status === 'DELIVERED');
       case 'cancelled':
         return orders.filter(order => order.status === 'CANCELLED');
-      case 'returned':
-        return orders.filter(order => order.status === 'RETURNED');
+      case 'complaint':
+        return orders.filter(order => order.status === 'REFUND_REQ');
+      case 'refunded':
+        return orders.filter(order => order.status === 'REFUNDED');
       case 'all':
       default:
         return orders;
@@ -179,8 +182,10 @@ const OrderHistory = () => {
         return "bg-green-100 text-green-800";
       case "CANCELLED":
         return "bg-red-100 text-red-800";
-      case "RETURNED":
+      case "REFUNDED":
         return "bg-orange-100 text-orange-800";
+      case "REFUND_REQ":
+        return "bg-amber-100 text-amber-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -198,6 +203,11 @@ const OrderHistory = () => {
   // Feedback handlers
   const handleOpenPopup = (mode) => {
     setPopupMode(mode);
+  };
+
+  // Reported handlers
+  const canReportOrder = (order) => {
+    return order.status === 'SHIPPED' || order.status === 'DELIVERED';
   };
 
   const handleClosePopup = () => {
@@ -223,13 +233,15 @@ const OrderHistory = () => {
       }
     } else if (popupMode === 'report') {
       try {
+        const formattedImages = data.images.map(url => ({ url }));
+
         const newData = {
           ...data,
           orderId: selectedOrder.orderId,
-          image: data.images ? data.images[0] : ""
+          images: formattedImages
         };
 
-        const response = await makeReport(newData);
+        await makeReport(newData);
         message.success('Báo cáo đơn hàng thành công');
         fetchOrders();
       } catch (error) {
@@ -238,10 +250,6 @@ const OrderHistory = () => {
       }
     }
     handleClosePopup();
-  };
-
-  const canReportOrder = (order) => {
-    return order.status === 'SHIPPED' || order.status === 'DELIVERED';
   };
 
   const renderOrderDetailsModal = () => {
@@ -496,7 +504,7 @@ const OrderHistory = () => {
 
                   {/* Order Action Buttons */}
                   <div className="mt-4 flex justify-end">
-                    {canReportOrder(order) &&  (
+                    {canReportOrder(order) && (
                       <button
                         className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors duration-200"
                         onClick={() => {
