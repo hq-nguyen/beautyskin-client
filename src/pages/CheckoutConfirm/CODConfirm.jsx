@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { toast } from "react-toastify";
@@ -36,25 +36,25 @@ const CODConfirmationPage = () => {
                     });
                     const defaultAddr = addressResponse.data.find(addr => addr.isDefault);
                     shippingAddr = defaultAddr || addressResponse.data[0];
-                    localStorage.setItem('defaultAddress', JSON.stringify(shippingAddr)); 
+                    localStorage.setItem('defaultAddress', JSON.stringify(shippingAddr));
                 }
 
                 const calculateEstimatedDelivery = (address) => {
                     const currentDate = new Date();
                     let deliveryDays = 3;
-                
+
                     const province = address?.province?.toLowerCase();
                     if (province && (
-                        province.includes('thành phố hồ chí minh') || 
-                        province.includes('tp.hcm') || 
+                        province.includes('thành phố hồ chí minh') ||
+                        province.includes('tp.hcm') ||
                         province.includes('hồ chí minh')
                     )) {
                         deliveryDays = 1;
                     }
-                
+
                     const estimatedDate = new Date(currentDate);
                     estimatedDate.setDate(currentDate.getDate() + deliveryDays);
-                
+
                     return estimatedDate.toLocaleDateString('vi-VN', {
                         day: '2-digit',
                         month: '2-digit',
@@ -62,15 +62,29 @@ const CODConfirmationPage = () => {
                     });
                 };
 
+                const originalTotalPrice = order.orderDetails.reduce(
+                    (total, detail) => total + (detail.quantity * detail.unitPrice),
+                    0
+                );
+
+                const hasPromotion = order.promotion && order.promotion.promoAmount > 0;
+                const promotionAmount = hasPromotion ? order.promotion.promoAmount : 0;
+                const promotionName = hasPromotion ? order.promotion.name : null;
+
                 setOrderData({
                     orderId: order.id.toString(),
                     total: order.totalPrice,
+                    originalTotalPrice: originalTotalPrice,
                     shippingFee: 0,
                     items: order.orderDetails.map(detail => ({
                         name: detail.product?.name || 'Unknown Product',
                         price: detail.unitPrice,
                         quantity: detail.quantity,
                     })),
+                    promotion: hasPromotion ? {
+                        name: promotionName,
+                        amount: promotionAmount
+                    } : null,
                     shippingAddress: shippingAddr,
                     estimatedDelivery: calculateEstimatedDelivery(shippingAddr)
                 });
@@ -121,7 +135,7 @@ const CODConfirmationPage = () => {
                     Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn sẽ được giao trong thời gian sớm nhất.
                 </p>
                 <p className="text-gray-600 mt-1">
-                    Mã đơn hàng: <span className="font-bold">{orderData.orderId}</span>
+                    Mã đơn hàng: <span className="font-bold">#{orderData.orderId}</span>
                 </p>
             </div>
 
@@ -133,23 +147,33 @@ const CODConfirmationPage = () => {
                 <div className="border-b border-gray-200 pb-4 mb-4">
                     {orderData.items.map((item, index) => (
                         <div key={index} className="flex justify-between py-2">
-                            <div>
+                            <div className="pr-20">
                                 <p className="text-gray-800">{item.name}</p>
                                 <p className="text-gray-600 text-sm">Số lượng: {item.quantity}</p>
                             </div>
-                            <span className="text-gray-800 font-medium">
+                            <span className="text-gray-800 font-medium w-24">
                                 {(item.price * item.quantity).toLocaleString()} đ
                             </span>
                         </div>
                     ))}
                 </div>
                 <div className="space-y-2">
+                    {/* Original Total Price */}
                     <div className="flex justify-between">
                         <span className="text-gray-700">Tạm tính:</span>
                         <span className="text-gray-800">
-                            {orderData.total.toLocaleString()} đ
+                            {orderData.originalTotalPrice.toLocaleString()} đ
                         </span>
                     </div>
+
+                    {/* Promotion Section */}
+                    {orderData.promotion && (
+                        <div className="flex justify-between text-green-600">
+                            <span>Khuyến mãi ({orderData.promotion.name}):</span>
+                            <span>-{orderData.promotion.amount.toLocaleString()} đ</span>
+                        </div>
+                    )}
+
                     <div className="flex justify-between">
                         <span className="text-gray-700">Phí vận chuyển:</span>
                         <span className="text-gray-800">

@@ -43,25 +43,43 @@ const OrderHistory = () => {
       setLoading(true);
       const response = await fetchOrderHistory();
 
-      const formattedOrders = response.map(order => ({
-        orderId: order.id,
-        createdAt: new Date(order.orderDate),
-        totalAmount: order.totalPrice,
-        status: order.orderStatus,
-        paymentStatus: order.paymentStatus,
-        orderDetails: order.orderDetails.map(detail => ({
-          orderDetailId: detail.orderDetailId,
-          quantity: detail.quantity,
-          price: detail.unitPrice,
-          feedback: detail.feedback,
-          product: {
-            id: detail.product.id,
-            name: detail.product.name,
-            images: detail.product.images,
-            category: detail.product.category ? detail.product.category.name : 'Unknown',
-          },
-        }))
-      }));
+      const formattedOrders = response.map(order => {
+        // Calculate original total price before promotion
+        const originalTotalPrice = order.orderDetails.reduce(
+          (total, detail) => total + (detail.quantity * detail.unitPrice),
+          0
+        );
+
+        // Determine promotion details
+        const hasPromotion = order.promotion && order.promotion.promoAmount > 0;
+        const promotionAmount = hasPromotion ? order.promotion.promoAmount : 0;
+        const promotionName = hasPromotion ? order.promotion.name : null;
+
+        return {
+          orderId: order.id,
+          createdAt: new Date(order.orderDate),
+          originalTotalPrice: originalTotalPrice,
+          totalAmount: order.totalPrice,
+          status: order.orderStatus,
+          paymentStatus: order.paymentStatus,
+          promotion: hasPromotion ? {
+            name: promotionName,
+            amount: promotionAmount
+          } : null,
+          orderDetails: order.orderDetails.map(detail => ({
+            orderDetailId: detail.orderDetailId,
+            quantity: detail.quantity,
+            price: detail.unitPrice,
+            feedback: detail.feedback,
+            product: {
+              id: detail.product.id,
+              name: detail.product.name,
+              images: detail.product.images,
+              category: detail.product.category ? detail.product.category.name : 'Unknown',
+            },
+          }))
+        };
+      });
 
       const sortedOrders = formattedOrders.sort((a, b) => b.createdAt - a.createdAt);
 
@@ -76,6 +94,7 @@ const OrderHistory = () => {
       setLoading(false);
     }
   };
+
 
   const getDisplayStatus = (status) => {
     switch (status) {
@@ -222,7 +241,7 @@ const OrderHistory = () => {
   };
 
   const canReportOrder = (order) => {
-    return order.status === 'DELIVERED';
+    return order.status === 'SHIPPED' || order.status === 'DELIVERED';
   };
 
   const renderOrderDetailsModal = () => {
@@ -243,7 +262,18 @@ const OrderHistory = () => {
               <p><strong>Mã đơn:</strong> #{selectedOrderToView.orderId}</p>
               <p><strong>Ngày đặt:</strong> {formatDate(selectedOrderToView.createdAt, "dd/MM/yyyy HH:mm")}</p>
               <p><strong>Trạng thái:</strong> {getDisplayStatus(selectedOrderToView.status)}</p>
-              <p><strong>Tổng tiền:</strong> {formatCurrency(selectedOrderToView.totalAmount)}</p>
+              <div>
+                <p><strong>Tổng tiền gốc:</strong> {formatCurrency(selectedOrderToView.originalTotalPrice)}</p>
+                {selectedOrderToView.promotion && (
+                  <div className="text-green-600">
+                    <p><strong>Khuyến mãi:</strong> {selectedOrderToView.promotion.name}</p>
+                    <p><strong>Giảm giá:</strong> {formatCurrency(selectedOrderToView.promotion.amount)}</p>
+                  </div>
+                )}
+                <p className="font-bold text-rose-600">
+                  <strong>Tổng thanh toán:</strong> {formatCurrency(selectedOrderToView.totalAmount)}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -384,9 +414,23 @@ const OrderHistory = () => {
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                         {getDisplayStatus(order.status)}
                       </span>
-                      <span className="font-semibold text-sm text-gray-900">
-                        {formatCurrency(order.totalAmount)}
-                      </span>
+                      <div className="text-right">
+                        {order.promotion && (
+                          <div className="text-xs text-green-600 mb-1">
+                            KM: {order.promotion.name} (-{formatCurrency(order.promotion.amount)})
+                          </div>
+                        )}
+                        <div className="flex items-center">
+                          {order.promotion && (
+                            <span className="text-xs text-gray-500 line-through mr-2">
+                              {formatCurrency(order.originalTotalPrice)}
+                            </span>
+                          )}
+                          <span className="font-semibold text-sm text-rose-600">
+                            {formatCurrency(order.totalAmount)}
+                          </span>
+                        </div>
+                      </div>
                       <button
                         className="text-gray-600 hover:text-blue-600"
                         onClick={() => setSelectedOrderToView(order)}
@@ -452,7 +496,7 @@ const OrderHistory = () => {
 
                   {/* Order Action Buttons */}
                   <div className="mt-4 flex justify-end">
-                    {canReportOrder(order) && (
+                    {canReportOrder(order) &&  (
                       <button
                         className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors duration-200"
                         onClick={() => {

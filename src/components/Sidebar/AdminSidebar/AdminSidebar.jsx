@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
 import { IoDiscOutline } from "react-icons/io5";
 import { MdOutlineDashboard, MdOutlineCategory, MdOutlineQuiz } from "react-icons/md";
-import { BiUser, BiPackage, BiCart } from "react-icons/bi"; // More comprehensive icon set
+import { BiUser, BiPackage, BiCart } from "react-icons/bi"; 
 import { assets } from '../../../assets/frontend_assets/assets';
 import { TbBrandBlogger } from "react-icons/tb";
 import SidebarLinkGroup from './SidebarLinkGroup';
@@ -64,12 +64,8 @@ function AdminSidebar({
       id: 'dashboard',
       label: 'Dashboard',
       icon: <MdOutlineDashboard size={20} />,
-      path: '/admin', // Base path for the group
+      path: '/admin/dashboard',
       mark: 'dashboard',
-      subItems: [
-        { label: 'Thống kê', path: 'dashboard' },
-        { label: 'Doanh thu', path: 'dashboard-reports' },
-      ],
     },
     {
       id: 'account',

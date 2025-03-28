@@ -28,7 +28,6 @@ const Navbar = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('id');
     message.success("Đã đăng xuất");
-    // toast.success('Đăng xuất thành công');
     navigate('/');
   };
 
@@ -40,7 +39,8 @@ const Navbar = () => {
       try {
         const response = await api.get(`/product/getByName?name=${query}`)
 
-        const validResults = response.data.filter(product => product.id && !isNaN(product.id))
+        const validResults = response.data.filter(product => product.id && !isNaN(product.id)).slice(0, 6);
+                         
         setSearchResult(validResults)
       } catch (error) {
         console.error("Error fetching search results:", error)

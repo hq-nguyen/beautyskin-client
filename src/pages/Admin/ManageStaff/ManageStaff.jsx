@@ -5,7 +5,6 @@ import { MdOutlineDeleteOutline, MdOutlineRemoveRedEye } from "react-icons/md";
 import StaffModel from './StaffModel';
 import AddStaff from './AddStaff';
 import { createStaff, deleteCustomer, fetchCustomer } from '../../../apis/customer';
-import { render } from 'react-dom';
 
 const ManageStaff = () => {
   const [staffs, setStaffs] = useState([]);
