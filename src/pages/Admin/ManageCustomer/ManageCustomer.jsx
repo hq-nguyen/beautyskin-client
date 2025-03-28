@@ -24,7 +24,7 @@ const ManageCustomer = () => {
                 const data = await fetchCustomer();
                 console.log(data); // Log the data to see its structure
                 // Filter to only include users with the roleEnums "CUSTOMER"
-                const customerData = data.filter(user => user.roleEnums === "USER");
+                const customerData = data.filter(user => user.role === "USER");
                 setCustomers(customerData);
                 setFilteredCustomers(customerData);
             } catch (error) {
@@ -144,8 +144,8 @@ const ManageCustomer = () => {
         },
         {
             title: 'Tổng chi tiêu',
-            dataIndex: 'totalAmount',
-            key: 'totalAmount',
+            dataIndex: 'totalExpenditures',
+            key: 'totalExpenditures',
             render: (amount) => amount ? `${amount.toLocaleString()} đ` : '0 đ',
         },
         {

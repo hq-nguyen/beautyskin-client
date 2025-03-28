@@ -17,7 +17,7 @@ const ManageStaff = () => {
     const getStaffs = async () => {
       try {
         const data = await fetchCustomer();
-        const staffData = data.filter(user => user.roleEnums === "STAFF");
+        const staffData = data.filter(user => user.role === "STAFF");
         setStaffs(staffData);
       } catch (error) {
         console.error("Error fetching staffs:", error);
@@ -71,9 +71,10 @@ const ManageStaff = () => {
 
   const columns = [
     {
-      title: 'Id',
-      dataIndex: 'id',
-      key: 'id',
+      title: 'STT',
+      key: 'index',
+      render: (_, __, index) =>  index + 1,
+      width: 70,
     },
     {
       title: 'Họ và tên',
@@ -106,7 +107,7 @@ const ManageStaff = () => {
       dataIndex: 'active',
       key: 'active',
       render: (active) => (
-        <Tag color={active ?  'green' : 'red'}>
+        <Tag color={active ? 'green' : 'red'}>
           {active ? 'Đang hoạt động' : 'Tạm khóa'}
         </Tag>
       ),
