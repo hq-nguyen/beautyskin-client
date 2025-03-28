@@ -46,7 +46,13 @@ function FeedbackModel({ mode, visible, close, submit }) {
     if (mode === "feedback") {
       submit({ rating, comment, images });
     } else if (mode === "report") {
-      submit({ reason, description, images });
+      // Find the correct value for the selected reason
+      const selectedReasonObj = reportReasons.find(r => r.label === reason);
+      submit({ 
+        reason: selectedReasonObj ? selectedReasonObj.value : "OTHER", 
+        description, 
+        images 
+      });
     }
   };
 
@@ -87,7 +93,7 @@ function FeedbackModel({ mode, visible, close, submit }) {
       ]}
     >
       {mode === "feedback" ? (
-        // Existing feedback modal content
+        // Existing feedback modal content (unchanged)
         <>
           <div style={{ marginBottom: 16 }}>
             <p>Đánh giá sản phẩm</p>

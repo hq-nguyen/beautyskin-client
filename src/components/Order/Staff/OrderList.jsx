@@ -160,7 +160,7 @@ const OrderList = () => {
             };
 
             // Check if it's a COD order and status is DELIVERED
-            if (newStatus === 'DELIVERED' && order.paymentMethod === 'COD') {
+            if (newStatus === 'DELIVERED' && order.paymentStatus === 'PENDING') {
               updatedOrder.paymentStatus = 'PAID';
             }
 
