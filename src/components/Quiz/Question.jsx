@@ -64,15 +64,15 @@ const Question = ({
             </div>
             <div className="space-y-5 text-left mb-8">
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mr-4 shadow-sm">1</div>
+                <div className="w-10 h-10 bg-[#EE1F5B] text-white rounded-full flex items-center justify-center mr-4 shadow-sm">1</div>
                 <p className="text-gray-800">Trả lời các câu hỏi về đặc điểm và tình trạng da của bạn</p>
               </div>
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mr-4 shadow-sm">2</div>
+                <div className="w-10 h-10 bg-[#EE1F5B] text-white rounded-full flex items-center justify-center mr-4 shadow-sm">2</div>
                 <p className="text-gray-800">Nhận báo cáo phân tích da chi tiết từ hệ thống chuyên gia</p>
               </div>
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mr-4 shadow-sm">3</div>
+                <div className="w-10 h-10 bg-[#EE1F5B] text-white rounded-full flex items-center justify-center mr-4 shadow-sm">3</div>
                 <p className="text-gray-800">Khám phá các sản phẩm được đề xuất phù hợp với loại da của bạn</p>
               </div>
             </div>
@@ -81,7 +81,7 @@ const Question = ({
                 setShowIntro(false);
                 if (onStart) onStart();
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-10 rounded-md shadow-sm transition-all duration-300 hover:shadow"
+              className="bg-[#EE1F5B] hover:bg-blue-700 text-white font-medium py-3 px-10 rounded-md shadow-sm transition-all duration-300 hover:shadow"
             >
               Bắt đầu ngay
             </button>
