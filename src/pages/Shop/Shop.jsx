@@ -184,8 +184,8 @@ const Shop = () => {
       case "high-low":
         filtered.sort((a, b) => b.price - a.price);
         break;
-      case "hot":                                                                                             
-        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      case "hot":
+        filtered.sort((a, b) => (b.productSold || 0) - (a.productSold || 0));
         break;
       case "newest":
         filtered.sort((a, b) => {
@@ -426,6 +426,8 @@ const Shop = () => {
                   newPrice={getDiscountedPrice(product)}
                   stock={product.stock}
                   status={product.status}
+                  averageRating={product.averageRating}
+                  productSold={product.productSold}
                 />
               ))}
             </div>

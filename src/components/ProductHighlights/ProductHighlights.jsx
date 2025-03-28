@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaStar } from "react-icons/fa";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import { fetchProducts } from "../../apis/product";
@@ -22,15 +21,15 @@ const ProductHighlights = () => {
         // Process products data
         if (data && data.length > 0) {
           // Sort by stock for hot deals (highest stock first)
-          const sortedByStock = [...data].sort((a, b) => b.stock - a.stock).slice(0, 7);
+          const sortedBySold = [...data].sort((a, b) => b.productSold - a.productSold).slice(0, 7);
           
           // Sort by date for new products (newest first)
           const sortedByDate = [...data].sort((a, b) => 
             new Date(b.createDateTime) - new Date(a.createDateTime)
           ).slice(0, 7);
           
-          setHotDealsProducts(sortedByStock);
-          console.log("hot deals:",sortedByStock);
+          setHotDealsProducts(sortedBySold);
+          console.log("hot deals:",sortedBySold);
           
           setNewProducts(sortedByDate);
         }
@@ -161,6 +160,8 @@ const ProductHighlights = () => {
                   name={product.name}
                   oldPrice={product.price}
                   newPrice={currentPrice}
+                  averageRating={product.averageRating}
+                  productSold={product.productSold}
                 />
               </div>
             );

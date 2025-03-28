@@ -24,7 +24,7 @@ const SkinTypeRecommendations = () => {
                 console.error("Error fetching user profile:", error);
             }
         };
-        
+
         if (user && user.id) {
             fetchUserProfile();
         }
@@ -32,7 +32,7 @@ const SkinTypeRecommendations = () => {
 
     // Use the skin profile we fetched
     const skinProfile = userSkinProfile;
-    
+
     // Check if user is eligible for recommendations
     const isUserEligible = user && skinProfile && skinProfile.skinType;
 
@@ -45,6 +45,7 @@ const SkinTypeRecommendations = () => {
                     const skinTypeId = skinProfile.skinType.id;
                     const productData = await getProductBySkinType(skinTypeId);
                     setProducts(Array.isArray(productData) ? productData : []);
+                    
                 } catch (error) {
                     console.error("Error fetching skin type products:", error);
                 } finally {
@@ -107,7 +108,7 @@ const SkinTypeRecommendations = () => {
             {/* Decorative elements */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-pink-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-rose-100 rounded-full -ml-12 -mb-12 opacity-50"></div>
-            
+
             {/* Title and Skin Type */}
             <div className="flex justify-between items-center mb-8 relative z-10">
                 <div className="flex flex-col">
@@ -149,6 +150,8 @@ const SkinTypeRecommendations = () => {
                                     name={product.name}
                                     oldPrice={product.oldPrice || product.price * 1.2}
                                     newPrice={product.price}
+                                    averageRating={product.averageRating}
+                                    productSold={product.productSold}
                                 />
                             </div>
                         ))}

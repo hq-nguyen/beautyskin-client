@@ -4,7 +4,6 @@ import StarRating from '../utils/StarRating';
 import { assets } from '../../assets/frontend_assets/assets';
 import api from '../../config/axios';
 import { useState, useEffect } from 'react';
-import { fetchProductFeedbacks } from '../../apis/feedback';
 import { createPortal } from 'react-dom';
 
 const FavoriteMessage = ({ message, type }) => {
@@ -19,13 +18,12 @@ const FavoriteMessage = ({ message, type }) => {
     );
 };
 
-const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
+const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRating = 0, productSold = 0 }) => {
     const [isFavoriting, setIsFavoriting] = useState(false);
     const [isInFavorites, setIsInFavorites] = useState(false);
     const [error, setError] = useState(null);
     const [favoriteMessage, setFavoriteMessage] = useState(null);
     const [messageType, setMessageType] = useState('success');
-    const [feedbackSummary, setFeedbackSummary] = useState({ count: 0, averageRating: 0 });
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     const formattedOldPrice = oldPrice ? oldPrice.toLocaleString() : '0';
@@ -40,36 +38,6 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
 
         checkLoginStatus();
     }, []);
-
-     useEffect(() => {
-        const getFeedbackSummary = async () => {
-            try {
-                const feedbacks = await fetchProductFeedbacks(id);
-
-                if (Array.isArray(feedbacks) && feedbacks.length > 0) {
-                    // Calculate average rating from all feedbacks
-                    const totalRating = feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0);
-                    const avgRating = totalRating / feedbacks.length;
-
-                    setFeedbackSummary({
-                        count: feedbacks.length,
-                        averageRating: avgRating || 0
-                    });
-                } else {
-                    // If no feedbacks or invalid data, keep default rating
-                    setFeedbackSummary({
-                        count: 0,
-                        averageRating: 0
-                    });
-                }
-            } catch (error) {
-                console.error("Error fetching feedback summary:", error);
-                // Keep the default rating if there's an error
-            }
-        };
-
-        getFeedbackSummary();
-    }, [id]);
 
     // Check if product is already in favorites
     useEffect(() => {
@@ -96,7 +64,6 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
     };
 
     const handleAddFavorites = async () => {
-
         if (!isLoggedIn) {
             // Redirect to login or show login message
             showMessage('Vui lòng đăng nhập để thêm sản phẩm vào yêu thích');
@@ -159,8 +126,8 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice }) => {
                     </h3>
                 </Link>
                 <div className="flex my-1">
-                    <StarRating rating={(feedbackSummary.averageRating).toFixed(1)} />
-                    <span className="ml-2 text-xs text-gray-500">({feedbackSummary.count})</span>
+                    <StarRating rating={averageRating.toFixed(1)} />
+                    <span className="ml-2 text-xs text-gray-500">({productSold})</span>
                 </div>
                 <div className="flex items-center">
                     <span className="text-xs text-gray-500 line-through">{formattedOldPrice} đ</span>
