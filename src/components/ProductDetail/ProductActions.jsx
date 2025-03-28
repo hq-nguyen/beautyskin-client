@@ -76,7 +76,9 @@ const ProductActions = ({ product, navigateToCompare }) => {
                 skinTypes: product.skinTypes?.map(type => type.name) || [],
                 skinConcerns: product.skinConcerns?.map(concern => concern.name) || [],
                 promotionValue: product.promotions?.[0]?.value || 0,
-                stock: product.stock
+                stock: product.stock,
+                productSold: product?.productSold || 0,
+                averageRating: product?.averageRating || 0,
             }));
             showNotification('Đã thêm sản phẩm vào so sánh', 'success');
         }
