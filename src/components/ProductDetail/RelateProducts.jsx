@@ -48,9 +48,8 @@ const RelatedProducts = ({ categoryId, currentProductId }) => {
     // Custom arrow components for the slider
     const SlickArrow = ({ direction, onClick }) => (
         <button
-            className={`absolute z-10 top-1/2 transform -translate-y-1/2 ${
-                direction === 'prev' ? 'left-0' : 'right-0'
-            } bg-white rounded-full shadow-md p-2 hover:bg-gray-100 focus:outline-none`}
+            className={`absolute z-10 top-1/2 transform -translate-y-1/2 ${direction === 'prev' ? 'left-0' : 'right-0'
+                } bg-white rounded-full shadow-md p-2 hover:bg-gray-100 focus:outline-none`}
             onClick={onClick}
         >
             {direction === 'prev' ? (
@@ -152,6 +151,8 @@ const RelatedProducts = ({ categoryId, currentProductId }) => {
                                         name={product.name}
                                         oldPrice={product.price}
                                         newPrice={newPrice}
+                                        averageRating={product.averageRating}
+                                        productSold={product.productSold}
                                     />
                                 </div>
                             );
