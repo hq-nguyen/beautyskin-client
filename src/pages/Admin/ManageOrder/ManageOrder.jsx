@@ -339,7 +339,7 @@ const ManageOrder = () => {
       width: 200,
       render: (_, record) => (
         <Space>
-          <Dropdown
+          {/* <Dropdown
             overlay={statusMenu(record)}
             trigger={['click']}
             disabled={statusUpdateLoading}
@@ -352,7 +352,7 @@ const ManageOrder = () => {
             >
               Cập nhật <DownOutlined />
             </Button>
-          </Dropdown>
+          </Dropdown> */}
           <Button
             icon={<DeleteOutlined />}
             type="text"
