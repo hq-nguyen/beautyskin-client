@@ -1,24 +1,31 @@
 import { useState, useEffect } from 'react';
-import { Table, Tag, Space, Modal, Button, Avatar } from 'antd';
-import { MdOutlineDeleteOutline, MdOutlineRemoveRedEye } from "react-icons/md";
-// import { fetchStaff, deleteStaff, addStaff } from '../../../apis/staff';
+import { Table, Tag, Space, Modal, Button, Select } from 'antd';
+import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { MdBlock } from "react-icons/md";
+import { CiUnlock } from "react-icons/ci";
 import StaffModel from './StaffModel';
 import AddStaff from './AddStaff';
-import { createStaff, deleteCustomer, fetchCustomer } from '../../../apis/customer';
+import { createStaff,  fetchStaff, lockAccount, unLockAccount, } from '../../../apis/customer';
+
+const { Option } = Select;
 
 const ManageStaff = () => {
   const [staffs, setStaffs] = useState([]);
+  const [filteredStaffs, setFilteredStaffs] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [currentStaff, setCurrentStaff] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     const getStaffs = async () => {
       try {
-        const data = await fetchCustomer();
+        const data = await fetchStaff();
+        // Filter to only include users with the roleEnums "STAFF"
         const staffData = data.filter(user => user.role === "STAFF");
         setStaffs(staffData);
+        setFilteredStaffs(staffData);
       } catch (error) {
         console.error("Error fetching staffs:", error);
       } finally {
@@ -28,45 +35,94 @@ const ManageStaff = () => {
     getStaffs();
   }, []);
 
-  const handleViewDetails = (staff) => {
-    console.log("Viewing details for:", staff); // Add this line
-    setCurrentStaff(staff);
-    setIsModalVisible(true);
-  };
+  useEffect(() => {
+    // Apply filters when statusFilter changes
+    if (statusFilter === 'all') {
+      setFilteredStaffs(staffs);
+    } else if (statusFilter === 'active') {
+      setFilteredStaffs(staffs.filter(staff => staff.active === true));
+    } else if (statusFilter === 'locked') {
+      setFilteredStaffs(staffs.filter(staff => staff.active === false));
+    }
+  }, [statusFilter, staffs]);
 
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-    setCurrentStaff(null);
-  };
-
-  const handleDelete = (staff) => {
+  const handleLockAccount = (staff) => {
     Modal.confirm({
-      title: 'Bạn có chắc chắn muốn xóa nhân viên này?',
-      content: 'Hành động này không thể hoàn tác!',
-      okText: 'Có, xóa',
+      title: 'Bạn có chắc chắn muốn khóa tài khoản nhân viên này?',
+      content: 'Hành động này có thể hoàn tác sau!',
+      okText: 'Có, khóa',
       okType: 'danger',
       cancelText: 'Không',
       onOk: async () => {
         try {
-          await deleteCustomer(staff.id);
-          setStaffs(staffs.filter(s => s.id !== staff.id));
-          Modal.success({ content: 'Xóa nhân viên thành công!' });
+          await lockAccount(staff.id);
+          // Update the local state after successful API call
+          const updatedStaffs = staffs.map(s => 
+            s.id === staff.id ? { ...s, active: false } : s
+          );
+          setStaffs(updatedStaffs);
+          Modal.success({ content: 'Khóa tài khoản nhân viên thành công!' });
         } catch (error) {
-          Modal.error({ title: 'Xóa nhân viên thất bại!', content: error.message });
+          Modal.error({ 
+            title: 'Khóa tài khoản nhân viên thất bại!', 
+            content: error.message 
+          });
         }
       },
     });
   };
 
+  const handleUnLockAccount = (staff) => {
+    Modal.confirm({
+      title: 'Bạn có chắc chắn muốn mở khóa tài khoản nhân viên này?',
+      content: 'Tài khoản sẽ có thể hoạt động bình thường sau khi mở khóa',
+      okText: 'Có, mở khóa',
+      okType: 'primary',
+      cancelText: 'Không',
+      onOk: async () => {
+        try {
+          await unLockAccount(staff.id);
+          // Update the local state after successful API call
+          const updatedStaffs = staffs.map(s => 
+            s.id === staff.id ? { ...s, active: true } : s
+          );
+          setStaffs(updatedStaffs);
+          Modal.success({ content: 'Mở khóa tài khoản nhân viên thành công!' });
+        } catch (error) {
+          Modal.error({ 
+            title: 'Mở khóa tài khoản nhân viên thất bại!', 
+            content: error.message 
+          });
+        }
+      },
+    });
+  };
+
+  const handleViewDetails = (staff) => {
+    setCurrentStaff(staff);
+    setIsModalVisible(true);
+  };
+
   const handleAddNewStaff = async (newStaff) => {
     try {
       const response = await createStaff(newStaff);
-      const newStaffWithId = { ...newStaff, id: response.id };
-      setStaffs([...staffs, newStaffWithId]); // Update the state with the new staff
-      setIsAddModalVisible(false); // Close the modal
+      const newStaffWithId = { 
+        ...newStaff, 
+        id: response.id, 
+        active: true // Assuming new staff is active by default
+      };
+      const updatedStaffs = [...staffs, newStaffWithId];
+      setStaffs(updatedStaffs);
+      setFilteredStaffs(updatedStaffs);
+      setIsAddModalVisible(false);
     } catch (error) {
       console.error("Error adding staff:", error);
+      Modal.error({ 
+        title: 'Thêm nhân viên thất bại!', 
+        content: error.message 
+      });
     }
+    getStaffs(); // Refresh the staff list after adding a new staff
   };
 
   const columns = [
@@ -87,28 +143,20 @@ const ManageStaff = () => {
       key: 'mail',
     },
     {
-      title: 'Số đơn đã giao',
-      dataIndex: 'numberOfAssigned',
-      key: 'numberOfAssigned',
-      render: (numberOfAssigned) => (
-        <Tag color="blue">hello {numberOfAssigned}</Tag>
-      )
-    },
-    {
       title: 'Số đơn đã xử lý',
-      dataIndex: 'numberOfOrderProcessed',
-      key: 'numberOfOrderProcessed',
+      dataIndex: 'completedOrders',
+      key: 'completedOrders',
       render: (numberOfAssigned) => (
-        <Tag color="blue">hi {numberOfAssigned}</Tag>
+        <Tag color="blue"> {numberOfAssigned} đơn hàng</Tag>
       )
     },
     {
-      title: 'Trạng thái',
+      title: 'Trạng thái khóa',
       dataIndex: 'active',
       key: 'active',
       render: (active) => (
-        <Tag color={active ? 'green' : 'red'}>
-          {active ? 'Đang hoạt động' : 'Tạm khóa'}
+        <Tag color={active ? 'blue' : 'volcano'}>
+          {active ? 'Đang hoạt động' : 'Đã khóa'}
         </Tag>
       ),
     },
@@ -117,8 +165,25 @@ const ManageStaff = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <Button onClick={() => handleViewDetails(record)} icon={<MdOutlineRemoveRedEye className="text-blue-500 w-5 h-5" />} />
-          <Button onClick={() => handleDelete(record)} icon={<MdOutlineDeleteOutline className="text-red-500 w-5 h-5" />} />
+          <Button 
+            icon={<MdOutlineRemoveRedEye className="text-blue-500 w-5 h-5" />} 
+            type="text"
+            onClick={() => handleViewDetails(record)} 
+          />
+          {record.active === true ? (
+            <Button
+              icon={<MdBlock />}
+              type="text"
+              danger
+              onClick={() => handleLockAccount(record)}
+            />
+          ) : (
+            <Button
+              icon={<CiUnlock />}
+              type="text"
+              onClick={() => handleUnLockAccount(record)}
+            />
+          )}
         </Space>
       ),
     },
@@ -128,7 +193,23 @@ const ManageStaff = () => {
     <div className="p-4">
       <div className='flex justify-between items-center mb-4'>
         <h1 className="text-2xl font-bold mb-4 text-black">Danh sách nhân viên</h1>
-        <Button type="primary" onClick={() => setIsAddModalVisible(true)}>Thêm nhân viên</Button>
+        
+        <div className="flex items-center space-x-4">
+          <Select 
+            value={statusFilter} 
+            onChange={setStatusFilter} 
+            style={{ width: 200 }}
+            placeholder="Lọc theo trạng thái"
+          >
+            <Option value="all">Tất cả</Option>
+            <Option value="active">Đang hoạt động</Option>
+            <Option value="locked">Đã khóa</Option>
+          </Select>
+          
+          <Button type="primary" onClick={() => setIsAddModalVisible(true)}>
+            Thêm nhân viên
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -136,7 +217,7 @@ const ManageStaff = () => {
       ) : (
         <Table
           columns={columns}
-          dataSource={staffs}
+          dataSource={filteredStaffs}
           rowKey="id"
           pagination={{ position: ['bottomRight'] }}
           rowClassName={(_, index) => (index % 2 === 0 ? "bg-gray-100" : "bg-white")}
@@ -148,7 +229,10 @@ const ManageStaff = () => {
         <StaffModel
           staff={currentStaff}
           visible={isModalVisible}
-          onCancel={handleCloseModal}
+          onCancel={() => {
+            setIsModalVisible(false);
+            setCurrentStaff(null);
+          }}
         />
       )}
 

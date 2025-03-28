@@ -5,7 +5,7 @@ import {
 } from '@ant-design/icons';
 import { MdBlock } from "react-icons/md";
 import { CiUnlock } from "react-icons/ci";
-import { fetchCustomer, lockCustomer, unLockCustomer } from '../../../apis/customer';
+import { fetchCustomer, lockAccount, unLockAccount } from '../../../apis/customer';
 import CustomerModel from './CustomerModel';
 
 const { Option } = Select;
@@ -22,8 +22,6 @@ const ManageCustomer = () => {
         const getCustomers = async () => {
             try {
                 const data = await fetchCustomer();
-                console.log(data); // Log the data to see its structure
-                // Filter to only include users with the roleEnums "CUSTOMER"
                 const customerData = data.filter(user => user.role === "USER");
                 setCustomers(customerData);
                 setFilteredCustomers(customerData);
@@ -37,7 +35,6 @@ const ManageCustomer = () => {
     }, []);
 
     useEffect(() => {
-        // Apply filters when statusFilter changes
         if (statusFilter === 'all') {
             setFilteredCustomers(customers);
         } else if (statusFilter === 'active') {
@@ -56,7 +53,7 @@ const ManageCustomer = () => {
             cancelText: 'Không',
             onOk: async () => {
                 try {
-                    await lockCustomer(customer.id); // Call your API to lock the customer
+                    await lockAccount(customer.id); // Call your API to lock the customer
                     // Update the local state after successful API call
                     const updatedCustomers = customers.map(c => {
                         if (c.id === customer.id) {
@@ -82,8 +79,7 @@ const ManageCustomer = () => {
             cancelText: 'Không',
             onOk: async () => {
                 try {
-                    await unLockCustomer(customer.id); // Assume you have this API function
-                    // Update the local state after successful API call
+                    await unLockAccount(customer.id); 
                     const updatedCustomers = customers.map(c => {
                         if (c.id === customer.id) {
                             return { ...c, active: true };
