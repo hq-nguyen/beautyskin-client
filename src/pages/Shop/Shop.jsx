@@ -23,6 +23,7 @@ const Shop = () => {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage, setProductsPerPage] = useState(12); // Number of products per page
   const [sortBy, setSortBy] = useState("");
 
   const filterMap = {
@@ -201,8 +202,18 @@ const Shop = () => {
     return filtered;
   }, [filters, products, searchQuery, sortBy]);
 
+  // Calculate pagination values
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredAndSortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredAndSortedProducts.length / productsPerPage);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   const handleSort = (sortType) => {
     setSortBy(sortType);
+    setCurrentPage(1); // Reset to first page when sorting changes
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -217,12 +228,13 @@ const Shop = () => {
 
       return { ...prev, [filterType]: updatedValues };
     });
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page when filter changes
   };
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page when search changes
 
     if (query.trim()) {
       localStorage.setItem('searchQuery', query);
@@ -242,6 +254,7 @@ const Shop = () => {
     });
     setSearchQuery("");
     setSortBy("");
+    setCurrentPage(1); // Reset to first page when filters are cleared
 
     localStorage.removeItem('searchQuery');
     localStorage.removeItem('filteredProducts');
@@ -299,6 +312,91 @@ const Shop = () => {
       return product.images[0].url;
     }
     return assets.product_new_1;
+  };
+
+  // Pagination component
+  const Pagination = () => {
+    const pageNumbers = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+
+    // Display limited page numbers with ellipsis
+    let pagesToShow = [];
+    
+    if (totalPages <= 7) {
+      // Show all pages if there are 7 or fewer
+      pagesToShow = pageNumbers;
+    } else {
+      // Always include first and last page
+      if (currentPage <= 4) {
+        // Near the beginning
+        pagesToShow = [1, 2, 3, 4, 5, '...', totalPages];
+      } else if (currentPage >= totalPages - 3) {
+        // Near the end
+        pagesToShow = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      } else {
+        // Middle
+        pagesToShow = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+      }
+    }
+
+    return (
+      <nav className="flex justify-center mt-8">
+        <ul className="flex space-x-2">
+          {/* Previous button */}
+          <li>
+            <button
+              onClick={() => currentPage > 1 && paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === 1
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-primary hover:bg-primary hover:text-white border border-primary'
+              }`}
+            >
+              &laquo;
+            </button>
+          </li>
+
+          {/* Page numbers */}
+          {pagesToShow.map((page, index) => (
+            <li key={index}>
+              {page === '...' ? (
+                <span className="px-3 py-1">...</span>
+              ) : (
+                <button
+                  onClick={() => paginate(page)}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === page
+                      ? 'bg-primary text-white'
+                      : 'text-primary hover:bg-primary border border-primary'
+                  }`}
+                >
+                  {page}
+                </button>
+              )}
+            </li>
+          ))}
+
+          {/* Next button */}
+          <li>
+            <button
+              onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === totalPages
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-primary hover:bg-primary border border-primary'
+              }`}
+            >
+              &raquo;
+            </button>
+          </li>
+        </ul>
+      </nav>
+    );
   };
 
   return (
@@ -372,7 +470,7 @@ const Shop = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl text-primary font-bold">Tất cả sản phẩm</h2>
               <div className="text-sm">
-                Hiển thị {filteredAndSortedProducts.length} sản phẩm
+                Hiển thị {indexOfFirstProduct + 1}-{Math.min(indexOfLastProduct, filteredAndSortedProducts.length)} trong số {filteredAndSortedProducts.length} sản phẩm
               </div>
             </div>
 
@@ -404,6 +502,23 @@ const Shop = () => {
                   Giá cao đến thấp
                 </button>
               </div>
+              
+              <div className="flex items-center space-x-2">
+                <span className="text-sm">Hiển thị:</span>
+                <select 
+                  className="border rounded p-1 text-sm"
+                  value={productsPerPage}
+                  onChange={(e) => {
+                    setProductsPerPage(Number(e.target.value));
+                    setCurrentPage(1); 
+                  }}
+                >
+                  <option value={12}>12</option>
+                  <option value={24}>24</option>
+                  <option value={36}>36</option>
+                  <option value={48}>48</option>
+                </select>
+              </div>
             </div>
 
             {searchQuery && (
@@ -415,7 +530,7 @@ const Shop = () => {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredAndSortedProducts.map((product) => (
+              {currentProducts.map((product) => (
                 <ProductItem
                   key={product.id}
                   id={product.id}
@@ -432,7 +547,7 @@ const Shop = () => {
               ))}
             </div>
 
-            {filteredAndSortedProducts.length === 0 && (
+            {filteredAndSortedProducts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-lg text-gray-600">Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</p>
                 <button
@@ -442,6 +557,8 @@ const Shop = () => {
                   Xóa bộ lọc
                 </button>
               </div>
+            ) : (
+              <Pagination />
             )}
           </div>
         </div>
