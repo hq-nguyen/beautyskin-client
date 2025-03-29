@@ -11,11 +11,11 @@ const Result = ({
 }) => {
   return (
     <div className="text-center">
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Kết quả kiểm tra da</h2>
+      <h2 className="text-2xl font-bold text-[#EE1F5B] mb-2">Kết quả kiểm tra da</h2>
       
       <div className="py-4">
         <div className="bg-blue-50 p-4 rounded-lg">
-          <h3 className="text-xl font-semibold text-blue-800">Loại da của bạn: {skinType}</h3>
+          <h3 className="text-xl font-semibold text-[#EE1F5B]">Loại da của bạn: {skinType}</h3>
           <p className="text-gray-600 mt-2">Tổng điểm: {totalPoints}</p>
         </div>
         
@@ -60,7 +60,7 @@ const Result = ({
         </button>
         <button
           onClick={onNavigate}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition"
+          className="px-4 py-2 bg-[#EE1F5B] text-white rounded-md transition"
         >
           Xem chi tiết về loại da
         </button>
