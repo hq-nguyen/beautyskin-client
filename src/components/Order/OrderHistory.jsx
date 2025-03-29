@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { message, Pagination, Modal } from 'antd';
 import { formatDate, formatCurrency } from '../../utils/format';
-import { fetchOrderHistory, cancelOrder, makeReport } from '../../apis/order';
+import { fetchOrderHistory, cancelOrder, makeReport, updateStatusOrder2 } from '../../apis/order';
 import { FaSearch, FaSpinner, FaEye } from 'react-icons/fa';
 import { CheckCircleTwoTone, ExclamationCircleOutlined } from '@ant-design/icons';
 import { assets } from '../../assets/frontend_assets/assets';
@@ -30,12 +30,14 @@ const OrderHistory = () => {
 
   const statusTabs = [
     { key: 'all', label: 'Tất cả' },
-    { key: 'wait-product', label: 'Chờ lấy hàng' },
-    { key: 'shipping', label: 'Chờ giao hàng' },
-    { key: 'delivered', label: 'Hoàn thành' },
+    { key: 'wait-product', label: 'Đơn hàng mới' },
+    { key: 'processed', label: 'Đang xử lí' },
+    { key: 'shipping', label: 'Đang giao hàng' },
+    { key: 'delivered', label: 'Đã giao hàng' },
+    { key: 'confirm', label: 'Hoàn thành' },
     { key: 'cancelled', label: 'Đã hủy' },
-    { key: 'complaint', label: 'Khiếu nại' },
-    { key: 'refunded', label: 'Trả hàng/Hoàn tiền' },
+    // { key: 'complaint', label: 'Khiếu nại' },
+    { key: 'refunded', label: 'Trả hàng' },
   ];
 
   const fetchOrders = async () => {
@@ -97,19 +99,21 @@ const OrderHistory = () => {
   const getDisplayStatus = (status) => {
     switch (status) {
       case "PENDING":
-        return "Chờ xử lý";
+        return "Đơn hàng mới";
       case "IN_PROGRESS":
         return "Đang xử lý";
       case "SHIPPED":
         return "Đang giao hàng";
       case "DELIVERED":
         return "Đã giao hàng";
+      case "CONFIRMED":
+        return "Hoàn thành";
       case "CANCELLED":
         return "Đã hủy";
       case "REFUND_REQ":
-        return "Đã khiếu nại";
+        return "Đã gửi khiếu nại";
       case "REFUNDED":
-        return "Đã trả hàng";
+        return "Đã hoàn tiền";
       default:
         return status || "Chờ xử lý";
     }
@@ -119,16 +123,20 @@ const OrderHistory = () => {
     switch (tab) {
       case 'wait-product':
         return orders.filter(order => order.status === 'PENDING');
+      case 'processed':
+        return orders.filter(order => order.status === 'IN_PROGRESS');
       case 'shipping':
         return orders.filter(order => order.status === 'SHIPPED');
       case 'delivered':
         return orders.filter(order => order.status === 'DELIVERED');
+      case 'confirm':
+        return orders.filter(order => order.status === 'CONFIRMED');
       case 'cancelled':
         return orders.filter(order => order.status === 'CANCELLED');
-      case 'complaint':
-        return orders.filter(order => order.status === 'REFUND_REQ');
       case 'refunded':
-        return orders.filter(order => order.status === 'REFUNDED');
+        return orders.filter(order => (order.status === 'REFUND_REQ' || order.status === 'REFUNDED'));
+      // case 'refunded':
+      //   return orders.filter(order => order.status === 'REFUNDED');
       case 'all':
       default:
         return orders;
@@ -173,6 +181,8 @@ const OrderHistory = () => {
       case "SHIPPED":
         return "bg-indigo-100 text-indigo-800";
       case "DELIVERED":
+        return "bg-green-100 text-green-800";
+      case "CONFIRMED":
         return "bg-green-100 text-green-800";
       case "CANCELLED":
         return "bg-red-100 text-red-800";
@@ -244,6 +254,25 @@ const OrderHistory = () => {
       }
     }
     handleClosePopup();
+  };
+
+  const confirmOrder = async (orderId) => {
+    Modal.confirm({
+      title: 'Xác nhận đơn hàng',
+      content: 'Bạn có chắc chắn muốn xác nhận đơn hàng này đã được giao thành công?',
+      okText: 'Xác nhận',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        try {
+          await updateStatusOrder2(orderId, "CONFIRMED");
+          message.success('Đơn hàng đã được xác nhận thành công');
+          fetchOrders();
+        } catch (error) {
+          console.error('Confirm order error:', error);
+          message.error('Có lỗi xảy ra khi xác nhận đơn hàng');
+        }
+      }
+    });
   };
 
   const renderOrderDetailsModal = () => {
@@ -499,15 +528,25 @@ const OrderHistory = () => {
                   {/* Order Action Buttons */}
                   <div className="mt-4 flex justify-end">
                     {canReportOrder(order) && (
-                      <button
-                        className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors duration-200"
-                        onClick={() => {
-                          handleOpenPopup("report");
-                          setSelectedOrder(order);
-                        }}
-                      >
-                        Báo cáo đơn hàng
-                      </button>
+                      <div className='flex gap-2'>
+                        <button
+                          className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200"
+                          onClick={() => {
+                            confirmOrder(order.orderId);
+                          }}
+                        >
+                          Xác nhận đơn
+                        </button>
+                        <button
+                          className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors duration-200"
+                          onClick={() => {
+                            handleOpenPopup("report");
+                            setSelectedOrder(order);
+                          }}
+                        >
+                          Báo cáo đơn hàng
+                        </button>
+                      </div>
                     )}
 
                     {canCancelOrder(order) && (
