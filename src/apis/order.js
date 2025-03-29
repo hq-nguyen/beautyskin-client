@@ -92,6 +92,15 @@ export const fetchOrders = async () => {
     }
 }
 
+export const fetchReportByOrder = async (id) => {
+    try {
+        const payload = await api.get(`report/get/${id}`);
+        return payload.data;
+    } catch (error) {
+        message.error(error.response.data);
+    }
+}
+
 export const cancelOrder = async (id) => {
     try {
         const payload = await api.put(`order/cancelOrder/${id}?orderId=${id}`);

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, Space, Table, Tag, message, Pagination, Dropdown, Menu, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { FaSearch, FaSpinner } from 'react-icons/fa';
-import { fetchOrders, updateStatusOrder2, updateStatusPayment } from '../../../apis/order';
+import { fetchOrders, fetchReportByOrder, updateStatusOrder2, updateStatusPayment } from '../../../apis/order';
 import {
   EditOutlined,
   DeleteOutlined,
@@ -23,17 +23,18 @@ const ManageOrder = () => {
   const statusTabs = [
     { key: 'all', label: 'Tất cả' },
     { key: 'pending', label: 'Đơn mới' },
-    { key: 'processing', label: 'Đang xử lý' },
-    { key: 'shipped', label: 'Đang giao hàng' },
-    { key: 'delivered', label: 'Hoàn thành' },
+    { key: 'processing', label: 'Xác nhận đơn' },
+    { key: 'shipping', label: 'Đang giao hàng' },
+    { key: 'delivered', label: 'Đã giao hàng' },
+    { key: 'confirmed', label: 'Hoàn thành' },
     { key: 'cancelled', label: 'Đã hủy' },
     { key: 'refund-request', label: 'Yêu cầu hoàn tiền' },
     { key: 'refunded', label: 'Trả hàng/Hoàn tiền' },
   ];
   const statusOptions2 = [
     { key: 'IN_PROGRESS', label: 'Xác nhận đơn' },
-    { key: 'SHIPPED', label: 'Giao hàng' },
-    { key: 'DELIVERED', label: 'Xác nhận hoàn thành' },
+    { key: 'SHIPPING', label: 'Đang giao hàng' },
+    { key: 'DELIVERED', label: 'Đã giao hàng' },
   ];
 
   useEffect(() => {
@@ -49,7 +50,6 @@ const ManageOrder = () => {
       setLoading(true);
       const data = await fetchOrders();
 
-      // Sort orders by date (most recent first)
       const sortedOrders = data.sort((a, b) =>
         dayjs(b.orderDate).valueOf() - dayjs(a.orderDate).valueOf()
       );
@@ -57,7 +57,6 @@ const ManageOrder = () => {
       setOrders(sortedOrders);
       setTotal(sortedOrders.length);
 
-      // Apply initial filtering and pagination
       applyFiltersAndPagination(sortedOrders, searchTerm, activeTab, currentPage, pageSize);
     } catch (error) {
       message.error('Error fetching orders');
@@ -70,7 +69,6 @@ const ManageOrder = () => {
   const filterOrdersByTab = (orders, tab) => {
     if (tab === 'all') return orders;
 
-    // Match the status values exactly as they appear in your API response
     return orders.filter(order => {
       const status = order.orderStatus.toUpperCase();
       switch (tab) {
@@ -78,10 +76,12 @@ const ManageOrder = () => {
           return status === 'PENDING';
         case 'processing':
           return status === 'IN_PROGRESS';
-        case 'shipped':
-          return status === 'SHIPPED';
+        case 'shipping':
+          return status === 'SHIPPING';
         case 'delivered':
           return status === 'DELIVERED';
+        case 'confirmed':
+          return status === 'CONFIRMED';
         case 'cancelled':
           return status === 'CANCELLED';
         case 'refund-request':
@@ -101,41 +101,29 @@ const ManageOrder = () => {
       return;
     }
 
-    // First apply tab filter
     let filtered = filterOrdersByTab(orders, tab);
-
-    // Then apply search filter for order ID or product name
     if (search) {
       filtered = filtered.filter(order => {
-        // Convert order ID to string and check if it includes search term
         const orderIdMatch = String(order.id).toLowerCase().includes(search.toLowerCase());
-
-        // Check if any product name in order details includes search term
         const productNameMatch = order.orderDetails?.some(detail =>
           detail.product?.name?.toLowerCase().includes(search.toLowerCase())
         );
-
         return orderIdMatch || productNameMatch;
       });
     }
-
-    // Update total count after filtering
     setTotal(filtered.length);
-
-    // Apply pagination
     const startIndex = (page - 1) * size;
     const paginatedOrders = filtered.slice(startIndex, startIndex + size);
-
     setDisplayedOrders(paginatedOrders);
   };
 
   const handleSearch = () => {
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const handleTabChange = (tabKey) => {
     setActiveTab(tabKey);
-    setCurrentPage(1); // Reset to first page when changing tabs
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page, pageSize) => {
@@ -160,24 +148,14 @@ const ManageOrder = () => {
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
       setStatusUpdateLoading(true);
-
-      // Call API to update order status
       const result = await updateStatusOrder2(orderId, newStatus);
 
-      // If successful, update local state
       if (result) {
-        // If the new status is DELIVERED, also update the payment status for COD orders
-        if (newStatus === 'DELIVERED') {
-          // Find the order to check if it's a COD order (no transaction or pending payment)
+        if (newStatus === 'SHIPPING') {
           const order = orders.find(order => order.id === orderId);
-
-          // Check if it's a COD order that needs payment update
-          // (Either no transaction or payment status is PENDING)
           if (order && (order.transaction === null || order.paymentStatus === 'PENDING')) {
-            // Call the API to update payment status to PAID
             await updateStatusPayment(orderId, 'PAID');
 
-            // Update local state with both status changes
             const updatedOrders = orders.map(order => {
               if (order.id === orderId) {
                 return {
@@ -192,7 +170,6 @@ const ManageOrder = () => {
             setOrders(updatedOrders);
             message.success(`Đơn hàng đã được cập nhật thành ${getOrderStatusLabel(newStatus)} và thanh toán đã được xác nhận`);
           } else {
-            // Just update the order status without changing payment status
             const updatedOrders = orders.map(order => {
               if (order.id === orderId) {
                 return { ...order, orderStatus: newStatus };
@@ -204,7 +181,6 @@ const ManageOrder = () => {
             message.success(`Trạng thái đơn hàng đã được cập nhật thành ${getOrderStatusLabel(newStatus)}`);
           }
         } else {
-          // For non-DELIVERED status updates, just update the order status
           const updatedOrders = orders.map(order => {
             if (order.id === orderId) {
               return { ...order, orderStatus: newStatus };
@@ -228,9 +204,9 @@ const ManageOrder = () => {
     try {
       setStatusUpdateLoading(true);
       const newStatus = approve ? 'REFUNDED' : 'DELIVERED';
-      
+
       const result = await updateStatusOrder2(orderId, newStatus);
-      
+
       if (result) {
         const updatedOrders = orders.map(order => {
           if (order.id === orderId) {
@@ -241,8 +217,8 @@ const ManageOrder = () => {
 
         setOrders(updatedOrders);
         message.success(
-          approve 
-            ? 'Yêu cầu hoàn tiền đã được chấp nhận' 
+          approve
+            ? 'Yêu cầu hoàn tiền đã được chấp nhận'
             : 'Yêu cầu hoàn tiền đã bị từ chối'
         );
       }
@@ -254,6 +230,99 @@ const ManageOrder = () => {
     }
   };
 
+  // New function to view refund request details
+  const viewRefundDetails = async (orderId) => {
+    try {
+      setStatusUpdateLoading(true);
+      const reportData = await fetchReportByOrder(orderId);
+      console.log("Report data:", reportData[0]);
+
+      if (reportData) {
+        Modal.confirm({
+          title: 'Chi tiết yêu cầu hoàn tiền',
+          width: 700,
+          content: (
+            <div className="p-4">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-gray-600 mb-1">Ngày yêu cầu:</p>
+                  <p className="font-medium">{dayjs(reportData.reportDate).format('DD/MM/YYYY HH:mm')}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600 mb-1">Số tiền hoàn trả:</p>
+                  <p className="font-medium text-red-600">{reportData[0]?.refund?.toLocaleString()} đ</p>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-gray-600 mb-1">Lý do:</p>
+                <p className="font-medium">{reportData[0].reason || 'Không có thông tin'}</p>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-gray-600 mb-1">Mô tả chi tiết:</p>
+                <p className="font-medium">{reportData[0].description || 'Không có thông tin'}</p>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-gray-600 mb-1">Thông tin khách hàng:</p>
+                <p className="font-medium">{reportData[0].customer?.fullName} ({reportData.customer?.mail})</p>
+              </div>
+
+              {reportData[0].images && reportData[0].images.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-gray-600 mb-1">Hình ảnh đính kèm:</p>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {reportData[0].images.map((img, index) => (
+                      <img
+                        key={index}
+                        src={img.url}
+                        alt={`Evidence ${index + 1}`}
+                        className="w-full h-24 object-cover rounded border border-gray-200"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ),
+          okText: 'Chấp nhận hoàn tiền',
+          footer: (
+            <div className="flex justify-end space-x-2">
+              <Button onClick={() => Modal.destroyAll()}>
+                Đóng
+              </Button>
+              <Button
+                danger
+                onClick={() => {
+                  Modal.destroyAll();
+                  handleRefundApproval(orderId, false);
+                }}
+              >
+                Từ chối yêu cầu
+              </Button>
+              <Button
+                type="primary"
+                style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                onClick={() => {
+                  Modal.destroyAll();
+                  handleRefundApproval(orderId, true);
+                }}
+              >
+                Chấp nhận hoàn tiền
+              </Button>
+            </div>
+          )
+
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching refund request details:", error);
+      message.error("Không thể tải thông tin yêu cầu hoàn tiền");
+    } finally {
+      setStatusUpdateLoading(false);
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status.toUpperCase()) {
@@ -261,14 +330,18 @@ const ManageOrder = () => {
         return 'gold';
       case 'IN_PROGRESS':
         return 'blue';
-      case 'SHIPPED':
+      case 'SHIPPING':
         return 'orange';
       case 'DELIVERED':
         return 'green';
+      case 'CONFIRMED':
+        return 'green';
       case 'CANCELLED':
         return 'red';
-      case 'REFUNDED':
+      case 'REFUND_REQ':
         return 'volcano';
+      case 'REFUNDED':
+        return 'green';
       default:
         return 'default';
     }
@@ -282,6 +355,8 @@ const ManageOrder = () => {
         return 'red';
       case 'PENDING':
         return 'orange';
+      case 'REFUNDED':
+        return 'volcano';
       default:
         return 'default';
     }
@@ -294,9 +369,11 @@ const ManageOrder = () => {
   const getOrderStatusLabel = (status) => {
     switch (status.toUpperCase()) {
       case 'PENDING': return 'Đơn mới';
-      case 'IN_PROGRESS': return 'Đang xử lý';
-      case 'SHIPPED': return 'Đang giao hàng';
-      case 'DELIVERED': return 'Hoàn thành';
+      case 'IN_PROGRESS': return 'Xác nhận đơn';
+      case 'SHIPPING': return 'Đang giao hàng';
+      case 'DELIVERED': return 'Đã giao hàng';
+      case 'CONFIRMED': return 'Hoàn thành';
+      case 'REFUND_REQ': return 'Yêu cầu hoàn tiền';
       case 'CANCELLED': return 'Đã hủy';
       case 'REFUNDED': return 'Trả hàng/Hoàn tiền';
       default: return status;
@@ -373,7 +450,7 @@ const ManageOrder = () => {
       width: 200,
       render: (_, record) => (
         <Space>
-          <Dropdown
+          {/* <Dropdown
             overlay={statusMenu(record)}
             trigger={['click']}
             disabled={statusUpdateLoading}
@@ -386,27 +463,16 @@ const ManageOrder = () => {
             >
               Cập nhật <DownOutlined />
             </Button>
-          </Dropdown>
+          </Dropdown> */}
           {record.orderStatus === 'REFUND_REQ' && (
-            <>
-              <Button
-                type="primary"
-                size="small"
-                onClick={() => handleRefundApproval(record.id, true)}
-                loading={statusUpdateLoading}
-              >
-                Chấp nhận
-              </Button>
-              <Button
-                type="default"
-                size="small"
-                danger
-                onClick={() => handleRefundApproval(record.id, false)}
-                loading={statusUpdateLoading}
-              >
-                Từ chối
-              </Button>
-            </>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => viewRefundDetails(record.id)}
+              loading={statusUpdateLoading}
+            >
+              Xem chi tiết
+            </Button>
           )}
           <Button
             icon={<DeleteOutlined />}
