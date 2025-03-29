@@ -13,10 +13,10 @@ const ProductClassification = () => {
     ];
 
     const skinTypeData = [
-        { id: 1, title: "Da dầu", icon: <FaOilCan />, image: assets.da_dau, filter: "oily" },
-        { id: 2, title: "Da khô", icon: <FaLeaf />, image: assets.da_kho, filter: "dry" },
-        { id: 3, title: "Da thường", icon: <FaTint />, image: assets.da_thuong, filter: "normal" },
-        { id: 4, title: "Da tổng hợp", icon: <FaBalanceScale />, image: assets.da_tonghop, filter: "combination" }
+        { id: 1, title: "Da dầu", icon: <FaOilCan />, image: assets.da_dau, filter: "da dầu" },
+        { id: 2, title: "Da khô", icon: <FaLeaf />, image: assets.da_kho, filter: "da khô" },
+        { id: 3, title: "Da thường", icon: <FaTint />, image: assets.da_thuong, filter: "da thường" },
+        { id: 4, title: "Da tổng hợp", icon: <FaBalanceScale />, image: assets.da_tonghop, filter: "da hỗn hợp" }
     ];
 
     const skinConcern = [
@@ -62,9 +62,23 @@ const ProductClassification = () => {
         }
     };
 
+    // Generate the correct URL parameter based on the selected tab
+    const getLinkUrl = (item) => {
+        switch (activeTab) {
+            case "skinType":
+                return `/shop?skinType=${encodeURIComponent(item.filter)}`;
+            case "skinConcern":
+                return `/shop?skinConcern=${encodeURIComponent(item.filter)}`;
+            case "texture":
+                return `/shop?texture=${encodeURIComponent(item.filter)}`;
+            default:
+                return `/shop?skinType=${encodeURIComponent(item.filter)}`;
+        }
+    };
+
     const ProductCard = ({ item }) => (
         <Link
-            to={`/shop?category=${activeTab}&filter=${item.filter}`} 
+            to={getLinkUrl(item)}
             className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer"
         >
             <div className="relative h-200 overflow-hidden">

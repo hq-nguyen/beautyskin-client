@@ -125,12 +125,28 @@ const Shop = () => {
         // Apply skinType filter from URL query parameter
         const queryParams = new URLSearchParams(location.search);
         const skinTypeFromUrl = queryParams.get("skinType");
+        const skinConcernFromUrl = queryParams.get("skinConcern");
+        const textureFromUrl = queryParams.get("texture");
 
         if (skinTypeFromUrl && filterMap.skinType[skinTypeFromUrl.toLowerCase()]) {
           setFilters(prev => ({
             ...prev,
             skinType: [filterMap.skinType[skinTypeFromUrl.toLowerCase()]]
           }));
+        }
+
+        if (skinConcernFromUrl && filterMap.skinConcern[skinConcernFromUrl.toLowerCase()]) {
+          setFilters(prev => ({
+            ...prev,
+            skinConcern: [filterMap.skinConcern[skinConcernFromUrl.toLowerCase()]]
+          }))
+        }
+
+        if (textureFromUrl && filterMap.texture[textureFromUrl.toLowerCase()]) {
+          setFilters(prev => ({
+            ...prev,
+            texture: [filterMap.texture[textureFromUrl.toLowerCase()]]
+          }))
         }
       } catch (error) {
         console.error("Error fetching product attributes:", error);
@@ -323,7 +339,7 @@ const Shop = () => {
     }
 
     let pagesToShow = [];
-    
+
     if (totalPages <= 7) {
       pagesToShow = pageNumbers;
     } else {
@@ -344,11 +360,10 @@ const Shop = () => {
             <button
               onClick={() => currentPage > 1 && paginate(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === 1
+              className={`px-3 py-1 rounded-md ${currentPage === 1
                   ? 'text-gray-400 cursor-not-allowed'
                   : 'text-primary hover:bg-primary hover:text-white border border-primary'
-              }`}
+                }`}
             >
               &laquo;
             </button>
@@ -362,11 +377,10 @@ const Shop = () => {
               ) : (
                 <button
                   onClick={() => paginate(page)}
-                  className={`px-3 py-1 rounded-md ${
-                    currentPage === page
+                  className={`px-3 py-1 rounded-md ${currentPage === page
                       ? 'bg-primary text-white'
                       : 'text-primary hover:bg-primary border border-primary'
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>
@@ -379,11 +393,10 @@ const Shop = () => {
             <button
               onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === totalPages
+              className={`px-3 py-1 rounded-md ${currentPage === totalPages
                   ? 'text-gray-400 cursor-not-allowed'
                   : 'text-primary hover:bg-primary border border-primary'
-              }`}
+                }`}
             >
               &raquo;
             </button>
@@ -496,15 +509,15 @@ const Shop = () => {
                   Giá cao đến thấp
                 </button>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <span className="text-sm">Hiển thị:</span>
-                <select 
+                <select
                   className="border rounded p-1 text-sm"
                   value={productsPerPage}
                   onChange={(e) => {
                     setProductsPerPage(Number(e.target.value));
-                    setCurrentPage(1); 
+                    setCurrentPage(1);
                   }}
                 >
                   <option value={12}>12</option>
