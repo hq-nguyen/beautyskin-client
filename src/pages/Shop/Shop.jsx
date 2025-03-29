@@ -322,22 +322,16 @@ const Shop = () => {
       pageNumbers.push(i);
     }
 
-    // Display limited page numbers with ellipsis
     let pagesToShow = [];
     
     if (totalPages <= 7) {
-      // Show all pages if there are 7 or fewer
       pagesToShow = pageNumbers;
     } else {
-      // Always include first and last page
       if (currentPage <= 4) {
-        // Near the beginning
         pagesToShow = [1, 2, 3, 4, 5, '...', totalPages];
       } else if (currentPage >= totalPages - 3) {
-        // Near the end
         pagesToShow = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
       } else {
-        // Middle
         pagesToShow = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
       }
     }
