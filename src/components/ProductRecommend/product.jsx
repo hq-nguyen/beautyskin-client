@@ -123,12 +123,12 @@ const ProductRecommendations = ({ skinType }) => {
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-lg text-indigo-700">
+                  <span className="font-bold text-lg text-[#EE1F5B]">
                     {formattedPrice(product.price)}
                   </span>
                   <Link 
                     to={`/product/${product.id}`}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700 transition-colors"
+                    className="bg-[#EE1F5B] text-white px-4 py-2 rounded-md text-sm transition-colors"
                   >
                     Xem chi tiết
                   </Link>
@@ -145,7 +145,7 @@ const ProductRecommendations = ({ skinType }) => {
             pathname: '/shop',
             search: `?skinType=${encodeURIComponent(skinType)}`
           }}
-          className="inline-block bg-white text-indigo-600 border border-indigo-600 px-6 py-2 rounded-md hover:bg-indigo-50 transition-colors font-medium"
+          className="inline-block bg-white text-[#EE1F5B] border border-red-600 px-6 py-2 rounded-md hover:bg-indigo-50 transition-colors font-medium"
         >
           Khám phá thêm các sản phẩm khác
         </Link>

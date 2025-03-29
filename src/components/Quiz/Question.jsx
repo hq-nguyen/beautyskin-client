@@ -81,7 +81,7 @@ const Question = ({
                 setShowIntro(false);
                 if (onStart) onStart();
               }}
-              className="bg-[#EE1F5B] hover:bg-blue-700 text-white font-medium py-3 px-10 rounded-md shadow-sm transition-all duration-300 hover:shadow"
+              className="bg-[#EE1F5B] text-white font-medium py-3 px-10 rounded-md shadow-sm transition-all duration-300 hover:shadow"
             >
               Bắt đầu ngay
             </button>
