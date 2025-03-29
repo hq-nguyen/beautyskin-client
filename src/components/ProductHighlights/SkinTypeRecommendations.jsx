@@ -30,13 +30,11 @@ const SkinTypeRecommendations = () => {
         }
     }, [user]);
 
-    // Use the skin profile we fetched
+
     const skinProfile = userSkinProfile;
 
-    // Check if user is eligible for recommendations
     const isUserEligible = user && skinProfile && skinProfile.skinType;
 
-    // Fetch products based on skin type
     useEffect(() => {
         const fetchProducts = async () => {
             if (isUserEligible) {
@@ -57,12 +55,10 @@ const SkinTypeRecommendations = () => {
         fetchProducts();
     }, [isUserEligible, skinProfile]);
 
-    // If user is not eligible or no products found, don't render the component
     if (!isUserEligible || (products.length === 0 && !loading)) {
         return null;
     }
 
-    // Slider settings
     const sliderSettings = {
         dots: true,
         infinite: products.length > 5,
@@ -105,11 +101,9 @@ const SkinTypeRecommendations = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-6 py-8 bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg shadow-md mt-12 mb-12 relative overflow-hidden">
-            {/* Decorative elements */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-pink-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-rose-100 rounded-full -ml-12 -mb-12 opacity-50"></div>
 
-            {/* Title and Skin Type */}
             <div className="flex justify-between items-center mb-8 relative z-10">
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2 mb-1">
@@ -123,16 +117,22 @@ const SkinTypeRecommendations = () => {
                     </p>
                 </div>
 
-                {/* View All button for large screens */}
+                <div className="flex items-center gap-2">
+                <Link to='/test-skin/dry' className="hidden lg:block group">
+                    <button className="text-sm px-5 py-2.5 bg-rose-600 rounded-full border border-rose-400 text-white hover:bg-rose-600 hover:text-white transition-colors duration-300 shadow-sm flex items-center gap-1 group-hover:gap-2">
+                        Khám phá lộ trình chăm sóc da 
+                    </button>
+                </Link>
+
                 <Link to="/shop" className="hidden lg:block group">
                     <button className="text-sm px-5 py-2.5 bg-white rounded-full border border-rose-400 text-rose-600 hover:bg-rose-600 hover:text-white transition-colors duration-300 shadow-sm flex items-center gap-1 group-hover:gap-2">
                         Xem tất cả
                         <ChevronRight size={16} className="transition-transform duration-300" />
                     </button>
                 </Link>
+                </div>
             </div>
 
-            {/* Loading state */}
             {loading ? (
                 <div className="flex justify-center items-center py-20">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
@@ -159,7 +159,6 @@ const SkinTypeRecommendations = () => {
                 </div>
             )}
 
-            {/* Button for small screens */}
             <div className="lg:hidden flex justify-center mt-8">
                 <Link to="/shop">
                     <button className="text-sm font-medium px-6 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-1">

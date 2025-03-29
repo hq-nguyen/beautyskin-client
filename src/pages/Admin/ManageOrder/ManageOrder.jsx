@@ -235,7 +235,7 @@ const ManageOrder = () => {
     try {
       setStatusUpdateLoading(true);
       const reportData = await fetchReportByOrder(orderId);
-      console.log("Report data:", reportData[0]);
+      console.log("Report data:", reportData);
 
       if (reportData) {
         Modal.confirm({

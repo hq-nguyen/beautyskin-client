@@ -21,14 +21,14 @@ const OrderList = () => {
     { key: 'all', label: 'Tất cả' },
     { key: 'pending', label: 'Đơn mới' },
     { key: 'processing', label: 'Đang xử lý' },
-    { key: 'shipped', label: 'Đang giao hàng' },
+    { key: 'shipping', label: 'Đang giao hàng' },
     { key: 'delivered', label: 'Đã giao hàng' },
   ];
 
   // Status options for updating order status
   const statusOptions = [
     { key: 'IN_PROGRESS', label: 'Xác nhận đơn' },
-    { key: 'SHIPPED', label: 'Giao hàng' },
+    { key: 'SHIPPING', label: 'Giao hàng' },
     { key: 'DELIVERED', label: 'Hoàn tất giao hàng' },
   ];
 
@@ -53,7 +53,7 @@ const OrderList = () => {
       // Filter out cancelled or returned orders - staff only sees active orders
       const filteredOrders = sortedOrders.filter(order => {
         const status = order.orderStatus.toUpperCase();
-        return ['PENDING', 'IN_PROGRESS', 'SHIPPED', 'DELIVERED'].includes(status);
+        return ['PENDING', 'IN_PROGRESS', 'SHIPPING', 'DELIVERED'].includes(status);
       });
 
       setOrders(filteredOrders);
@@ -80,8 +80,8 @@ const OrderList = () => {
           return status === 'PENDING';
         case 'processing':
           return status === 'IN_PROGRESS';
-        case 'shipped':
-          return status === 'SHIPPED';
+        case 'shipping':
+          return status === 'SHIPPING';
         case 'delivered':
           return status === 'DELIVERED';
         default:
@@ -160,7 +160,7 @@ const OrderList = () => {
             };
 
             // Check if it's a COD order and status is DELIVERED
-            if (newStatus === 'DELIVERED' && order.paymentStatus === 'PENDING') {
+            if (newStatus === 'SHIPPING' && order.paymentStatus === 'PENDING') {
               updatedOrder.paymentStatus = 'PAID';
             }
 
@@ -186,7 +186,7 @@ const OrderList = () => {
         return 'gold';
       case 'IN_PROGRESS':
         return 'blue';
-      case 'SHIPPED':
+      case 'SHIPPING':
         return 'orange';
       case 'DELIVERED':
         return 'green';
@@ -216,7 +216,7 @@ const OrderList = () => {
     switch (status.toUpperCase()) {
       case 'PENDING': return 'Đơn mới';
       case 'IN_PROGRESS': return 'Đang xử lý';
-      case 'SHIPPED': return 'Đang giao hàng';
+      case 'SHIPPING': return 'Đang giao hàng';
       case 'DELIVERED': return 'Đã giao hàng';
       default: return status;
     }
@@ -241,9 +241,9 @@ const OrderList = () => {
         availableOptions = [{ key: 'IN_PROGRESS', label: 'Xác nhận đơn' }];
         break;
       case 'IN_PROGRESS':
-        availableOptions = [{ key: 'SHIPPED', label: 'Giao hàng' }];
+        availableOptions = [{ key: 'SHIPPING', label: 'Giao hàng' }];
         break;
-      case 'SHIPPED':
+      case 'SHIPPING':
         availableOptions = [{ key: 'DELIVERED', label: 'Hoàn tất giao hàng' }];
         break;
       default:

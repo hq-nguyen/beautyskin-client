@@ -496,7 +496,7 @@ const OrderHistory = () => {
                           </div>
 
                           {/* Add feedback button for delivered orders */}
-                          {order?.status === "DELIVERED" ? (
+                          {order?.status === "CONFIRM" ? (
                             orderDetail?.feedback === false ? (
                               <div className="mt-2 flex justify-between">
                                 <div></div>
