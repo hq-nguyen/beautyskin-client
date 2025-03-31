@@ -1,27 +1,25 @@
-import { useState, useEffect } from 'react';
-import { Card, Steps, Collapse, List, Tag, Alert, Typography, Divider } from 'antd';
-import { SkinOutlined, ExperimentOutlined, BulbOutlined } from '@ant-design/icons';
+import { Card, Steps, Collapse, List, Tag, Alert, Typography, Divider, Badge, Space } from 'antd';
+import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph, Text } = Typography;
 const { Panel } = Collapse;
 
 const Oily = () => {
-  const [recommendedProducts, setRecommendedProducts] = useState([]);
-
-  // You can fetch recommended products from your API here
-  useEffect(() => {
-    // Fetch products specifically for oily skin
-    // const fetchProducts = async () => {
-    //   const products = await fetchProductsBySkinType('oily');
-    //   setRecommendedProducts(products);
-    // };
-    // fetchProducts();
-  }, []);
-
   const skincareMorningSteps = [
     {
       title: 'Sữa rửa mặt',
       description: 'Rửa mặt với sữa rửa mặt dịu nhẹ, không chứa dầu để loại bỏ bã nhờn tích tụ qua đêm.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/16"><Tag color="blue">Sữa Rửa Mặt Trà Xanh Ngừa Mụn</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Toner',
@@ -30,6 +28,17 @@ const Oily = () => {
     {
       title: 'Serum',
       description: 'Thoa serum chứa Niacinamide hoặc Salicylic Acid để kiểm soát dầu và se khít lỗ chân lông.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/20"><Tag color="blue">Serum Trị Mụn Tea Tree Oil</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Kem dưỡng ẩm',
@@ -38,6 +47,17 @@ const Oily = () => {
     {
       title: 'Kem chống nắng',
       description: 'Thoa kem chống nắng dạng gel hoặc lotion với SPF tối thiểu 30.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/15"><Tag color="blue">Kem Chống Nắng Kiềm Dầu</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
   ];
 
@@ -45,22 +65,77 @@ const Oily = () => {
     {
       title: 'Tẩy trang',
       description: 'Sử dụng dầu tẩy trang hoặc nước tẩy trang không dầu.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/19"><Tag color="blue">Nước Tẩy Trang Micellar</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Sữa rửa mặt',
       description: 'Rửa mặt kỹ để loại bỏ hoàn toàn dầu và bụi bẩn.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/29"><Tag color="blue">Sữa Rửa Mặt CeraVe Sạch Sâu Cho Da Thường Đến Da Dầu 473ml</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Toner',
       description: 'Sử dụng toner để cân bằng da.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/30"><Tag color="blue">Dung dịch loại bỏ tế bào chết Skin Perfecting 2% BHA Liquid Exfoliant 118ml</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Điều trị',
       description: 'Sử dụng các sản phẩm đặc trị (nếu cần) như benzoyl peroxide hoặc retinol.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/25"><Tag color="blue">Tẩy Tế Bào Chết Hóa Học AHA/BHA</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
-      title: 'Kem dưỡng ẩm',
+      title: 'Dưỡng ẩm',
       description: 'Thoa kem dưỡng ẩm dạng nhẹ.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/26"><Tag color="blue">Kem Dưỡng La Roche-Posay Effaclar Mat</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
   ];
 
@@ -131,6 +206,13 @@ const Oily = () => {
           current={-1}
           items={skincareMorningSteps}
         />
+        <Divider />
+        <Alert
+          message="Lưu ý"
+          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+          type="info"
+          showIcon
+        />
       </Card>
 
       {/* Evening Routine */}
@@ -143,6 +225,13 @@ const Oily = () => {
           direction="vertical"
           current={-1}
           items={skincareEveningSteps}
+        />
+        <Divider />
+        <Alert
+          message="Lưu ý"
+          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+          type="info"
+          showIcon
         />
       </Card>
 
@@ -200,6 +289,19 @@ const Oily = () => {
             </List.Item>
           )}
         />
+      </Card>
+
+      {/* Maintenance Tips */}
+      <Title level={3} className="mb-4">
+        Duy trì làn da khỏe mạnh
+      </Title>
+      <Card className="mb-8">
+        <Paragraph>
+          Da dầu cần được chăm sóc đặc biệt để kiểm soát lượng dầu thừa mà vẫn đảm bảo độ ẩm cần thiết. Việc duy trì quy trình chăm sóc da đều đặn sẽ giúp cải thiện tình trạng da đáng kể.
+        </Paragraph>
+        <Paragraph>
+          <strong>Lưu ý quan trọng:</strong> Da dầu thường thay đổi theo mùa và điều kiện thời tiết. Vào mùa hè, khi thời tiết nóng ẩm, da có thể tiết nhiều dầu hơn, do đó cần điều chỉnh sản phẩm phù hợp. Ngược lại, vào mùa đông, không nên bỏ qua bước dưỡng ẩm dù da có dầu.
+        </Paragraph>
       </Card>
     </div>
   );

@@ -1,27 +1,24 @@
-import { useState, useEffect } from 'react';
-import { Card, Steps, Collapse, List, Tag, Alert, Typography, Divider } from 'antd';
-import { SkinOutlined, ExperimentOutlined, BulbOutlined } from '@ant-design/icons';
+import { Card, Steps, List, Tag, Alert, Typography, Divider, Space } from 'antd';
+import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph, Text } = Typography;
-const { Panel } = Collapse;
 
 const Normal = () => {
-  const [recommendedProducts, setRecommendedProducts] = useState([]);
-
-  // You can fetch recommended products from your API here
-  useEffect(() => {
-    // Fetch products specifically for normal skin
-    // const fetchProducts = async () => {
-    //   const products = await fetchProductsBySkinType('normal');
-    //   setRecommendedProducts(products);
-    // };
-    // fetchProducts();
-  }, []);
-
   const skincareMorningSteps = [
     {
       title: 'Sữa rửa mặt',
       description: 'Rửa mặt với sữa rửa mặt dịu nhẹ để làm sạch da.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/12"><Tag color="blue">Sữa rửa mặt Reihaku Hatomugi Facial Foam</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Toner',
@@ -30,14 +27,47 @@ const Normal = () => {
     {
       title: 'Serum',
       description: 'Thoa serum chứa vitamin C để bảo vệ da khỏi tác động môi trường và chống oxy hóa.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/14"><Tag color="blue">Serum Dưỡng Ẩm Hyaluronic Acid</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Kem dưỡng ẩm',
       description: 'Dùng kem dưỡng ẩm phù hợp với da thường để duy trì độ ẩm cân bằng.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/27"><Tag color="blue">Kem Chống Nắng Dưỡng Ẩm SPF50+ PA+++</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Kem chống nắng',
       description: 'Thoa kem chống nắng với SPF tối thiểu 30 để bảo vệ da khỏi tia UV.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/27"><Tag color="blue">Kem Chống Nắng Dưỡng Trắng Bảo Vệ Chống Ánh Sáng Xanh Ceuticoz Uvicoz Lotion SPF50+ PA++++ </Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
   ];
 
@@ -45,10 +75,32 @@ const Normal = () => {
     {
       title: 'Tẩy trang',
       description: 'Sử dụng dầu tẩy trang hoặc nước tẩy trang nhẹ nhàng.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/19"><Tag color="blue">Nước Tẩy Trang Micellar</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Sữa rửa mặt',
       description: 'Rửa mặt để loại bỏ bụi bẩn và dầu thừa tích tụ trong ngày.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/6"><Tag color="blue">Tẩy Trang 2 Lớp Emmié by HappySkin 3 In 1 Bi-Phase Micellar Water</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Toner',
@@ -61,6 +113,17 @@ const Normal = () => {
     {
       title: 'Kem dưỡng ẩm',
       description: 'Thoa kem dưỡng ẩm để khóa ẩm qua đêm.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/23"><Tag color="blue">Kem Dưỡng Mắt Chống Nhăn Peptide</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
   ];
 
@@ -132,6 +195,13 @@ const Normal = () => {
           current={-1}
           items={skincareMorningSteps}
         />
+        <Divider />
+        <Alert
+          message="Lưu ý"
+          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+          type="info"
+          showIcon
+        />
       </Card>
 
       {/* Evening Routine */}
@@ -144,6 +214,13 @@ const Normal = () => {
           direction="vertical"
           current={-1}
           items={skincareEveningSteps}
+        />
+        <Divider />
+        <Alert
+          message="Lưu ý"
+          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+          type="info"
+          showIcon
         />
       </Card>
 
@@ -174,7 +251,7 @@ const Normal = () => {
           renderItem={(item) => (
             <List.Item>
               <List.Item.Meta
-                title={<Tag color="green">{item.name}</Tag>}
+                title={<Tag color="blue">{item.name}</Tag>}
                 description={item.benefit}
               />
             </List.Item>

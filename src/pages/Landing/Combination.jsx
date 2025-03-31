@@ -1,27 +1,26 @@
-import { useState, useEffect } from 'react';
-import { Card, Steps, Collapse, List, Tag, Alert, Typography, Divider } from 'antd';
-import { SkinOutlined, ExperimentOutlined, BulbOutlined } from '@ant-design/icons';
+import { Card, Steps, Collapse, List, Tag, Alert, Typography, Divider, Badge, Space } from 'antd';
+import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph, Text } = Typography;
 const { Panel } = Collapse;
 
 const Combination = () => {
-  const [recommendedProducts, setRecommendedProducts] = useState([]);
-
-  // You can fetch recommended products from your API here
-  useEffect(() => {
-    // Fetch products specifically for combination skin
-    // const fetchProducts = async () => {
-    //   const products = await fetchProductsBySkinType('combination');
-    //   setRecommendedProducts(products);
-    // };
-    // fetchProducts();
-  }, []);
 
   const skincareMorningSteps = [
     {
       title: 'Sữa rửa mặt',
       description: 'Rửa mặt với sữa rửa mặt nhẹ nhàng, không chứa xà phòng để giữ độ ẩm cho vùng da khô và kiểm soát dầu ở vùng chữ T.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/29"><Tag color="green">Sữa Rửa Mặt CeraVe</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Toner',
@@ -30,6 +29,20 @@ const Combination = () => {
     {
       title: 'Serum',
       description: 'Thoa serum chứa Hyaluronic Acid để cấp ẩm cho vùng da khô và Salicylic Acid để kiểm soát dầu ở vùng chữ T.',
+      subTitle: (
+        <>
+          <Badge.Ribbon text="Tùy chọn" color="blue" />
+          <div className="mt-2">
+            <ShoppingOutlined style={{ marginRight: 8 }} />
+            <Text strong>Sản phẩm gợi ý:</Text>
+            <div className="ml-4 mt-2">
+              <Space>
+                <a href="/product/30"><Tag color="green">Skin Perfecting 2% BHA Liquid Exfoliant 118ml</Tag></a>
+              </Space>
+            </div>
+          </div>
+        </>
+      )
     },
     {
       title: 'Kem dưỡng ẩm',
@@ -38,6 +51,17 @@ const Combination = () => {
     {
       title: 'Kem chống nắng',
       description: 'Thoa kem chống nắng không chứa dầu với SPF tối thiểu 30.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/9"><Tag color="green">Kem Chống Nắng Dưỡng Ẩm Ceuticoz Uvicoz Aqua Gel Sunscreen SPF 30+</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
   ];
 
@@ -45,10 +69,32 @@ const Combination = () => {
     {
       title: 'Tẩy trang',
       description: 'Sử dụng dầu tẩy trang để loại bỏ lớp trang điểm và bụi bẩn.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/19"><Tag color="green">Nước Tẩy Trang Micellar</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Sữa rửa mặt',
       description: 'Rửa mặt với sữa rửa mặt dịu nhẹ.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/12"><Tag color="green">Sữa rửa mặt Reihaku Hatomugi Facial Foam</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Toner',
@@ -57,10 +103,54 @@ const Combination = () => {
     {
       title: 'Serum',
       description: 'Sử dụng serum chứa Salicylic Acid để kiểm soát dầu và Hyaluronic Acid để cấp ẩm.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/31"><Tag color="green">Tinh chất trị mụn, se khít lỗ chân lông The Ordinary Niacinamide 10% + Zinc 1%</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
+    },
+    {
+      title: 'Retinol/Retinoid',
+      description: 'Sử dụng 2-3 lần/tuần để cải thiện cấu trúc da và giảm mụn.',
     },
     {
       title: 'Kem dưỡng ẩm',
       description: 'Thoa kem dưỡng ẩm nhẹ nhàng cho toàn bộ khuôn mặt, tập trung vào vùng da khô.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/32"><Tag color="green">Kem dưỡng ẩm Neutrogena Hydro Boost Water Gel</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
+    },
+    {
+      title: 'Mặt nạ đất sét',
+      description: 'Sử dụng 1-2 lần/tuần cho vùng chữ T để kiểm soát dầu thừa.',
+      subTitle: (
+        <>
+          <Badge.Ribbon text="Tùy chọn" color="blue" />
+          <div className="mt-2">
+            <ShoppingOutlined style={{ marginRight: 8 }} />
+            <Text strong>Sản phẩm gợi ý:</Text>
+            <div className="ml-4 mt-2">
+              <Space>
+                <a href="/product/17"><Tag color="green">Mặt Nạ Đất Sét Se Khít Lỗ Chân Lông</Tag></a>
+              </Space>
+            </div>
+          </div>
+        </>
+      )
     },
   ];
 
@@ -130,6 +220,13 @@ const Combination = () => {
           current={-1}
           items={skincareMorningSteps}
         />
+        <Divider />
+        <Alert
+          message="Lưu ý"
+          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+          type="info"
+          showIcon
+        />
       </Card>
 
       {/* Evening Routine */}
@@ -142,6 +239,13 @@ const Combination = () => {
           direction="vertical"
           current={-1}
           items={skincareEveningSteps}
+        />
+        <Divider />
+        <Alert
+          message="Lưu ý"
+          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+          type="info"
+          showIcon
         />
       </Card>
 
