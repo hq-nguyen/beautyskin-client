@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { fetchProductById } from '../../apis/product';
 import { fetchProductFeedbacks } from '../../apis/feedback';
 import StarRating from '../utils/StarRating';
@@ -93,11 +93,15 @@ const ProductDetail = () => {
         <div className="container mx-auto px-4 py-8">
             {/* Breadcrumb */}
             <div className="flex items-center space-x-2 text-sm mb-8">
-                <a href="/" className="text-gray-500 hover:text-primary">Trang chủ</a>
+                <Link to="/" className="text-gray-500 hover:text-rose-600">Trang chủ</Link>
                 <span className="text-gray-400">/</span>
-                <a href="/shop" className="text-gray-500 hover:text-primary">
+                <Link to="/shop" className="text-gray-500 hover:text-rose-600">
+                    Mua hàng
+                </Link>
+                <span className="text-gray-400">/</span>
+                <p className="text-gray-500">
                     {product.category?.name || 'Danh mục'}
-                </a>
+                </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">

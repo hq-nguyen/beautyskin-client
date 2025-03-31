@@ -1,0 +1,7 @@
+/* Style for navigation buttons */
+.slick-slider .slick-next:before {
+    color: #f43f5e;
+}
+.slick-slider .slick-prev:before {
+    color: #f43f5e;
+}

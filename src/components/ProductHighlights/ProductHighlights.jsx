@@ -4,6 +4,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import { fetchProducts } from "../../apis/product";
 import ProductItem from "../Card/ProductItem";
+import './index.css'; 
 
 const ProductHighlights = () => {
   const [activeTab, setActiveTab] = useState("hotDeals");
