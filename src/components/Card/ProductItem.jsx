@@ -104,11 +104,11 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
                 className="relative h-60 group block hover:scale-95 transition-transform duration-300"
                 to={`/product/${id}`}
             >
-                {displayPromotion && (
+                {/* {displayPromotion && (
                     <div className="absolute top-2 left-2 bg-primary font-semibold text-white text-xs px-2 py-1 rounded">
                         -{promotion}%
                     </div>
-                )}
+                )} */}
                 <img
                     src={image}
                     alt={name}
@@ -130,8 +130,8 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
                     <span className="ml-2 text-xs text-gray-500">({productSold})</span>
                 </div>
                 <div className="flex items-center">
-                    <span className="text-xs text-gray-500 line-through">{formattedOldPrice} đ</span>
-                    <span className="ml-2 text-base font-semibold text-primary">{formattedNewPrice} đ</span>
+                    {/* <span className="text-xs text-gray-500 line-through">{formattedOldPrice} đ</span> */}
+                    <span className="text-base font-semibold text-primary">{formattedNewPrice} đ</span>
                 </div>
                 <div className="flex space-x-2 mt-2">
                     <Link to={`/product/${id}`}

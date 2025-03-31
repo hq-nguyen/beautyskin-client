@@ -113,10 +113,6 @@ const Navbar = () => {
             <p>Trắc nghiệm loại da</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
           </NavLink>
-          <NavLink to='/compare' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
-            <p>So sánh</p>
-            <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
-          </NavLink>
         </ul>
         <div className="hidden md:block max-w-xs w-full px-4">
           <form onSubmit={handleSearch} className="relative">
