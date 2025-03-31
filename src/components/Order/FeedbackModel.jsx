@@ -54,6 +54,7 @@ function FeedbackModel({ mode, visible, close, submit }) {
         images 
       });
     }
+    resetForm();
   };
 
   const resetForm = () => {

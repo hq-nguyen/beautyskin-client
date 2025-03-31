@@ -231,6 +231,7 @@ const OrderHistory = () => {
         };
 
         await createFeedback(newData);
+        message.success('Đánh giá sản phẩm thành công');
         fetchOrders();
       } catch (error) {
         console.error(error);
@@ -489,14 +490,14 @@ const OrderHistory = () => {
                           <Link to={`/product/${orderDetail?.product?.id}`}>
                             <h4 className="text-sm hover:text-rose-600 font-medium text-gray-900 truncate">{orderDetail?.product?.name}</h4>
                           </Link>
-                          <p className="text-xs text-gray-500">{orderDetail?.product?.category}</p>
+                          {/* <p className="text-xs text-gray-500">{orderDetail?.product?.category?.name}</p> */}
                           <div className="mt-1 flex items-center justify-between">
                             <p className="text-xs text-gray-600">Số lượng: {orderDetail?.quantity}</p>
                             <p className="font-medium text-xs text-gray-900">{formatCurrency(orderDetail?.price)} x {orderDetail?.quantity}</p>
                           </div>
 
                           {/* Add feedback button for delivered orders */}
-                          {order?.status === "CONFIRM" ? (
+                          {order?.status === "CONFIRMED" ? (
                             orderDetail?.feedback === false ? (
                               <div className="mt-2 flex justify-between">
                                 <div></div>

@@ -12,19 +12,19 @@ const ProductActions = ({ product, navigateToCompare }) => {
     const [notification, setNotification] = useState(null);
     const [isFavoriting, setIsFavoriting] = useState(false);
     const [isInFavorites, setIsInFavorites] = useState(false);
-    
+
     const handleQuantityChange = (e) => {
         const value = parseInt(e.target.value);
-        if (value > 0 && value <= 3) {
+        if (value > 0) { // Now allowing any positive value
             setQuantity(value);
         }
     };
-    
+
     const showNotification = (message, type) => {
         setNotification({ message, type });
-        setTimeout(() => setNotification(null), 1500);
+        setTimeout(() => setNotification(null), 600);
     };
-    
+
     const handleAddFavorites = async () => {
         try {
             setIsFavoriting(true);
@@ -47,7 +47,10 @@ const ProductActions = ({ product, navigateToCompare }) => {
     };
 
     const handleAddToCart = () => {
-        if (quantity > 3) {
+        if (quantity > product.stock) {
+            showNotification(`Chỉ còn ${product.stock} sản phẩm trong kho`, 'error');
+            return;
+        } else if (quantity > 3) {
             showNotification('Sản phẩm chỉ có thể thêm tối đa là 3', 'error');
             return;
         } else if (product) {
@@ -59,7 +62,8 @@ const ProductActions = ({ product, navigateToCompare }) => {
                 image: product.images?.[0]?.url || 'https://via.placeholder.com/80x80',
                 description: product.description,
                 originalPrice: product.price,
-                promo: product.promotions?.[0]?.value || 0
+                promo: product.promotions?.[0]?.value || 0,
+                maxStock: product.stock
             }));
             showNotification('Đã thêm sản phẩm vào giỏ hàng', 'success');
         }
@@ -83,7 +87,6 @@ const ProductActions = ({ product, navigateToCompare }) => {
             showNotification('Đã thêm sản phẩm vào so sánh', 'success');
         }
 
-        // Navigate to compare page
         navigateToCompare();
     };
 
@@ -93,7 +96,7 @@ const ProductActions = ({ product, navigateToCompare }) => {
                 <div className="flex items-center">
                     <label htmlFor="quantity" className="text-gray-700 mr-3">Số lượng:</label>
                     <div className="flex items-center border rounded-md">
-                        <button 
+                        <button
                             onClick={() => quantity > 1 && setQuantity(q => q - 1)}
                             className="px-3 py-2 border-r hover:bg-gray-100"
                         >
@@ -103,13 +106,12 @@ const ProductActions = ({ product, navigateToCompare }) => {
                             type="number"
                             id="quantity"
                             min="1"
-                            max="3"
                             value={quantity}
                             onChange={handleQuantityChange}
                             className="w-12 text-center py-2 border-none focus:outline-none"
                         />
-                        <button 
-                            onClick={() => quantity < 3 && setQuantity(q => q + 1)}
+                        <button
+                            onClick={() => setQuantity(q => q + 1)}
                             className="px-3 py-2 border-l hover:bg-gray-100"
                         >
                             +
@@ -117,14 +119,15 @@ const ProductActions = ({ product, navigateToCompare }) => {
                     </div>
                 </div>
                 <p className="text-sm text-gray-500">
-                    {product.stock} sản phẩm có sẵn
+                    {product.stock > 0 ? `${product.stock} sản phẩm có sẵn` : 'Hết hàng'}
                 </p>
             </div>
 
             <div className="flex flex-wrap gap-3 mt-6">
                 <button
                     onClick={handleAddToCart}
-                    className="w-48 bg-primary text-white py-3 rounded-md hover:opacity-90 transition-all"
+                    className={`w-48 bg-primary text-white py-3 rounded-md transition-all ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
+                        }`}
                     disabled={product.stock <= 0}
                 >
                     Thêm vào giỏ hàng
@@ -148,15 +151,14 @@ const ProductActions = ({ product, navigateToCompare }) => {
                     <MdCompare className="mr-2" size={20} /> So sánh
                 </button>
             </div>
-            
+
             {/* Centered Notification */}
             {notification && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
-                    <div className={`p-4 rounded-md shadow-lg border animate-fade-in ${
-                        notification.type === 'success' 
-                            ? 'bg-green-100 border-green-300 text-green-700' 
+                    <div className={`p-4 rounded-md shadow-lg border animate-fade-in ${notification.type === 'success'
+                            ? 'bg-green-100 border-green-300 text-green-700'
                             : 'bg-red-100 border-red-300 text-red-700'
-                    }`}>
+                        }`}>
                         <p className="font-medium">{notification.message}</p>
                     </div>
                 </div>

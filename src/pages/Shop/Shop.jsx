@@ -411,7 +411,7 @@ const Shop = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
-          <div className="lg:w-1/5 space-y-6 bg-card p-6 rounded-lg h-fit sticky -top-64">
+          <div className="lg:w-1/5 space-y-6 bg-card p-6 rounded-lg h-fit sticky" style={{ top: "-32rem" }}>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">Mua hàng</h2>
               <button

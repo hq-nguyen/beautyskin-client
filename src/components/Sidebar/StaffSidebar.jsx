@@ -5,7 +5,7 @@ import {
   UserOutlined,
   LogoutOutlined
 } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../redux/features/useSlice';
 
@@ -39,9 +39,9 @@ const StaffSidebar = () => {
   
   return (
     <div className="relative h-screen w-64 bg-white shadow-lg flex flex-col">
-      <div className="p-4 flex items-center justify-center mb-5">
+      <Link to={'/'} className="p-4 flex items-center justify-center mb-5">
         <h2 className="m-0 text-gray-800 text-xl font-semibold tracking-wider">BeautySkin</h2>
-      </div>
+      </Link>
       
       <div className="flex-grow overflow-y-auto">
         <Menu

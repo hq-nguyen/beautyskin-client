@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Space, Table, Tag, message, Pagination, Dropdown, Menu, Modal } from 'antd';
 import dayjs from 'dayjs';
-import { FaSearch, FaSpinner } from 'react-icons/fa';
+import { FaEye, FaSearch, FaSpinner } from 'react-icons/fa';
 import { fetchOrders, fetchReportByOrder, updateStatusOrder2, updateStatusPayment } from '../../../apis/order';
 import {
   EditOutlined,
@@ -19,6 +19,8 @@ const ManageOrder = () => {
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
+  const [viewOrderModalVisible, setViewOrderModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const statusTabs = [
     { key: 'all', label: 'Tất cả' },
@@ -266,7 +268,7 @@ const ManageOrder = () => {
 
               <div className="mb-4">
                 <p className="text-gray-600 mb-1">Thông tin khách hàng:</p>
-                <p className="font-medium">{reportData[0].customer?.fullName} ({reportData.customer?.mail})</p>
+                <p className="font-medium">{reportData[0].customer?.fullName} ({reportData[0].customer?.mail})</p>
               </div>
 
               {reportData[0].images && reportData[0].images.length > 0 && (
@@ -362,6 +364,14 @@ const ManageOrder = () => {
     }
   };
 
+  const getPaymentMethodLabel = (method) => {
+    switch (method) {
+      case 'COD': return 'Thanh toán khi nhận hàng';
+      case 'ONLINE': return 'Thanh toán trực tuyến';
+      default: return method;
+    }
+  };
+
   const formatCurrency = (amount) => {
     return `${amount.toLocaleString()} đ`;
   };
@@ -389,6 +399,16 @@ const ManageOrder = () => {
     }
   };
 
+  const handleViewOrder = (orderId) => {
+      const order = orders.find(order => order.id === orderId);
+      if (order) {
+        setSelectedOrder(order);
+        setViewOrderModalVisible(true);
+      } else {
+        message.error('Không tìm thấy thông tin đơn hàng');
+      }
+    };
+
   // Generate dropdown menu for status update
   const statusMenu = (record) => (
     <Menu
@@ -409,12 +429,53 @@ const ManageOrder = () => {
       width: 70,
     },
     {
+      title: 'Mã đơn',
+      dataIndex: 'id',
+      key: 'id',
+      render: (id) => (
+        <button onClick={() => handleViewOrder(id)} className="text-blue-600 font-semibold cursor-pointer hover:underline">
+          #{id}
+        </button>
+      ),
+    },
+    {
       title: 'Ngày đặt',
       dataIndex: 'orderDate',
       key: 'orderDate',
       sorter: (a, b) => dayjs(a.orderDate).valueOf() - dayjs(b.orderDate).valueOf(),
       sortDirections: ['descend', 'ascend'],
       render: (date) => dayjs(date).format('DD/MM/YYYY HH:mm'),
+    },
+    {
+      title: 'Khách hàng',
+      dataIndex: 'user',
+      key: 'user',
+      render: (user) => (
+        <div>
+          {user ? (
+            <div className="text-sm">{user.fullName}</div>
+          ) : (
+            <div className="text-sm">Không xác đinh</div>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Sản phẩm',
+      key: 'products',
+      width: 300,
+      render: (_, record) => (
+        <div>
+          {record.orderDetails.map((detail, index) => {
+            const truncatedName = detail.product.name.split(" ").slice(0, 8).join(" ");
+            return (
+              <div key={detail.id} className={index > 0 ? "mt-1" : ""}>
+                {truncatedName}...   x  {detail.quantity}
+              </div>
+            );
+          })}
+        </div>
+      ),
     },
     {
       title: 'Tổng tiền',
@@ -425,7 +486,21 @@ const ManageOrder = () => {
       render: (total) => formatCurrency(total),
     },
     {
-      title: 'Trạng thái thanh toán',
+      title: 'Phương thức TT',
+      dataIndex: 'transactions',
+      key: 'transactions',
+      render: (transactions) => (
+        <div>
+          {transactions && transactions.length > 0 ? (
+            <div className="text-sm">{transactions[0].enums}</div>
+          ) : (
+            <div className="text-sm">-</div>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Thanh toán',
       dataIndex: 'paymentStatus',
       key: 'paymentStatus',
       render: (paymentStatus) => (
@@ -435,7 +510,7 @@ const ManageOrder = () => {
       )
     },
     {
-      title: 'Trạng thái đơn hàng',
+      title: 'Trạng thái',
       dataIndex: 'orderStatus',
       key: 'orderStatus',
       render: (orderStatus) => (
@@ -464,6 +539,12 @@ const ManageOrder = () => {
               Cập nhật <DownOutlined />
             </Button>
           </Dropdown> */}
+          <Button
+            size="small"
+            icon={<FaEye />}
+            onClick={() => handleViewOrder(record.id)}
+          >
+          </Button>
           {record.orderStatus === 'REFUND_REQ' && (
             <Button
               type="primary"
@@ -474,16 +555,21 @@ const ManageOrder = () => {
               Xem chi tiết
             </Button>
           )}
-          <Button
+          {/* <Button
             icon={<DeleteOutlined />}
             type="text"
             danger
             onClick={() => handleDelete(record.id)}
-          />
+          /> */}
         </Space>
       ),
     },
   ];
+
+  const handleCloseViewOrderModal = () => {
+    setViewOrderModalVisible(false);
+    setSelectedOrder(null);
+  };
 
   return (
     <div className="w-full mt-6 p-4">
@@ -562,6 +648,164 @@ const ManageOrder = () => {
           )}
         </div>
       )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* Order View Modal */}
+      <Modal
+        open={viewOrderModalVisible}
+        onCancel={handleCloseViewOrderModal}
+        footer={null}
+        width={700}
+        bodyStyle={{ padding: '0px' }}
+        centered
+      >
+        {selectedOrder && (
+          <div className="bg-white rounded-lg overflow-hidden">
+            {/* Header */}
+            <div className="p-4 flex justify-between items-center">
+              <h2 className="text-xl font-bold">Chi tiết đơn hàng #{selectedOrder.id}</h2>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              {/* Order Information */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3 border-b pb-2">Thông tin đơn hàng</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Ngày đặt hàng:</p>
+                    <p className="font-medium">{dayjs(selectedOrder.orderDate).format('DD/MM/YYYY HH:mm')}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Trạng thái đơn hàng:</p>
+                    <Tag color={getStatusColor(selectedOrder.orderStatus)}>
+                      {getOrderStatusLabel(selectedOrder.orderStatus)}
+                    </Tag>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Phương thức thanh toán:</p>
+                    <p className="font-medium">
+                      {selectedOrder.transactions && selectedOrder.transactions.length > 0
+                        ? getPaymentMethodLabel(selectedOrder.transactions[0].enums)
+                        : 'Không có thông tin'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Trạng thái thanh toán:</p>
+                    <Tag color={getPaymentStatusColor(selectedOrder.paymentStatus)}>
+                      {getPaymentStatusLabel(selectedOrder.paymentStatus)}
+                    </Tag>
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Information */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3 border-b pb-2">Thông tin khách hàng</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Tên khách hàng:</p>
+                    <p className="font-medium">{selectedOrder.user?.fullName || 'Không xác định'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Email:</p>
+                    <p className="font-medium">{selectedOrder.user?.mail || 'Không có thông tin'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Số điện thoại:</p>
+                    <p className="font-medium">{selectedOrder.user?.phone || 'Không có thông tin'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Tên đăng nhập:</p>
+                    <p className="font-medium">{selectedOrder.user?.username || 'Không có thông tin'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Product Details */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3 border-b pb-2">Chi tiết sản phẩm</h3>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="py-2 px-3 text-left border">Sản phẩm</th>
+                      <th className="py-2 px-3 text-center border">Số lượng</th>
+                      <th className="py-2 px-3 text-right border">Đơn giá</th>
+                      <th className="py-2 px-3 text-right border">Thành tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedOrder.orderDetails.map((detail, index) => (
+                      <tr key={detail.orderDetailId || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="py-2 px-3 border">
+                          <div className="flex items-center">
+                            {detail.product.images && detail.product.images.length > 0 && (
+                              <img
+                                src={detail.product.images[0].url}
+                                alt={detail.product.name}
+                                className="w-12 h-12 object-cover mr-2 rounded"
+                              />
+                            )}
+                            <div>
+                              <p className="font-medium">{detail.product.name}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-2 px-3 text-center border">{detail.quantity}</td>
+                        <td className="py-2 px-3 text-right border">{formatCurrency(detail.unitPrice)}</td>
+                        <td className="py-2 px-3 text-right border">{formatCurrency(detail.totalPrice)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-gray-100">
+                      <td colSpan="3" className="py-2 px-3 text-right border font-semibold">Tổng cộng:</td>
+                      <td className="py-2 px-3 text-right border font-bold">{formatCurrency(selectedOrder.totalPrice)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              {/* Payment Information */}
+              {selectedOrder.transactions && selectedOrder.transactions.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3 border-b pb-2">Thông tin thanh toán</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Mã giao dịch:</p>
+                      <p className="font-medium">#{selectedOrder.transactions[0].id}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Số tiền:</p>
+                      <p className="font-medium">{formatCurrency(selectedOrder.transactions[0].amount)}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Footer */}
+              <div className="flex justify-end pt-4 border-t">
+                <Button type="primary" onClick={handleCloseViewOrderModal}>
+                  Đóng
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
