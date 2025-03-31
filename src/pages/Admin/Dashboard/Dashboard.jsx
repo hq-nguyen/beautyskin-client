@@ -3,6 +3,7 @@ import { BarChart, LineChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { Wallet, Users, Package, ShoppingCart, TrendingUp } from 'lucide-react';
 import { getDashboardSummary, getRevenueByMonth } from '../../../apis/dashboard';
 import { formatCurrency } from '../../../utils/format';
+import YearlyRevenueChart from './YearlyRevenueChart'; 
 
 const DashboardMain = () => {
   const [summary, setSummary] = useState(null);
@@ -173,7 +174,7 @@ const DashboardMain = () => {
           
           {/* Top Products */}
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Top 5 sản phẩm bán chạy trong tháng</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Top 5 sản phẩm bán chạy trong tháng {new Date().getMonth() + 1}</h2>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={productChartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -206,7 +207,7 @@ const DashboardMain = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Top Products Table */}
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Chi tiết sản phẩm bán chạy</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Chi tiết sản phẩm bán chạy trong tháng {new Date().getMonth() + 1}</h2>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -246,7 +247,7 @@ const DashboardMain = () => {
           
           {/* Top Customers Table */}
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Top khách hàng</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Top khách hàng trong tháng {new Date().getMonth() + 1}</h2>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -285,64 +286,8 @@ const DashboardMain = () => {
           </div>
         </div>
         
-        {/* Revenue by Month Table */}
-        <div className="bg-white p-6 rounded-xl shadow-md mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Chi tiết doanh thu theo tháng</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">Tháng</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Năm</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doanh thu</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">% Tăng trưởng</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {monthlyRevenue.sort((a, b) => {
-                  if (a.year !== b.year) return b.year - a.year;
-                  return b.month - a.month;
-                }).map((item, index, array) => {
-                  const prevMonth = index < array.length - 1 ? array[index + 1].totalRevenue : null;
-                  const growthRate = calculateGrowthRate(item.totalRevenue, prevMonth);
-                  
-                  return (
-                    <tr key={`${item.month}-${item.year}`} className="hover:bg-gray-50 transition-colors duration-150">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">Tháng {item.month}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{item.year}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{formatCurrency(item.totalRevenue)}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {growthRate !== null ? (
-                          <div className="flex items-center">
-                            {parseFloat(growthRate) > 0 ? (
-                              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                            ) : parseFloat(growthRate) < 0 ? (
-                              <TrendingUp className="h-4 w-4 text-red-500 mr-1 transform rotate-180" />
-                            ) : null}
-                            <span className={`text-sm font-medium ${
-                              parseFloat(growthRate) > 0 ? 'text-green-500' : 
-                              parseFloat(growthRate) < 0 ? 'text-red-500' : 'text-gray-500'
-                            }`}>
-                              {parseFloat(growthRate) > 0 ? '+' : ''}{growthRate}%
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="text-sm text-gray-500">-</div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <YearlyRevenueChart />
+
       </div>
     </div>
   );
