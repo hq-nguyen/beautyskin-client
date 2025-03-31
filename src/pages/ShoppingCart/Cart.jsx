@@ -14,6 +14,7 @@ const ShoppingCart = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isCheckoutModalVisible, setIsCheckoutModalVisible] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState(null);
   const navigate = useNavigate();
 
   const cart = useSelector((state) => state.cart?.listItem || []);
@@ -21,14 +22,23 @@ const ShoppingCart = () => {
   const originalTotalPrice = useSelector((state) => state.cart?.originalTotalPrice || 0);
   const dispatch = useDispatch();
 
-  // Check if any product has quantity less than 3
-  const hasInvalidQuantityProducts = cart.some(product => (product.quantity || 1) > 3);
+  // Check if any product has quantity greater than 3 or exceeds stock
+  const invalidProducts = cart.filter(product => {
+    return (product.quantity > 3) || (product.quantity > product.maxStock);
+  });
+  
+  const hasInvalidProducts = invalidProducts.length > 0;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsLoggedIn(!!token);
     setLoading(false);
   }, []);
+
+  const showNotification = (message) => {
+    setNotificationMessage(message);
+    setTimeout(() => setNotificationMessage(null), 3000);
+  };
 
   const showDeleteConfirm = (id) => {
     setItemToDelete(id);
@@ -48,8 +58,24 @@ const ShoppingCart = () => {
     setItemToDelete(null);
   };
 
+  const handleIncrementQuantity = (product) => {
+    // Check if adding one more would exceed stock
+    if (product.quantity >= product.maxStock) {
+      showNotification(`Chỉ còn ${product.maxStock} sản phẩm trong kho`);
+      return;
+    }
+    
+    // Check if adding one more would exceed the limit of 3
+    if (product.quantity >= 3) {
+      showNotification('Sản phẩm chỉ có thể thêm tối đa là 3');
+      return;
+    }
+    
+    dispatch(addToCart(product));
+  };
+
   const handleCheckout = () => {
-    if (hasInvalidQuantityProducts) {
+    if (hasInvalidProducts) {
       setIsCheckoutModalVisible(true);
     } else {
       navigate('/checkout');
@@ -107,10 +133,10 @@ const ShoppingCart = () => {
       ) : (
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="w-full lg:w-2/3">
-            {hasInvalidQuantityProducts && (
+            {hasInvalidProducts && (
               <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-4 flex items-center">
                 <MdWarning className="h-5 w-5 mr-2 text-yellow-600" />
-                <span>Một số sản phẩm trong giỏ hàng của bạn có số lượng lớn hơn 3. Vui lòng điều chỉnh số lượng để tiếp tục đặt hàng.</span>
+                <span>Một số sản phẩm trong giỏ hàng của bạn có số lượng không hợp lệ. Vui lòng điều chỉnh số lượng để tiếp tục đặt hàng.</span>
               </div>
             )}
             <table className="w-full">
@@ -124,18 +150,27 @@ const ShoppingCart = () => {
               </thead>
               <tbody>
                 {cart.map((product) => {
-                  const isInvalidQuantity = (product.quantity || 1) > 3;
+                  const isOverLimit = product.quantity > 3;
+                  const isOverStock = product.quantity > product.maxStock;
+                  const isInvalid = isOverLimit || isOverStock;
+                  
                   return (
-                    <tr key={product.id} className={`border-b border-gray-200 ${isInvalidQuantity ? 'bg-yellow-50' : ''}`}>
+                    <tr key={product.id} className={`border-b border-gray-200 ${isInvalid ? 'bg-yellow-50' : ''}`}>
                       <td className="py-4 pl-2">
                         <div className="flex">
                           <img src={product.image} alt={product.name} className="w-24 h-20 object-contain mr-2" />
                           <div>
                             <div className="font-medium text-sm w-80">{product.name}</div>
-                            {isInvalidQuantity && (
+                            {isOverLimit && (
                               <div className="text-yellow-600 text-xs flex items-center mt-1">
                                 <MdWarning className="h-4 w-4 mr-1" />
                                 Sản phẩm chỉ được mua tối đa là 3
+                              </div>
+                            )}
+                            {isOverStock && (
+                              <div className="text-yellow-600 text-xs flex items-center mt-1">
+                                <MdWarning className="h-4 w-4 mr-1" />
+                                Chỉ còn {product.maxStock} sản phẩm trong kho
                               </div>
                             )}
                             <div className="flex space-x-2 text-sm mb-2 mt-1">
@@ -169,7 +204,7 @@ const ShoppingCart = () => {
                           <span className="px-2">{product.quantity || 1}</span>
                           <button
                             className="px-2 py-1 text-gray-500 hover:text-gray-700"
-                            onClick={() => dispatch(addToCart(product))}
+                            onClick={() => handleIncrementQuantity(product)}
                           >
                             +
                           </button>
@@ -284,6 +319,15 @@ const ShoppingCart = () => {
                 Đã hiểu
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification Message */}
+      {notificationMessage && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-red-100 border border-red-300 text-red-700 p-4 rounded-md shadow-lg">
+            <p className="font-medium">{notificationMessage}</p>
           </div>
         </div>
       )}

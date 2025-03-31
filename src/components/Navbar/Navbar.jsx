@@ -20,7 +20,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const totalQuantity = useSelector((state) => state.cart?.totalQuantity || 0);
-  
+
 
   const handleLogout = () => {
     dispatch(logout());
@@ -40,7 +40,7 @@ const Navbar = () => {
         const response = await api.get(`/product/getByName?name=${query}`)
 
         const validResults = response.data.filter(product => product.id && !isNaN(product.id)).slice(0, 6);
-                         
+
         setSearchResult(validResults)
       } catch (error) {
         console.error("Error fetching search results:", error)
@@ -93,7 +93,7 @@ const Navbar = () => {
           <img src={assets.logo} className='w-36' alt="" />
         </Link>
         <ul className="hidden sm:flex gap-5 text-sm text-gray-700">
-        <NavLink to='/' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
+          <NavLink to='/' className='hover:text-rose-600 duration-150 flex flex-col items-center gap-1'>
             <p>Trang chủ</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
           </NavLink>
@@ -200,7 +200,24 @@ const Navbar = () => {
                       </div>
                     </>
                   </div>
-
+                ) : user.roleEnum === "STAFF" ? (
+                  <div className='dropdown-menu-box flex flex-col gap-1 w-36 py-2 px-2 bg-white text-gray-500 rounded shadow-lg'>
+                    <>
+                      <div>
+                        <Link to='/staff' className='block cursor-pointer hover:text-white py-1 px-2 hover:bg-rose-600 rounded-sm duration-300'>
+                          Dashboard
+                        </Link>
+                      </div>
+                      <div>
+                        <button
+                          onClick={handleLogout}
+                          className='w-full text-left cursor-pointer hover:text-white py-1 px-2 hover:bg-rose-600 rounded-sm duration-300'
+                        >
+                          Đăng xuất
+                        </button>
+                      </div>
+                    </>
+                  </div>
                 ) : (
                   <div className='dropdown-menu-box flex flex-col gap-1 w-48 py-2 px-2 bg-white text-gray-500 rounded shadow-lg'>
                     <>
