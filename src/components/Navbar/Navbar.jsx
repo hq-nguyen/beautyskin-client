@@ -25,8 +25,7 @@ const Navbar = () => {
   const handleLogout = () => {
     dispatch(logout());
     dispatch(clearCart());
-    localStorage.removeItem('token');
-    localStorage.removeItem('id');
+    localStorage.clear();
     message.success("Đã đăng xuất");
     navigate('/');
   };

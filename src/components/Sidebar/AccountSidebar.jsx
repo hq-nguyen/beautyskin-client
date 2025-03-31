@@ -49,8 +49,7 @@ function AccountSidebar() {
 
     const handleLogout = () => {
         dispatch(logout());
-        localStorage.removeItem('id');
-        localStorage.removeItem('token');
+        localStorage.clear();
         toast.success('Đăng xuất thành công');
         navigate('/');
     };
