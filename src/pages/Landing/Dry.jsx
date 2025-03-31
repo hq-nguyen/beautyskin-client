@@ -1,27 +1,25 @@
-import { useState, useEffect } from 'react';
-import { Card, Steps, Collapse, List, Tag, Alert, Typography, Divider } from 'antd';
-import { SkinOutlined, ExperimentOutlined, BulbOutlined } from '@ant-design/icons';
+import { Card, Steps, Collapse, List, Tag, Alert, Typography, Divider, Badge, Space } from 'antd';
+import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph, Text } = Typography;
 const { Panel } = Collapse;
 
 const Dry = () => {
-  const [recommendedProducts, setRecommendedProducts] = useState([]);
-
-  // You can fetch recommended products from your API here
-  useEffect(() => {
-    // Fetch products specifically for dry skin
-    // const fetchProducts = async () => {
-    //   const products = await fetchProductsBySkinType('dry');
-    //   setRecommendedProducts(products);
-    // };
-    // fetchProducts();
-  }, []);
-
   const skincareMorningSteps = [
     {
       title: 'Sữa rửa mặt',
       description: 'Rửa mặt với sữa rửa mặt dạng kem để giữ ẩm cho da.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/16"><Tag color="green">Sữa Rửa Mặt Trà Xanh Ngừa Mụn</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Toner',
@@ -30,14 +28,47 @@ const Dry = () => {
     {
       title: 'Serum',
       description: 'Thoa serum chứa Hyaluronic Acid để cấp ẩm sâu.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/20"><Tag color="green">Serum Trị Mụn Tea Tree Oil</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Kem dưỡng ẩm',
       description: 'Dùng kem dưỡng ẩm đậm đặc để khóa ẩm.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/15"><Tag color="green">Kem Chống Nắng Kiềm Dầu SPF50</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Kem chống nắng',
       description: 'Thoa kem chống nắng dưỡng ẩm với SPF tối thiểu 30.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/10"><Tag color="green">Kem Chống Nắng Dưỡng Trắng Bảo Vệ Chống Ánh Sáng Xanh Ceuticoz Uvicoz Lotion SPF50+ PA++++</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
   ];
 
@@ -45,10 +76,32 @@ const Dry = () => {
     {
       title: 'Tẩy trang',
       description: 'Sử dụng dầu tẩy trang để loại bỏ lớp trang điểm và bụi bẩn.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/33"><Tag color="green">Dầu tẩy trang DHC Deep Cleansing Oil</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Sữa rửa mặt',
       description: 'Rửa mặt với sữa rửa mặt dịu nhẹ.',
+      subTitle: (
+        <>
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <Text strong>Sản phẩm gợi ý:</Text>
+          <div className="ml-4 mt-2">
+            <Space>
+              <a href="/product/34"><Tag color="green">Sữa rửa Mặt La Roche-Posay Cho Da Khô Nhạy Cảm 200ml</Tag></a>
+            </Space>
+          </div>
+        </>
+      )
     },
     {
       title: 'Toner',
@@ -61,6 +114,10 @@ const Dry = () => {
     {
       title: 'Kem dưỡng ẩm',
       description: 'Thoa kem dưỡng ẩm đậm đặc để phục hồi độ ẩm qua đêm.',
+    },
+    {
+      title: 'Dầu dưỡng',
+      description: 'Sử dụng dầu dưỡng để tăng cường khả năng giữ ẩm cho da.',
     },
   ];
 
@@ -131,6 +188,13 @@ const Dry = () => {
           current={-1}
           items={skincareMorningSteps}
         />
+        <Divider />
+        <Alert
+          message="Lưu ý"
+          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+          type="info"
+          showIcon
+        />
       </Card>
 
       {/* Evening Routine */}
@@ -143,6 +207,13 @@ const Dry = () => {
           direction="vertical"
           current={-1}
           items={skincareEveningSteps}
+        />
+        <Divider />
+        <Alert
+          message="Lưu ý"
+          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+          type="info"
+          showIcon
         />
       </Card>
 

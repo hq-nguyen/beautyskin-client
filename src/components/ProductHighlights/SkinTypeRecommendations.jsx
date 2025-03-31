@@ -43,7 +43,7 @@ const SkinTypeRecommendations = () => {
                     const skinTypeId = skinProfile.skinType.id;
                     const productData = await getProductBySkinType(skinTypeId);
                     setProducts(Array.isArray(productData) ? productData : []);
-                    
+
                 } catch (error) {
                     console.error("Error fetching skin type products:", error);
                 } finally {
@@ -99,6 +99,18 @@ const SkinTypeRecommendations = () => {
         ],
     };
 
+    const getSkinTypeRoute = (skinTypeId) => {
+        const skinTypeRoutes = {
+          2: 'normal',
+          3: 'oily',
+          4: 'dry',
+          5: 'sensitive',
+          6: 'combination'
+        };
+        
+        return skinTypeRoutes[skinTypeId] || 'normal'; 
+      };
+
     return (
         <div className="max-w-7xl mx-auto px-6 py-8 bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg shadow-md mt-12 mb-12 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-pink-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
@@ -118,18 +130,21 @@ const SkinTypeRecommendations = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                <Link to='/test-skin/dry' className="hidden lg:block group">
-                    <button className="text-sm px-5 py-2.5 bg-rose-600 rounded-full border border-rose-400 text-white hover:bg-rose-600 hover:text-white transition-colors duration-300 shadow-sm flex items-center gap-1 group-hover:gap-2">
-                        Khám phá lộ trình chăm sóc da 
-                    </button>
-                </Link>
+                    <Link
+                        to={skinProfile?.skinType ? `/test-skin/${getSkinTypeRoute(skinProfile.skinType.id)}` : '/test-skin'}
+                        className="hidden lg:block group"
+                    >
+                        <button className="text-sm px-5 py-2.5 bg-rose-600 rounded-full border border-rose-400 text-white hover:bg-rose-600 hover:text-white transition-colors duration-300 shadow-sm flex items-center gap-1 group-hover:gap-2">
+                            Khám phá lộ trình chăm sóc da
+                        </button>
+                    </Link>
 
-                <Link to="/shop" className="hidden lg:block group">
-                    <button className="text-sm px-5 py-2.5 bg-white rounded-full border border-rose-400 text-rose-600 hover:bg-rose-600 hover:text-white transition-colors duration-300 shadow-sm flex items-center gap-1 group-hover:gap-2">
-                        Xem tất cả
-                        <ChevronRight size={16} className="transition-transform duration-300" />
-                    </button>
-                </Link>
+                    <Link to="/shop" className="hidden lg:block group">
+                        <button className="text-sm px-5 py-2.5 bg-white rounded-full border border-rose-400 text-rose-600 hover:bg-rose-600 hover:text-white transition-colors duration-300 shadow-sm flex items-center gap-1 group-hover:gap-2">
+                            Xem tất cả
+                            <ChevronRight size={16} className="transition-transform duration-300" />
+                        </button>
+                    </Link>
                 </div>
             </div>
 
