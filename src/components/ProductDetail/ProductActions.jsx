@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { AiOutlineHeart } from 'react-icons/ai';
 import { MdCompare } from 'react-icons/md';
 import api from '../../apis/product';
-import { addToCartWithQuantity } from '../../redux/features/cartSlice';
+import { addToCartWithQuantity, clearCart } from '../../redux/features/cartSlice';
 import { addToCompare } from '../../redux/features/compareSlice';
 
 const ProductActions = ({ product, navigateToCompare }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [quantity, setQuantity] = useState(1);
     const [notification, setNotification] = useState(null);
     const [isFavoriting, setIsFavoriting] = useState(false);
@@ -69,6 +71,35 @@ const ProductActions = ({ product, navigateToCompare }) => {
         }
     };
 
+    const handleBuyNow = () => {
+        if (quantity > product.stock) {
+            showNotification(`Chỉ còn ${product.stock} sản phẩm trong kho`, 'error');
+            return;
+        } else if (quantity > 3) {
+            showNotification('Sản phẩm chỉ có thể thêm tối đa là 3', 'error');
+            return;
+        } else if (product) {
+            // Clear the current cart first
+            dispatch(clearCart());
+            
+            // Add this product to cart
+            dispatch(addToCartWithQuantity({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: quantity,
+                image: product.images?.[0]?.url || 'https://via.placeholder.com/80x80',
+                description: product.description,
+                originalPrice: product.price,
+                promo: product.promotions?.[0]?.value || 0,
+                maxStock: product.stock
+            }));
+            
+            // Navigate to checkout page
+            navigate('/checkout');
+        }
+    };
+
     const handleAddToCompare = () => {
         if (product) {
             dispatch(addToCompare({
@@ -126,11 +157,19 @@ const ProductActions = ({ product, navigateToCompare }) => {
             <div className="flex flex-wrap gap-3 mt-6">
                 <button
                     onClick={handleAddToCart}
-                    className={`w-48 bg-primary text-white py-3 rounded-md transition-all ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
+                    className={`w-36 md:w-40 bg-primary text-white py-3 rounded-md transition-all ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
                         }`}
                     disabled={product.stock <= 0}
                 >
                     Thêm vào giỏ hàng
+                </button>
+                <button
+                    onClick={handleBuyNow}
+                    className={`w-36 md:w-40 bg-rose-600 text-white py-3 rounded-md transition-all ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
+                        }`}
+                    disabled={product.stock <= 0}
+                >
+                    Mua ngay
                 </button>
                 <button
                     onClick={handleAddFavorites}
