@@ -65,6 +65,7 @@ import support_icon from './support-icon.png'
 import skintest_banner from './SkinType.jpg'
 import empty_cart from './empty-cart.png'
 import skin_test from './test-skin-type.jpg'
+import promotion from './promotion.jpg'
 
 
 export const assets = {
@@ -134,5 +135,6 @@ export const assets = {
     thumbnail,
     skintest_banner,
     empty_cart,
-    skin_test
+    skin_test,
+    promotion,
 }

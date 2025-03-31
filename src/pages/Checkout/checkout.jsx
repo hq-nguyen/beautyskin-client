@@ -177,9 +177,9 @@ const CheckoutPage = () => {
   return (
     <div className="max-w-6xl mx-auto p-4 font-sans">
       <div className="flex items-center text-gray-600 mb-6">
-        <a href="/" className="hover:opacity-80 hover:text-[#d90429]">Trang chủ</a>
+        <Link to="/" className="hover:opacity-80 hover:text-[#d90429]">Trang chủ</Link>
         <span className="mx-2">›</span>
-        <a href="/checkout/cart" className="hover:opacity-80 hover:text-[#d90429]">Giỏ hàng</a>
+        <Link to="/checkout/cart" className="hover:opacity-80 hover:text-[#d90429]">Giỏ hàng</Link>
         <span className="mx-2">›</span>
         <span className="text-gray-700">Thanh toán</span>
       </div>
@@ -198,6 +198,8 @@ const CheckoutPage = () => {
             appliedPromotion={appliedPromotion}
             applyCoupon={applyCoupon}
             removeAppliedPromotion={removeAppliedPromotion}
+            setAppliedPromotion={setAppliedPromotion}
+            originalTotalPrice={originalTotalPrice} 
           />
 
           <OrderSummary
