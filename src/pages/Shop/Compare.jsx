@@ -77,8 +77,23 @@ const ComparePage = () => {
     if (compareItems.length === 1) {
         return (
             <div className="container mx-auto px-4 py-8">
+                <div className="mb-8 flex justify-between items-center">
+                    <h1 className="text-2xl font-bold">So sánh sản phẩm</h1>
+                    <Link
+                        to="/shop"
+                        className="inline-block bg-primary text-white px-6 py-3 rounded-md hover:opacity-90 flex items-center"
+                    >
+                        <FiPlus className="mr-2" /> Thêm sản phẩm
+                    </Link>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="border rounded-lg p-4 relative">
+                        <button
+                            onClick={() => handleRemoveFromCompare(compareItems[0].id)}
+                            className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
+                        >
+                            <FiX size={20} />
+                        </button>
                         <Link to={`/product/${compareItems[0].id}`}>
                             <img
                                 src={compareItems[0].image}
@@ -216,7 +231,6 @@ const ComparePage = () => {
                                 ))}
                             </tr>
 
-                            {/* Remaining table rows (Name, Price, Category, etc.) stay the same */}
                             <tr>
                                 <td className="border p-4 font-medium">Tên sản phẩm</td>
                                 {compareItems.map(item => (
@@ -279,27 +293,6 @@ const ComparePage = () => {
                                             ? item.skinConcerns.join(', ')
                                             : 'N/A'
                                         }
-                                    </td>
-                                ))}
-                            </tr>
-
-                            <tr>
-                                <td className="border p-4 font-medium">Đánh giá</td>
-                                {compareItems.map(item => (
-                                    <td key={item.id} className="border p-4 text-center">
-                                        <div className="flex items-center justify-center">
-                                            <FiStar className="text-rose-600 mr-1" />
-                                            <span>{item.averageRating || 0}</span>
-                                        </div>
-                                    </td>
-                                ))}
-                            </tr>
-
-                            <tr>
-                                <td className="border p-4 font-medium">Đã bán</td>
-                                {compareItems.map(item => (
-                                    <td key={item.id} className="border p-4 text-center">
-                                        {item.productSold || 0} sản phẩm
                                     </td>
                                 ))}
                             </tr>
