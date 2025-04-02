@@ -346,55 +346,6 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
             <Row gutter={[16, 0]}>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label="Khuyến mãi"
-                  name="promotion"
-                  tooltip="Giá trị từ 0 đến 1, tương đương 0% đến 100% khuyến mãi"
-                  rules={[
-                    { 
-                      validator: (_, value) => {
-                        if (value >= 0 && value <= 1) {
-                          return Promise.resolve();
-                        }
-                        return Promise.reject(new Error('Giá trị khuyến mãi phải từ 0 đến 1!'));
-                      }
-                    }
-                  ]}
-                >
-                  <div>
-                    <Select
-                      style={{ width: '100%', marginBottom: '8px' }}
-                      value={promotionType}
-                      onChange={(value) => setPromotionType(value)}
-                    >
-                      <Option value="select">Chọn từ giá trị có sẵn</Option>
-                      <Option value="input">Nhập giá trị tùy chỉnh</Option>
-                    </Select>
-                    
-                    {promotionType === 'select' ? (
-                      <Select style={{ width: '100%' }}>
-                        <Option value={0}>0% (Không khuyến mãi)</Option>
-                        <Option value={0.1}>10%</Option>
-                        <Option value={0.2}>20%</Option>
-                        <Option value={0.3}>30%</Option>
-                        <Option value={0.4}>40%</Option>
-                        <Option value={0.5}>50%</Option>
-                      </Select>
-                    ) : (
-                      <InputNumber
-                        style={{ width: '100%' }}
-                        min={0}
-                        max={1}
-                        step={0.05}
-                        formatter={value => `${(value * 100).toFixed(0)}%`}
-                        parser={value => value.replace('%', '') / 100}
-                      />
-                    )}
-                  </div>
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={12}>
-                <Form.Item
                   label="Số lượng sản phẩm"
                   name="stock"
                   rules={[{ required: true, message: 'Vui lòng nhập tồn kho!' }]}

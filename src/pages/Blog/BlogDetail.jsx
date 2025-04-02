@@ -53,7 +53,7 @@ const BlogDetail = () => {
         const url = window.location.href;
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
     };
-    
+
     const handleInstagramShare = () => {
         // Mở ứng dụng Instagram trên thiết bị di động hoặc trang chủ Instagram trên web
         window.open('https://www.instagram.com/', '_blank');
@@ -86,9 +86,11 @@ const BlogDetail = () => {
             <div className="hidden lg:block w-px bg-gray-200 mx-6"></div>
 
             <aside className="lg:w-1/5 sticky top-4 flow-root ">
-                <h2 className="text-xl font-semibold mb-4">Bài viết mới nhất</h2>
-                <hr className='bg-black w-[20%] h-[3px] mb-4' />
-                <LatestPostsSidebar />
+                <div className='sticky top-32'>
+                    <h2 className="text-xl font-semibold mb-4">Bài viết mới nhất</h2>
+                    <hr className='bg-black w-[20%] h-[3px] mb-4' />
+                    <LatestPostsSidebar />
+                </div>
             </aside>
         </div>
     );

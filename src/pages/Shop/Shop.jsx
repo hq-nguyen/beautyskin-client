@@ -16,7 +16,7 @@ const Shop = () => {
 
   const [filters, setFilters] = useState({
     category: [],
-    priceRange: [0, 10000000],
+    priceRange: [0, 1500000],
     skinType: [],
     skinConcern: [],
     texture: []
@@ -55,6 +55,7 @@ const Shop = () => {
     const getProducts = async () => {
       try {
         const data = await fetchProducts();
+        console.log("Fetched Products:", data);
         const availableProducts = data.filter(
           product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
         );
@@ -191,12 +192,12 @@ const Shop = () => {
   const currentProducts = filteredAndSortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredAndSortedProducts.length / productsPerPage);
 
-  // Change page
+
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleSort = (sortType) => {
     setSortBy(sortType);
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -211,15 +212,13 @@ const Shop = () => {
 
       return { ...prev, [filterType]: updatedValues };
     });
-    setCurrentPage(1); // Reset to first page when filter changes
+    setCurrentPage(1);
   };
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when search changes
-    
-    // Remove localStorage operations for search query
+    setCurrentPage(1);
   };
 
   const clearFilters = () => {
@@ -232,26 +231,17 @@ const Shop = () => {
     });
     setSearchQuery("");
     setSortBy("");
-    setCurrentPage(1); // Reset to first page when filters are cleared
-
-    // Remove localStorage operations
+    setCurrentPage(1); 
   };
 
-  // Updated getFilterCounts to only count products that match all other active filters
   const getFilterCounts = (filterType, options) => {
     const counts = {};
-    
+
     options.forEach(option => {
-      // Start with counts at 0
       counts[option.id] = 0;
-      
-      // For each product, check if it would match if we add this filter option
+
       filteredAndSortedProducts.forEach(product => {
-        // Create a temporary filter set that excludes the current filter type
-        const tempFilters = {...filters};
-        
-        // For the current filter type we're calculating counts for, 
-        // we need to exclude it from the filtering
+        const tempFilters = { ...filters };
         if (filterType === 'category') {
           if (product.category && product.category.id === option.id) {
             counts[option.id]++;
@@ -271,7 +261,7 @@ const Shop = () => {
         }
       });
     });
-    
+
     return counts;
   };
 
@@ -301,16 +291,9 @@ const Shop = () => {
     );
   };
 
-  const getPromotionPercentage = (product) => {
-    if (product.promotions && product.promotions.length > 0) {
-      return 20;
-    }
-    return 20;
-  };
-
   const getDiscountedPrice = (product) => {
-    if (product.promotions && product.promotions.length > 0) {
-      return product.price - (product.price * 0.2);
+    if (product.promotion) {
+      return product.price - (product.price * product.promotion);
     }
     return product.price;
   };
@@ -353,8 +336,8 @@ const Shop = () => {
               onClick={() => currentPage > 1 && paginate(currentPage - 1)}
               disabled={currentPage === 1}
               className={`px-3 py-1 rounded-md ${currentPage === 1
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-primary hover:bg-primary hover:text-white border border-primary'
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-primary hover:bg-primary hover:text-white border border-primary'
                 }`}
             >
               &laquo;
@@ -370,8 +353,8 @@ const Shop = () => {
                 <button
                   onClick={() => paginate(page)}
                   className={`px-3 py-1 rounded-md ${currentPage === page
-                      ? 'bg-primary text-white'
-                      : 'text-primary hover:bg-primary border border-primary'
+                    ? 'bg-primary text-white'
+                    : 'text-primary hover:bg-primary border border-primary'
                     }`}
                 >
                   {page}
@@ -386,8 +369,8 @@ const Shop = () => {
               onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
               disabled={currentPage === totalPages}
               className={`px-3 py-1 rounded-md ${currentPage === totalPages
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-primary hover:bg-primary border border-primary'
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-primary hover:bg-primary border border-primary'
                 }`}
             >
               &raquo;
@@ -397,6 +380,7 @@ const Shop = () => {
       </nav>
     );
   };
+  console.log("Filtered and Sorted Products:", currentProducts);
 
   return (
     <div className="min-h-screen bg-background bg-gray-50 my-8">
@@ -447,9 +431,9 @@ const Shop = () => {
               <Slider
                 range
                 min={0}
-                max={10000000}
+                max={1500000}
                 step={100000}
-                defaultValue={[0, 10000000]}
+                defaultValue={[0, 1500000]}
                 value={filters.priceRange}
                 onChange={(value) => handleFilterChange("priceRange", value)}
                 tipFormatter={(value) => `${value.toLocaleString()} đ`}
@@ -534,10 +518,10 @@ const Shop = () => {
                   key={product.id}
                   id={product.id}
                   image={getProductImage(product)}
-                  promotion={getPromotionPercentage(product)}
+                  promotion={product.promotion}
                   name={product.name}
                   oldPrice={product.price}
-                  newPrice={getDiscountedPrice(product)}
+                  newPrice={product.price}
                   stock={product.stock}
                   status={product.status}
                   averageRating={product.averageRating}

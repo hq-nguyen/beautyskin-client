@@ -91,7 +91,7 @@ const AddProductPage = () => {
             status: "AVAILABLE",
             instruction: values.instruction || "",
             categoryId: values.categoryId || [],
-            price: parseFloat(values.price) || 0,
+            price: parseInt(values.price) || 0, // Changed to parseInt to ensure no decimals
             ingredient: values.ingredient || "",
             skinTypeId: values.skinTypeId || [],
             skinConcernId: values.skinConcernId || [],
@@ -210,7 +210,7 @@ const AddProductPage = () => {
         style={{ width: '100%' }}
         initialValues={{
           stock: 0,
-          price: 0
+          price: 1000
         }}
       >
         <Row gutter={[24, 24]}>
@@ -239,20 +239,27 @@ const AddProductPage = () => {
                   </Form.Item>
                 </Col>
 
-                {/* <Col xs={24} md={12}>
-                  <Form.Item label="Loại da" name="skinTypeId">
-                    <Select mode="multiple">
-                      {skinTypes.map((skinType) => (
-                        <Select.Option key={skinType.id} value={skinType.id}>{skinType.name}</Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col> */}
-
                 <Col xs={24} md={8}>
-                  <Form.Item label="Giá tiền" name="price" rules={[{ required: true, message: 'Vui lòng nhập giá tiền!' }]}>
+                  <Form.Item 
+                    label="Giá tiền" 
+                    name="price" 
+                    rules={[
+                      { required: true, message: 'Vui lòng nhập giá tiền!' },
+                      { type: 'number', min: 1000, message: 'Giá tiền phải từ 1000 trở lên!' },
+                      { 
+                        validator: (_, value) => {
+                          if (value && !Number.isInteger(value)) {
+                            return Promise.reject('Giá tiền không được có phần thập phân!');
+                          }
+                          return Promise.resolve();
+                        }
+                      }
+                    ]}
+                  >
                     <InputNumber
                       style={{ width: '100%' }}
+                      precision={0}
+                      min={1000}
                       formatter={(value) => ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                     />

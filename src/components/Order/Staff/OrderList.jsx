@@ -118,7 +118,7 @@ const OrderList = () => {
 
   const handleTabChange = (tabKey) => {
     setActiveTab(tabKey);
-    setCurrentPage(1); 
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page, pageSize) => {
@@ -311,15 +311,15 @@ const OrderList = () => {
       render: (date) => dayjs(date).format('DD/MM/YYYY HH:mm'),
     },
     {
-      title: 'Tên khách hàng',
-      dataIndex: 'user',
-      key: 'user',
-      render: (user) => (
+      title: 'Khách hàng',
+      dataIndex: 'userResponse',
+      key: 'userResponse',
+      render: (userResponse) => (
         <div>
-          {user ? (
-            <div className="text-sm">{user.fullName}</div>
+          {userResponse ? (
+            <div className="text-sm">{userResponse.fullName}</div>
           ) : (
-            <div className="text-sm">Không xác định</div>
+            <div className="text-sm">Không xác đinh</div>
           )}
         </div>
       ),
@@ -331,9 +331,9 @@ const OrderList = () => {
       render: (_, record) => (
         <div>
           {record.orderDetails.map((detail, index) => {
-            const truncatedName = detail.product.name.split(" ").slice(0, 8).join(" ");
+            const truncatedName = detail.orderProductResponse.name.split(" ").slice(0, 8).join(" ");
             return (
-              <div key={detail.id || detail.orderDetailId} className={index > 0 ? "mt-1" : ""}>
+              <div key={detail.id} className={index > 0 ? "mt-1" : ""}>
                 {truncatedName}...   x  {detail.quantity}
               </div>
             );
@@ -351,14 +351,14 @@ const OrderList = () => {
     },
     {
       title: 'Phương thức TT',
-      dataIndex: 'transactions',
-      key: 'transactions',
-      render: (transactions) => (
+      dataIndex: 'paymentMethod',
+      key: 'paymentMethod',
+      render: (paymentMethod) => (
         <div>
-          {transactions && transactions.length > 0 ? (
-            <div className="text-sm">{transactions[0].enums}</div>
+          {paymentMethod && paymentMethod === 'VNPAY' ? (
+            <div className="text-sm">Trực tuyến</div>
           ) : (
-            <div className="text-sm">-</div>
+            <div className="text-sm">Tiền mặt</div>
           )}
         </div>
       ),
@@ -534,9 +534,9 @@ const OrderList = () => {
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Phương thức thanh toán:</p>
                     <p className="font-medium">
-                      {selectedOrder.transactions && selectedOrder.transactions.length > 0
-                        ? getPaymentMethodLabel(selectedOrder.transactions[0].enums)
-                        : 'Không có thông tin'}
+                      {selectedOrder.paymentMethod === "VNPAY"
+                        ? "Trực tuyến"
+                        : 'Tiền mặt'}
                     </p>
                   </div>
                   <div>
@@ -554,19 +554,15 @@ const OrderList = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Tên khách hàng:</p>
-                    <p className="font-medium">{selectedOrder.user?.fullName || 'Không xác định'}</p>
+                    <p className="font-medium">{selectedOrder.userResponse?.fullName || 'Không xác định'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Email:</p>
-                    <p className="font-medium">{selectedOrder.user?.mail || 'Không có thông tin'}</p>
+                    <p className="font-medium">{selectedOrder.userResponse?.mail || 'Không có thông tin'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Số điện thoại:</p>
-                    <p className="font-medium">{selectedOrder.user?.phone || 'Không có thông tin'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Tên đăng nhập:</p>
-                    <p className="font-medium">{selectedOrder.user?.username || 'Không có thông tin'}</p>
+                    <p className="font-medium">{selectedOrder.userResponse?.phone || 'Không có thông tin'}</p>
                   </div>
                 </div>
               </div>
@@ -588,15 +584,15 @@ const OrderList = () => {
                       <tr key={detail.orderDetailId || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="py-2 px-3 border">
                           <div className="flex items-center">
-                            {detail.product.images && detail.product.images.length > 0 && (
+                            {detail.orderProductResponse.image && (
                               <img
-                                src={detail.product.images[0].url}
-                                alt={detail.product.name}
+                                src={detail.orderProductResponse.image.url}
+                                alt={detail.orderProductResponse.name}
                                 className="w-12 h-12 object-cover mr-2 rounded"
                               />
                             )}
                             <div>
-                              <p className="font-medium">{detail.product.name}</p>
+                              <p className="font-medium">{detail.orderProductResponse.name}</p>
                             </div>
                           </div>
                         </td>
@@ -616,17 +612,17 @@ const OrderList = () => {
               </div>
 
               {/* Payment Information */}
-              {selectedOrder.transactions && selectedOrder.transactions.length > 0 && (
+              {selectedOrder.transactions && selectedOrder.orderTransactions.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold mb-3 border-b pb-2">Thông tin thanh toán</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    {/* <div>
                       <p className="text-sm text-gray-600 mb-1">Mã giao dịch:</p>
                       <p className="font-medium">#{selectedOrder.transactions[0].id}</p>
-                    </div>
+                    </div> */}
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Số tiền:</p>
-                      <p className="font-medium">{formatCurrency(selectedOrder.transactions[0].amount)}</p>
+                      <p className="font-medium">{formatCurrency(selectedOrder.orderTransactions[0].transactionAmount)}</p>
                     </div>
                   </div>
                 </div>

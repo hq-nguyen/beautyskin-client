@@ -13,8 +13,6 @@ const SkinTypeRecommendations = () => {
     const [loading, setLoading] = useState(false);
     const user = useSelector((state) => state.user);
     const [userSkinProfile, setUserSkinProfile] = useState(null);
-
-    // Fetch user skin profile if not available in Redux
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
@@ -161,9 +159,9 @@ const SkinTypeRecommendations = () => {
                                 <ProductItem
                                     id={product.id}
                                     image={product?.images[0]?.url || assets.product_new_1}
-                                    promotion={product.discount || 20}
+                                    promotion={product.promotion}
                                     name={product.name}
-                                    oldPrice={product.oldPrice || product.price * 1.2}
+                                    oldPrice={product.price}
                                     newPrice={product.price}
                                     averageRating={product.averageRating}
                                     productSold={product.productSold}
