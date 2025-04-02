@@ -1,12 +1,16 @@
+import { Link } from "react-router-dom";
+
 const ProductList = ({ cart }) => (
     <>
         {cart.map((product) => (
             <div key={product.id} className="flex flex-col md:flex-row border-b border-gray-200 py-4">
                 <div className="flex mb-4 md:mb-0">
-                    <img src={product.image} alt={product.name} className="w-24 h-20 object-cover mr-2" />
-                    <div className="flex-1">
-                        <h3 className="font-medium text-sm w-80">{product.name}</h3>
-                    </div>
+                    <Link to={`/product/${product.id}`}>
+                        <img src={product.image} alt={product.name} className="w-24 h-20 object-cover mr-2" />
+                    </Link>
+                    <Link to={`/product/${product.id}`} className="flex-1">
+                        <h3 className="font-medium text-sm w-80 hover:text-rose-600">{product.name}</h3>
+                    </Link>
                 </div>
                 <div className="md:ml-auto text-right mt-4 md:mt-0">
                     <div className="flex flex-col items-end">

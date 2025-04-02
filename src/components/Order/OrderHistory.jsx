@@ -333,7 +333,6 @@ const OrderHistory = () => {
     );
   };
 
-  // New cancel order function
   const handleCancelOrder = (orderId) => {
     confirm({
       title: 'Hủy đơn hàng',
@@ -346,10 +345,9 @@ const OrderHistory = () => {
           setCancelLoading(true);
           await cancelOrder(orderId);
           message.success('Đơn hàng đã được hủy thành công');
-          fetchOrders(); // Refresh order list
+          fetchOrders(); 
         } catch (error) {
           console.error('Cancel order error:', error);
-          // Error message is already handled in the cancelOrder function
         } finally {
           setCancelLoading(false);
         }

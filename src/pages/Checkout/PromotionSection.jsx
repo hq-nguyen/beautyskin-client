@@ -125,9 +125,6 @@ const PromotionSection = ({
                 </div>
             )}
 
-            <p className="text-gray-600 text-sm mt-2 mb-1">- Sau khi áp dụng, Mã giảm giá có thể không dùng được trong vòng 15 phút.</p>
-            <p className="text-gray-600 text-sm">- Trong quá trình thanh toán, chúng tôi sẽ tạm khóa mã giảm giá của quý khách để đảm bảo phiên giao dịch được ổn định.</p>
-
             {/* Promotion Modal */}
             {showPromotionModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">

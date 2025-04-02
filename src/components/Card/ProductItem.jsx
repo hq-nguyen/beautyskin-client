@@ -18,7 +18,7 @@ const FavoriteMessage = ({ message, type }) => {
     );
 };
 
-const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRating = 0, productSold = 0 }) => {
+const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRating = 0, productSold = 0, stock = 0 }) => {
     const [isFavoriting, setIsFavoriting] = useState(false);
     const [isInFavorites, setIsInFavorites] = useState(false);
     const [error, setError] = useState(null);
@@ -29,6 +29,7 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
     const formattedOldPrice = oldPrice ? oldPrice.toLocaleString() : '0';
     const formattedNewPrice = newPrice ? newPrice.toLocaleString() : '0';
     const displayPromotion = promotion && promotion > 0;
+    const isOutOfStock = stock === 0;
 
     useEffect(() => {
         const checkLoginStatus = () => {
@@ -39,7 +40,6 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
         checkLoginStatus();
     }, []);
 
-    // Check if product is already in favorites
     useEffect(() => {
         if (!isLoggedIn) return;
         const checkFavoriteStatus = async () => {
@@ -65,13 +65,11 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
 
     const handleAddFavorites = async () => {
         if (!isLoggedIn) {
-            // Redirect to login or show login message
             showMessage('Vui lòng đăng nhập để thêm sản phẩm vào yêu thích');
             return;
         }
 
         if (isInFavorites) {
-            // If already in favorites, show a message and do nothing
             showMessage('Sản phẩm đã có trong danh sách yêu thích!');
             return;
         }
@@ -99,20 +97,20 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
     };
 
     return (
-        <div className="relative flex flex-col bg-white p-2 pb-8 hover:border hover:border-rose-500 transition-transform duration-150">
+        <div className={`relative flex flex-col p-2 pb-8 transition-transform duration-150 ${isOutOfStock ? 'bg-gray-200' : 'bg-white'} ${!isOutOfStock ? 'hover:border hover:border-rose-500' : ''}`}>
             <Link
                 className="relative h-60 group block hover:scale-95 transition-transform duration-300"
                 to={`/product/${id}`}
             >
-                {/* {displayPromotion && (
-                    <div className="absolute top-2 left-2 bg-primary font-semibold text-white text-xs px-2 py-1 rounded">
-                        -{promotion}%
+                {isOutOfStock && (
+                    <div className="absolute inset-0 bg-gray-500 bg-opacity-30 flex items-center justify-center z-10">
+                        <span className="bg-red-500 text-white px-3 py-1 rounded-md font-medium">Hết hàng</span>
                     </div>
-                )} */}
+                )}
                 <img
                     src={image}
                     alt={name}
-                    className="w-full h-48 object-contain mt-6"
+                    className={`w-full h-48 object-contain mt-6 ${isOutOfStock ? 'opacity-70' : ''}`}
                     onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = assets.product_new_1;
@@ -121,7 +119,7 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
             </Link>
             <div className="mt-2">
                 <Link to={`/product/${id}`}>
-                    <h3 className="text-sm font-semibold text-gray-600 hover:text-pink-600 line-clamp-2 min-h-[40px]">
+                    <h3 className={`text-sm font-semibold line-clamp-2 min-h-[40px] ${isOutOfStock ? 'text-gray-500' : 'text-gray-600 hover:text-pink-600'}`}>
                         {name}
                     </h3>
                 </Link>
@@ -130,12 +128,18 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
                     <span className="ml-2 text-xs text-gray-500">({productSold})</span>
                 </div>
                 <div className="flex items-center">
-                    {/* <span className="text-xs text-gray-500 line-through">{formattedOldPrice} đ</span> */}
-                    <span className="text-base font-semibold text-primary">{formattedNewPrice} đ</span>
+                    <span className={`text-base font-semibold ${isOutOfStock ? 'text-gray-500' : 'text-primary'}`}>
+                        {formattedNewPrice} đ
+                    </span>
+                    {!isOutOfStock && stock < 5 && (
+                        <span className="ml-2 text-xs text-orange-500">Còn {stock} sản phẩm</span>
+                    )}
                 </div>
                 <div className="flex space-x-2 mt-2">
                     <Link to={`/product/${id}`}
-                        className="flex-1 bg-primary text-white py-2 rounded-md transition-colors duration-300 hover:opacity-80 flex items-center justify-center space-x-1"
+                        className={`flex-1 py-2 rounded-md transition-colors duration-300 flex items-center justify-center space-x-1 ${
+                            isOutOfStock ? 'bg-gray-400 text-white cursor-default' : 'bg-primary text-white hover:opacity-80'
+                        }`}
                     >
                         <FaEye className="w-4 h-4" />
                         <span>Xem nhanh</span>
@@ -143,8 +147,9 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
                     <button
                         onClick={handleAddFavorites}
                         disabled={isFavoriting}
-                        className={`bg-gray-100 p-2 rounded-md transition-colors duration-300 hover:opacity-90 ${isFavoriting ? "opacity-50 cursor-not-allowed" : ""
-                            }`}
+                        className={`bg-gray-100 p-2 rounded-md transition-colors duration-300 ${
+                            isFavoriting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"
+                        }`}
                     >
                         <FaHeart className={`w-4 h-4 ${isInFavorites ? "text-red-500" : "text-gray-500 hover:text-red-500"}`} />
                     </button>

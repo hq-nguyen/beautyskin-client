@@ -85,6 +85,12 @@ const Navbar = () => {
     }
   };
 
+  const handleProductClick = (productId) => {
+    setSearchResult([]);
+    setSearchQuery("");
+    navigate(`/product/${productId}`);
+  };
+
   return (
     <div className='navbar sticky top-0 z-50 bg-white shadow-md'>
       <div className='navbar sticky top-0 flex items-center justify-between py-5 font-medium px-4 lg:px-[9vw]'>
@@ -144,11 +150,10 @@ const Navbar = () => {
           {searchResult.length > 0 && (
             <div className="absolute left-1/2 transform -translate-x-1/2 z-10 bg-white border border-gray-300 rounded-lg mt-2 max-h-108 overflow-y-auto shadow-lg">
               {searchResult.map((product) => (
-                <Link
+                <div
                   key={product.id}
-                  to={`/product/${product.id}`}
-                  className="flex items-center p-3 hover:bg-gray-100"
-                  onClick={() => setSearchResult([])}
+                  className="flex items-center p-3 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleProductClick(product.id)}
                 >
                   <img
                     src={product?.images[0]?.url || assets.da_dau}
@@ -161,7 +166,7 @@ const Navbar = () => {
                       {formatCurrency(product.price)}
                     </p>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}
@@ -273,12 +278,10 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Overlay for small screens */}
       {visible && (
         <div className="overlay" onClick={() => setVisible(false)} />
       )}
 
-      {/* Sidebar menu for small screens */}
       <div className={`sidebar ${visible ? 'visible' : 'hidden'}`}>
         <div className='flex flex-col text-gray-600'>
           <div onClick={() => setVisible(false)} className='flex items-center gap-4 p-3 text-primary cursor-pointer'>

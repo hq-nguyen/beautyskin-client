@@ -14,10 +14,6 @@ const OrderSummary = ({
             <span className="text-[#d90429] font-bold">-{totalDiscount.toLocaleString()} đ</span>
         </div>
         <div className="flex justify-between py-2">
-            <span className="text-gray-700">Sử dụng điểm tích lũy:</span>
-            <span className="font-bold">-0 đ</span>
-        </div>
-        <div className="flex justify-between py-2">
             <span className="text-gray-700">Phí vận chuyển:</span>
             <span className="font-bold">0 đ</span>
         </div>

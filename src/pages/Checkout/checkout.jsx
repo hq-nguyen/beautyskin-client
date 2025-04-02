@@ -231,7 +231,6 @@ const CheckoutPage = () => {
             <button
               className={`bg-[#EE1F5B] text-white py-3 px-6 rounded text-lg font-medium ${!agreeToTerms || !selectedAddressId ? 'opacity-60 cursor-not-allowed' : ''}`}
               onClick={handlePlaceOrder}
-              disabled={!agreeToTerms || !selectedAddressId}
             >
               Đặt hàng
             </button>

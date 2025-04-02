@@ -19,12 +19,8 @@ const ProductHighlights = () => {
         setLoading(true);
         const data = await fetchProducts();
         
-        // Process products data
         if (data && data.length > 0) {
-          // Sort by stock for hot deals (highest stock first)
           const sortedBySold = [...data].sort((a, b) => b.productSold - a.productSold).slice(0, 7);
-          
-          // Sort by date for new products (newest first)
           const sortedByDate = [...data].sort((a, b) => 
             new Date(b.createDateTime) - new Date(a.createDateTime)
           ).slice(0, 7);
@@ -45,7 +41,6 @@ const ProductHighlights = () => {
   }, []);
 
   useEffect(() => {
-    // Update displayed products based on active tab
     setProducts(activeTab === "hotDeals" ? hotDealsProducts : newProducts);
   }, [activeTab, hotDealsProducts, newProducts]);
 
@@ -59,28 +54,28 @@ const ProductHighlights = () => {
     autoplaySpeed: 3000,
     responsive: [
       {
-        breakpoint: 1280, // xl
+        breakpoint: 1280,
         settings: {
           slidesToShow: 4,
           slidesToScroll: 1,
         }
       },
       {
-        breakpoint: 1024, // lg
+        breakpoint: 1024, 
         settings: {
           slidesToShow: 3,
           slidesToScroll: 1,
         }
       },
       {
-        breakpoint: 640, // sm
+        breakpoint: 640,
         settings: {
           slidesToShow: 2,
           slidesToScroll: 1,
         }
       },
       {
-        breakpoint: 480, // xs
+        breakpoint: 480,
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
@@ -89,16 +84,13 @@ const ProductHighlights = () => {
     ]
   };
 
-  // Calculate discount percentage
   const calculateDiscount = (originalPrice, discountPrice) => {
     if (!originalPrice || !discountPrice || originalPrice <= discountPrice) return 20;
     return Math.round(((originalPrice - discountPrice) / originalPrice) * 100);
   };
 
-  // Get current price after applying promotions (if any)
   const getCurrentPrice = (product) => {
     if (product.promotions && product.promotions.length > 0) {
-      // Find the active promotion with the highest discount
       const activePromotion = product.promotions
         .filter(promo => new Date(promo.endDateTime) >= new Date())
         .sort((a, b) => b.discountPercentage - a.discountPercentage)[0];
@@ -163,6 +155,7 @@ const ProductHighlights = () => {
                   newPrice={currentPrice}
                   averageRating={product.averageRating}
                   productSold={product.productSold}
+                  stock={product.stock}
                 />
               </div>
             );
@@ -170,7 +163,6 @@ const ProductHighlights = () => {
         </Slider>
       </div>
 
-      {/* Button for small screens */}
       <div className="lg:hidden flex justify-center mt-8">
         <Link to="/shop">
           <button className="text-sm font-semibold px-4 py-2 bg-gray-600 text-white rounded-full shadow hover:bg-pink-600 transition-colors duration-300">
