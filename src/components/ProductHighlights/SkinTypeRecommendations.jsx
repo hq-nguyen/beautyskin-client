@@ -167,6 +167,7 @@ const SkinTypeRecommendations = () => {
                                     newPrice={product.price}
                                     averageRating={product.averageRating}
                                     productSold={product.productSold}
+                                    stock={product.stock}
                                 />
                             </div>
                         ))}

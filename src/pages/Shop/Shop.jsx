@@ -54,25 +54,11 @@ const Shop = () => {
   useEffect(() => {
     const getProducts = async () => {
       try {
-        const storedQuery = localStorage.getItem('searchQuery');
-        const storedFilteredProducts = localStorage.getItem('filteredProducts');
-
-        if (storedQuery) {
-          setSearchQuery(storedQuery);
-        }
-
-        if (storedFilteredProducts) {
-          const filteredProducts = JSON.parse(storedFilteredProducts).filter(
-            product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK' && product.stock > 0
-          );
-          setProducts(filteredProducts);
-        } else {
-          const data = await fetchProducts();
-          const availableProducts = data.filter(
-            product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK' && product.stock > 0
-          );
-          setProducts(availableProducts);
-        }
+        const data = await fetchProducts();
+        const availableProducts = data.filter(
+          product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
+        );
+        setProducts(availableProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -156,26 +142,7 @@ const Shop = () => {
     fetchAttributes();
   }, [location.search]);
 
-  const getFilterCounts = (filterType, options) => {
-    const counts = {};
-    options.forEach(option => {
-      let count = 0;
-      products.forEach(product => {
-        if (filterType === 'category') {
-          if (product.category && product.category.id === option.id) count++;
-        } else if (filterType === 'skinType') {
-          if (product.skinTypes && product.skinTypes.some(type => type.id === option.id)) count++;
-        } else if (filterType === 'skinConcern') {
-          if (product.skinConcerns && product.skinConcerns.some(concern => concern.id === option.id)) count++;
-        } else if (filterType === 'texture') {
-          if (product.forms && product.forms.some(form => form.id === option.id)) count++;
-        }
-      });
-      counts[option.id] = count;
-    });
-    return counts;
-  };
-
+  // Updated to use filtered products for count calculation
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products.filter(product => {
       const priceInRange = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
@@ -251,13 +218,8 @@ const Shop = () => {
     const query = e.target.value;
     setSearchQuery(query);
     setCurrentPage(1); // Reset to first page when search changes
-
-    if (query.trim()) {
-      localStorage.setItem('searchQuery', query);
-    } else {
-      localStorage.removeItem('searchQuery');
-      localStorage.removeItem('filteredProducts');
-    }
+    
+    // Remove localStorage operations for search query
   };
 
   const clearFilters = () => {
@@ -272,15 +234,45 @@ const Shop = () => {
     setSortBy("");
     setCurrentPage(1); // Reset to first page when filters are cleared
 
-    localStorage.removeItem('searchQuery');
-    localStorage.removeItem('filteredProducts');
+    // Remove localStorage operations
+  };
 
-    fetchProducts().then(data => {
-      const availableProducts = data.filter(
-        product => product.status !== 'OUT_OF_STOCK' && product.status !== 'INSUFFICIENT_STOCK'
-      );
-      setProducts(availableProducts);
+  // Updated getFilterCounts to only count products that match all other active filters
+  const getFilterCounts = (filterType, options) => {
+    const counts = {};
+    
+    options.forEach(option => {
+      // Start with counts at 0
+      counts[option.id] = 0;
+      
+      // For each product, check if it would match if we add this filter option
+      filteredAndSortedProducts.forEach(product => {
+        // Create a temporary filter set that excludes the current filter type
+        const tempFilters = {...filters};
+        
+        // For the current filter type we're calculating counts for, 
+        // we need to exclude it from the filtering
+        if (filterType === 'category') {
+          if (product.category && product.category.id === option.id) {
+            counts[option.id]++;
+          }
+        } else if (filterType === 'skinType') {
+          if (product.skinTypes && product.skinTypes.some(type => type.id === option.id)) {
+            counts[option.id]++;
+          }
+        } else if (filterType === 'skinConcern') {
+          if (product.skinConcerns && product.skinConcerns.some(concern => concern.id === option.id)) {
+            counts[option.id]++;
+          }
+        } else if (filterType === 'texture') {
+          if (product.forms && product.forms.some(form => form.id === option.id)) {
+            counts[option.id]++;
+          }
+        }
+      });
     });
+    
+    return counts;
   };
 
   const FilterSection = ({ title, options, filterType }) => {

@@ -80,6 +80,16 @@ export const getSkinProfile = async ( id) => {
     }
 };
 
+export const getUserRank = async () => {
+    try {
+        const response = await api.get('/user/getRank');
+        return response.data;
+    } catch (error) {
+        console.error('Error updating skin profile:', error);
+        throw new Error("Có lỗi xảy ra khi lưu dữ liệu loại da của bạn. Xin thông cảm!");
+    }
+};
+
 
 // staff 
 export const createStaff = async (staff) => {

@@ -36,7 +36,6 @@ const UserProfile = () => {
             birthday: birthday || ""
           });
 
-          // Also update formData to match user data
           setFormData({
             fullName: fullName || "",
             phone: phone,

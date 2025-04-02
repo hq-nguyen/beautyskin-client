@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, Trash2, X } from 'lucide-react';
-import { toast } from "react-toastify";
 import api from '../../config/axios';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { message } from 'antd';
 
 const AddressManagement = () => {
     const navigate = useNavigate();
@@ -89,7 +89,7 @@ const AddressManagement = () => {
             console.log("done fetching address");
         } catch (error) {
             console.error("Error fetching addresses", error);
-            toast.error("Không thể tải danh sách địa chỉ");
+            // message.error("Không thể tải danh sách địa chỉ");
         } finally {
             setIsLoading(false);
         }
@@ -178,10 +178,10 @@ const AddressManagement = () => {
                     phone: '',
                     isDefault: false
                 });
-                toast.success('Thêm địa chỉ thành công');
+                message.success('Thêm địa chỉ thành công');
             } catch (error) {
                 console.error('Error adding address:', error);
-                toast.error(error.response?.data?.message || 'Không thể thêm địa chỉ');
+                message.error(error.response?.data?.message || 'Không thể thêm địa chỉ');
             } finally {
                 setIsLoading(false);
             }
@@ -192,7 +192,7 @@ const AddressManagement = () => {
         const addressToEdit = addresses.find(addr => addr.id === id);
         const userId = localStorage.getItem('id');
         if (!addressToEdit) {
-            toast.error("Không tìm thấy địa chỉ");
+            message.error("Không tìm thấy địa chỉ");
             return;
         }
         addressToEdit.userId = userId;
@@ -221,11 +221,11 @@ const AddressManagement = () => {
             }
 
             await api.put(`/address/update/${editingAddress.id}`, { ...editingAddress });
-            toast.success("Cập nhật địa chỉ thành công");
+            message.success("Cập nhật địa chỉ thành công");
             await fetch();
             setShowEditModal(false);
         } catch (error) {
-            toast.error("Không thể cập nhật địa chỉ");
+            message.error("Không thể cập nhật địa chỉ");
             console.log("Error updating address:", error.response?.data || error.message);
         } finally {
             setIsLoading(false);
@@ -241,11 +241,11 @@ const AddressManagement = () => {
         try {
             setIsLoading(true);
             await api.delete(`address/delete/${addressToDelete}`);
-            toast.success('Xóa địa chỉ thành công');
+            message.success('Xóa địa chỉ thành công');
             await fetch();
             setShowConfirmDelete(false);
         } catch (error) {
-            toast.error('Không thể xóa địa chỉ');
+            message.error('Không thể xóa địa chỉ');
             console.log("Error deleting address", error);
         } finally {
             setIsLoading(false);

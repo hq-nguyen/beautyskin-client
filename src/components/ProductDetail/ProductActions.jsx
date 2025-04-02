@@ -150,7 +150,7 @@ const ProductActions = ({ product, navigateToCompare }) => {
                     </div>
                 </div>
                 <p className="text-sm text-gray-500">
-                    {product.stock > 0 ? `${product.stock} sản phẩm có sẵn` : 'Hết hàng'}
+                    {product.stock > 0 ? `` : 'Hết hàng'}
                 </p>
             </div>
 

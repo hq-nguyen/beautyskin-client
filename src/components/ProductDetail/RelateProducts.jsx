@@ -153,6 +153,7 @@ const RelatedProducts = ({ categoryId, currentProductId }) => {
                                         newPrice={newPrice}
                                         averageRating={product.averageRating}
                                         productSold={product.productSold}
+                                        stock={product.stock}
                                     />
                                 </div>
                             );

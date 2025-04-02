@@ -22,11 +22,10 @@ const ShoppingCart = () => {
   const originalTotalPrice = useSelector((state) => state.cart?.originalTotalPrice || 0);
   const dispatch = useDispatch();
 
-  // Check if any product has quantity greater than 3 or exceeds stock
   const invalidProducts = cart.filter(product => {
     return (product.quantity > 3) || (product.quantity > product.maxStock);
   });
-  
+
   const hasInvalidProducts = invalidProducts.length > 0;
 
   useEffect(() => {
@@ -37,7 +36,7 @@ const ShoppingCart = () => {
 
   const showNotification = (message) => {
     setNotificationMessage(message);
-    setTimeout(() => setNotificationMessage(null), 3000);
+    setTimeout(() => setNotificationMessage(null), 600);
   };
 
   const showDeleteConfirm = (id) => {
@@ -64,13 +63,13 @@ const ShoppingCart = () => {
       showNotification(`Chỉ còn ${product.maxStock} sản phẩm trong kho`);
       return;
     }
-    
+
     // Check if adding one more would exceed the limit of 3
     if (product.quantity >= 3) {
       showNotification('Sản phẩm chỉ có thể thêm tối đa là 3');
       return;
     }
-    
+
     dispatch(addToCart(product));
   };
 
@@ -118,13 +117,13 @@ const ShoppingCart = () => {
       >
         Xóa giỏ hàng
       </button>
-      
+
       {cart.length === 0 ? (
         <div className="text-center pb-10">
           <img src={assets.empty_cart} alt="Empty cart" className="w-1/5 mx-auto" />
           <h2 className='text-rose-600'>Giỏ hàng của bạn đang trống</h2>
-          <button 
-            onClick={() => navigate('/shop')} 
+          <button
+            onClick={() => navigate('/shop')}
             className="mt-4 text-blue-600 hover:text-rose-600 hover:underline"
           >
             Tiếp tục mua sắm
@@ -153,14 +152,16 @@ const ShoppingCart = () => {
                   const isOverLimit = product.quantity > 3;
                   const isOverStock = product.quantity > product.maxStock;
                   const isInvalid = isOverLimit || isOverStock;
-                  
+
                   return (
                     <tr key={product.id} className={`border-b border-gray-200 ${isInvalid ? 'bg-yellow-50' : ''}`}>
                       <td className="py-4 pl-2">
-                        <div className="flex">
-                          <img src={product.image} alt={product.name} className="w-24 h-20 object-contain mr-2" />
+                        <div className="flex pr-6">
+                          <Link to={`/product/${product.id}`}>
+                            <img src={product.image} alt={product.name} className="w-24 h-20 object-contain mr-2" />
+                          </Link>
                           <div>
-                            <div className="font-medium text-sm w-80">{product.name}</div>
+                            <Link to={`/product/${product.id}`} className="font-medium text-sm w-80 hover:text-rose-600">{product.name}</Link>
                             {isOverLimit && (
                               <div className="text-yellow-600 text-xs flex items-center mt-1">
                                 <MdWarning className="h-4 w-4 mr-1" />
@@ -191,9 +192,9 @@ const ShoppingCart = () => {
                       </td>
                       <td className="py-4 text-right">
                         <div className="font-medium text-sm whitespace-nowrap">{(product.price || 0).toLocaleString()} đ</div>
-                        <div className="text-sm text-gray-500 line-through whitespace-nowrap">{(product.originalPrice || 0).toLocaleString()} đ</div>
+                        {/* <div className="text-sm text-gray-500 line-through whitespace-nowrap">{(product.originalPrice || 0).toLocaleString()} đ</div> */}
                       </td>
-                      <td className="py-4">
+                      <td className="py-4 px-2">
                         <div className="flex justify-center items-center border border-gray-300 rounded w-24 mx-auto">
                           <button
                             className="px-2 py-1 text-gray-500 hover:text-gray-700"
@@ -232,7 +233,7 @@ const ShoppingCart = () => {
                 <span className="text-orange-500 whitespace-nowrap">{originalTotalPrice.toLocaleString()} đ</span>
               </div>
               <div className="text-sm text-gray-500 mb-4 text-right">(Đã bao gồm VAT)</div>
-              <button 
+              <button
                 onClick={handleCheckout}
                 className="w-full bg-[#EE1F5B] hover:opacity-80 text-white font-medium py-3 rounded"
               >
@@ -240,8 +241,8 @@ const ShoppingCart = () => {
               </button>
             </div>
             <div className="mt-6">
-              <button 
-                onClick={() => navigate('/shop')} 
+              <button
+                onClick={() => navigate('/shop')}
                 className="flex items-center text-rose-600 hover:text-rose-500"
               >
                 <IoIosArrowRoundBack className="text-2xl" />

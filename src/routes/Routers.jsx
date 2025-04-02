@@ -175,7 +175,7 @@ const Routers = () => {
           element: <FavoriteProducts />,
         },
         {
-          path: "promotion",
+          path: "level",
           element: <Promotion />,
         },
         {

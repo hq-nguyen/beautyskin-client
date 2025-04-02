@@ -20,7 +20,7 @@ function AccountSidebar() {
         { icon: faLocationDot, text: 'Địa chỉ nhận hàng', route: '/user/address' },
         { icon: faBox, text: 'Quản lý đơn hàng', route: '/user/manage-order' },
         { icon: faHeart, text: 'Sản phẩm yêu thích', route: '/user/wishlist' },
-        { icon: faStar, text: 'Tích điểm', route: '/user/promotion' },
+        { icon: faStar, text: 'Hạng thành viên', route: '/user/level' },
         { icon: faLock, text: 'Đổi mật khẩu', route: '/user/change-password' }
         
     ];
