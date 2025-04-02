@@ -113,8 +113,13 @@ const AddressManagement = () => {
     const validateForm = (address) => {
         const newErrors = {};
         const phoneRegex = /^\d{10}$/;
+        const nameRegex = /^[a-zA-ZÀ-ỹ\s']+$/;
 
-        if (!address.name?.trim()) newErrors.name = "Vui lòng nhập tên người nhận";
+        if (!address.name?.trim()) {
+            newErrors.name = "Vui lòng nhập tên người nhận";
+        } else if (!nameRegex.test(address.name)) {
+            newErrors.name = "Tên chỉ được chứa chữ cái, không được chứa số hoặc ký tự đặc biệt";
+        }
         if (!phoneRegex.test(address.phone)) newErrors.phone = "Số điện thoại không hợp lệ";
         if (!address.address?.trim()) newErrors.address = "Vui lòng nhập địa chỉ";
         if (!address.province) newErrors.province = "Vui lòng chọn tỉnh/thành phố";
