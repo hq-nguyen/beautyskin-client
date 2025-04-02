@@ -41,7 +41,7 @@ const DashboardMain = () => {
   };
 
   const getMonthName = (monthNum) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
     return months[monthNum - 1];
   };
 
@@ -66,8 +66,8 @@ const DashboardMain = () => {
     revenue: item.totalRevenue
   })).sort((a, b) => {
     if (a.year !== b.year) return a.year - b.year;
-    const monthIndex1 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(a.month);
-    const monthIndex2 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(b.month);
+    const monthIndex1 = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'].indexOf(a.month);
+    const monthIndex2 = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'].indexOf(b.month);
     return monthIndex1 - monthIndex2;
   });
 
@@ -154,7 +154,7 @@ const DashboardMain = () => {
                   />
                   <Tooltip 
                     formatter={(value) => [formatCurrency(value), "Doanh thu"]}
-                    labelFormatter={(label) => `Tháng ${label}`}
+                    labelFormatter={(label) => `${label}`}
                     contentStyle={{ backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e5e7eb' }}
                   />
                   <Legend wrapperStyle={{ paddingTop: 10 }} />

@@ -69,11 +69,11 @@ const ManageBlog = () => {
 
     const columns = [
         {
-            title: 'ID',
-            dataIndex: 'id',
-            key: 'id',
+            title: 'STT',
+            dataIndex: 'index',
+            key: 'index',
+            render: (_, __, index) => index + 1,
         },
-
         {
             title: 'Tiêu đề',
             dataIndex: 'title',
@@ -121,8 +121,8 @@ const ManageBlog = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => handleEdit(record)} icon={<CiEdit className="text-blue-500 w-5 h-5" />} />
-                    <Button onClick={() => handleDelete(record)} icon={<MdOutlineDeleteOutline className="text-blue-500 w-5 h-5"/>}></Button>
+                    <Button type='text' onClick={() => handleEdit(record)} icon={<CiEdit className="text-blue-500 w-5 h-5" />} />
+                    <Button type='text' onClick={() => handleDelete(record)} icon={<MdOutlineDeleteOutline className="text-blue-500 w-5 h-5"/>}></Button>
                 </Space>
             ),
         },

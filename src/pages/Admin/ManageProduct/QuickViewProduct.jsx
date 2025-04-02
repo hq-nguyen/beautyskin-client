@@ -127,17 +127,6 @@ const QuickViewModal = ({ product, visible, onCancel }) => {
                             </div>
 
                             <div className="space-y-4">
-                                <div className="flex items-center space-x-2">
-                                    <span
-                                        className={`px-3 py-1 rounded-full text-sm ${
-                                            product.stock > 10
-                                                ? "bg-green-100 text-green-800"
-                                                : "bg-red-100 text-red-800"
-                                        }`}
-                                    >
-                                        {product.stock} sản phẩm có sẵn
-                                    </span>
-                                </div>
                                 <div className="flex items-center space-x-4">
                                     <div className="flex items-center border rounded-md">
                                         <button
@@ -161,24 +150,6 @@ const QuickViewModal = ({ product, visible, onCancel }) => {
                                     </div>
                                 </div>
 
-                                {capacities.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
-                                        {capacities.map((cap) => (
-                                            <button
-                                                key={cap}
-                                                onClick={() => setSelectedCapacity(cap)}
-                                                className={`px-4 py-2 rounded-md ${
-                                                    selectedCapacity === cap
-                                                        ? "bg-primary text-white"
-                                                        : "bg-gray-100 hover:bg-gray-200"
-                                                }`}
-                                            >
-                                                {cap}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-
                                 <div className="flex flex-wrap gap-2 justify-between">
                                     <button className="w-32 grow bg-primary text-white rounded-md hover:opacity-90">
                                         Thêm vào giỏ hàng
@@ -194,7 +165,7 @@ const QuickViewModal = ({ product, visible, onCancel }) => {
 
                             <div className="border-t pt-6">
                                 <div className="flex space-x-4 border-b">
-                                    {["description", "ingredients", "how to use"].map(
+                                    {["Mô tả", "Thành phần", "Hướng dẫn sử dụng"].map(
                                         (tab) => (
                                             <button
                                                 key={tab}
@@ -212,7 +183,7 @@ const QuickViewModal = ({ product, visible, onCancel }) => {
                                 </div>
 
                                 <div className="pt-4">
-                                    {selectedTab === "description" && (
+                                    {selectedTab === "Mô tả" && (
                                         <div className="grid gap-4">
                                             <p className='font-bold underline text-lg'>Mô tả:</p>
                                             <div dangerouslySetInnerHTML={{ __html: product.description }} />
@@ -238,13 +209,13 @@ const QuickViewModal = ({ product, visible, onCancel }) => {
                                         </div>
                                     )}
 
-                                    {selectedTab === "ingredients" && (
+                                    {selectedTab === "Thành phần" && (
                                         <div>
                                             <p className="mb-4">{product.ingredient || "Không có thông tin thành phần."}</p>
                                         </div>
                                     )}
 
-                                    {selectedTab === "how to use" && (
+                                    {selectedTab === "Hướng dẫn sử dụng" && (
                                         <div dangerouslySetInnerHTML={{ __html: product.instruction || "Không có hướng dẫn sử dụng." }} />
                                     )}
                                 </div>

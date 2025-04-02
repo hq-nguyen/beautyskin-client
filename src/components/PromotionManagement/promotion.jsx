@@ -4,25 +4,7 @@ import { ShoppingBagIcon, StarIcon, ShareIcon, CrownIcon } from 'lucide-react';
 import { getUserRank } from '../../apis/customer';
 import api from '../../config/axios';
 import { assets } from '../../assets/frontend_assets/assets';
-import MembershipRankTabs from './MembershipRankTabs'; 
-
-const MedalIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="text-yellow-500"
-  >
-    <circle cx="12" cy="8" r="6" />
-    <path d="M15.477 12.89 L17 22l-5-3-5 3 1.523-9.11" />
-  </svg>
-);
+import MembershipRankTabs from './MembershipRankTabs';
 
 const RewardPointsManagement = () => {
   const [userPoints, setUserPoints] = useState(0);
@@ -85,12 +67,13 @@ const RewardPointsManagement = () => {
     { amount: 20000000, rank: "Diamond" }
   ];
 
+
   useEffect(() => {
     const fetchUserRank = async () => {
       try {
         const response = await getUserRank();
         setUserPoints(response || 0);
-        
+
         let currentRank = "Bronze";
         let nextRankName = "Silver";
         let nextRankAmount = 5000000;
@@ -99,14 +82,12 @@ const RewardPointsManagement = () => {
         for (let i = rankThresholds.length - 1; i >= 0; i--) {
           if (userPoints >= rankThresholds[i].amount) {
             currentRank = rankThresholds[i].rank;
-            
+
             if (i < rankThresholds.length - 1) {
               nextRankName = rankThresholds[i + 1].rank;
               nextRankAmount = rankThresholds[i + 1].amount - userPoints;
-              
-              const currentThreshold = rankThresholds[i].amount;
               const nextThreshold = rankThresholds[i + 1].amount;
-              progressPercentage = ((userPoints - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
+              progressPercentage = (userPoints / nextThreshold) * 100;
             } else {
               nextRankName = "Max Rank";
               nextRankAmount = 0;
@@ -150,12 +131,12 @@ const RewardPointsManagement = () => {
       {/* User Profile Section - Similar to Image */}
       <div className="flex items-center space-x-4 p-4 mb-4">
         <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-green-500">
-          <img src={assets.icon}alt="User Avatar" className="w-full h-full object-cover" />
+          <img src={assets.icon} alt="User Avatar" className="w-full h-full object-cover" />
         </div>
         <div>
           <h1 className="text-xl font-bold text-rose-600">{user.fullName}</h1>
           <div className="flex space-x-2">
-            <span className="text-gray-600 flex items-center">Số điện thoại: {user.phone} <span className="ml-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg></span></span>
+            <span className="text-gray-600 flex items-center">Số điện thoại: {user.phone} <span className="ml-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l2 2" /></svg></span></span>
           </div>
           <div className="flex space-x-2 mt-1">
             <span className={`px-3 py-1 text-sm bg-rose-200 font-semibold rounded-full ${getRankColor(userRank)}`}>{userRank}</span>
@@ -185,7 +166,7 @@ const RewardPointsManagement = () => {
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div className="bg-red-600 h-2 rounded-full" style={{ width: `${progress}%` }}></div>
             </div>
-            <div className="absolute" style={{ left: `${progress}%`, top: "-8px", transform: "translateX(-50%)" }}>
+            <div className="absolute" style={{ left: `${progress}%`, top: "-4px", transform: "translateX(-50%)" }}>
               <div className="w-4 h-4 bg-red-600 rounded-full"></div>
             </div>
           </div>

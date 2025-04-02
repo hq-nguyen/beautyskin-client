@@ -3,13 +3,10 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { fetchProductById } from '../../apis/product';
 import { fetchProductFeedbacks } from '../../apis/feedback';
 import StarRating from '../utils/StarRating';
-
-// Import the new components
 import ProductImageGallery from './ProductImageGallery';
 import ProductTabs from './ProductTabs';
 import ProductActions from './ProductActions';
 import RelatedProducts from './RelateProducts';
-// import RelatedProducts from './RelatedProducts';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -26,7 +23,6 @@ const ProductDetail = () => {
                 const data = await fetchProductById(id);
                 setProduct(data);
 
-                // fetch feedback data
                 try {
                     const response = await fetchProductFeedbacks(id);
                     setFeedbackData(response);

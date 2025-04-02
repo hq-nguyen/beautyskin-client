@@ -17,12 +17,15 @@ const MembershipRankTabs = () => {
     ],
     silver: [
       { title: 'Điều kiện', content: 'Tổng chi tiêu từ 5.000.000đ đến dưới 10.000.000đ' },
+      { title: 'Ưu đãi hấp dẫn', content: 'Các mã khuyến mãi dành riêng cho khách hàng ở cấp bậc Silver' },
     ],
     gold: [
       { title: 'Điều kiện', content: 'Tổng chi tiêu từ 10.000.000đ đến dưới 20.000.000đ' },
+      { title: 'Ưu đãi hấp dẫn', content: 'Các mã khuyến mãi dành riêng cho khách hàng ở cấp bậc Gold' },
     ],
     diamond: [
       { title: 'Điều kiện', content: 'Tổng chi tiêu từ 20.000.000đ trở lên' },
+      { title: 'Ưu đãi hấp dẫn', content: 'Các mã khuyến mãi dành riêng cho khách hàng ở cấp bậc Diamond' },
     ]
   };
 
