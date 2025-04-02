@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineHeart } from 'react-icons/ai';
@@ -6,14 +6,25 @@ import { MdCompare } from 'react-icons/md';
 import api from '../../apis/product';
 import { addToCartWithQuantity, clearCart } from '../../redux/features/cartSlice';
 import { addToCompare } from '../../redux/features/compareSlice';
+import { assets } from '../../assets/frontend_assets/assets';
 
 const ProductActions = ({ product, navigateToCompare }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [quantity, setQuantity] = useState(1);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [notification, setNotification] = useState(null);
     const [isFavoriting, setIsFavoriting] = useState(false);
     const [isInFavorites, setIsInFavorites] = useState(false);
+
+    useEffect(() => {
+        const checkLoginStatus = () => {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            setIsLoggedIn(!!token);
+        };
+
+        checkLoginStatus();
+    }, []);
 
     const handleQuantityChange = (e) => {
         const value = parseInt(e.target.value);
@@ -28,6 +39,11 @@ const ProductActions = ({ product, navigateToCompare }) => {
     };
 
     const handleAddFavorites = async () => {
+        if (!isLoggedIn) {
+            showNotification('Vui lòng đăng nhập để thêm sản phẩm vào yêu thích');
+            return;
+        }
+
         try {
             setIsFavoriting(true);
 
@@ -49,6 +65,11 @@ const ProductActions = ({ product, navigateToCompare }) => {
     };
 
     const handleAddToCart = () => {
+        if (!isLoggedIn) {
+            showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
+            return;
+        }
+        
         if (quantity > product.stock) {
             showNotification(`Chỉ còn ${product.stock} sản phẩm trong kho`, 'error');
             return;
@@ -61,7 +82,7 @@ const ProductActions = ({ product, navigateToCompare }) => {
                 name: product.name,
                 price: product.price,
                 quantity: quantity,
-                image: product.images?.[0]?.url || 'https://via.placeholder.com/80x80',
+                image: product.images?.[0]?.url || assets.news_3,
                 description: product.description,
                 originalPrice: product.price,
                 promo: product.promotions?.[0]?.value || 0,
@@ -72,6 +93,10 @@ const ProductActions = ({ product, navigateToCompare }) => {
     };
 
     const handleBuyNow = () => {
+        if (!isLoggedIn) {
+            showNotification('Vui lòng đăng nhập để mua sản phẩm');
+            return;
+        }
         if (quantity > product.stock) {
             showNotification(`Chỉ còn ${product.stock} sản phẩm trong kho`, 'error');
             return;
@@ -79,23 +104,18 @@ const ProductActions = ({ product, navigateToCompare }) => {
             showNotification('Sản phẩm chỉ có thể thêm tối đa là 3', 'error');
             return;
         } else if (product) {
-            // Clear the current cart first
             dispatch(clearCart());
-            
-            // Add this product to cart
             dispatch(addToCartWithQuantity({
                 id: product.id,
                 name: product.name,
                 price: product.price,
                 quantity: quantity,
-                image: product.images?.[0]?.url || 'https://via.placeholder.com/80x80',
+                image: product.images?.[0]?.url || assets.news_3,
                 description: product.description,
                 originalPrice: product.price,
                 promo: product.promotions?.[0]?.value || 0,
                 maxStock: product.stock
             }));
-            
-            // Navigate to checkout page
             navigate('/checkout');
         }
     };
@@ -106,7 +126,7 @@ const ProductActions = ({ product, navigateToCompare }) => {
                 id: product.id,
                 name: product.name,
                 price: product.price,
-                image: product.images?.[0]?.url || 'https://via.placeholder.com/80x80',
+                image: product.images?.[0]?.url || assets.news_3,
                 category: product.category?.name,
                 skinTypes: product.skinTypes?.map(type => type.name) || [],
                 skinConcerns: product.skinConcerns?.map(concern => concern.name) || [],
@@ -195,8 +215,8 @@ const ProductActions = ({ product, navigateToCompare }) => {
             {notification && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
                     <div className={`p-4 rounded-md shadow-lg border animate-fade-in ${notification.type === 'success'
-                            ? 'bg-green-100 border-green-300 text-green-700'
-                            : 'bg-red-100 border-red-300 text-red-700'
+                        ? 'bg-green-100 border-green-300 text-green-700'
+                        : 'bg-red-100 border-red-300 text-red-700'
                         }`}>
                         <p className="font-medium">{notification.message}</p>
                     </div>

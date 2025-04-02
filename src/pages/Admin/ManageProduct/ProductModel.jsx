@@ -24,6 +24,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
   const [tags, setTags] = useState([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
+  const [promotionType, setPromotionType] = useState('input');
 
   const fetchCategories = async () => {
     const cate = await ProductAttributeService.getCategories();
@@ -61,12 +62,12 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
   // Initialize form values when product changes
   useEffect(() => {
     if (product && visible) {
-      // Set initial form values from product data
       form.setFieldsValue({
         name: product.name,
         description: product.description,
         stock: product.stock,
         price: product.price,
+        promotion: product.promotion || 0,
         ingredient: product.ingredient,
         instruction: product.instruction,
         categoryId: product.categoryId || (product.category ? product.category.id : null),
@@ -75,10 +76,10 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
         skinTypeId: product.skinTypes?.map(type => type.id) || [],
         skinConcernId: product.skinConcerns?.map(concern => concern.id) || [],
         tagId: product.tags?.map(tag => tag.id) || [],
-        // formId: product.formIds && product.formIds.length > 0 ? product.formIds[0] : null,
         formIds: product.forms?.map(f => f.id) || [],
         stepId: product.stepId?.map(step => step.id) || [],
       });
+      setPromotionType(product.promotion !== undefined ? 'input' : 'select');
 
       // Initialize file list with existing images
       if (product.images && product.images.length > 0) {
@@ -117,8 +118,6 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 );
               })
               .map(image => image.id);
-            // .filter(image => existingImageUrls.includes(image.url))
-            // .map(image => image.id);
 
             imageIds = [...keptImages];
           }
@@ -146,10 +145,6 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
             imageIds = [...imageIds, ...newImageIds];
           }
 
-          const promotionIds = product.promotions ? product.promotions.map(promo =>
-            typeof promo === 'object' ? promo.id : promo
-          ) : [];
-
           // Create updated product data
           const updatedProductData = {
             id: product.id,
@@ -163,6 +158,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
             instruction: values.instruction || "",
             categoryId: values.categoryId || 0,
             price: parseFloat(values.price) || 0,
+            promotion: parseFloat(values.promotion) || 0,
             ingredient: values.ingredient || "",
             skinTypeId: values.skinTypeId || [],
             skinConcernId: values.skinConcernId || [],
@@ -170,7 +166,6 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
             formIds: values.formIds ? [values.formIds].flat() : [],
             routineSteps: values.routineSteps || [],
             images: imageIds,
-            promotions: promotionIds,
             deleted: false
           };
 
@@ -326,18 +321,78 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 <Form.Item
                   label="Giá tiền"
                   name="price"
-                  rules={[{ required: true, message: 'Vui lòng nhập giá tiền!' }]}
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập giá tiền!' },
+                    { 
+                      validator: (_, value) => {
+                        if (value >= 1000) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(new Error('Giá phải từ 1.000 VNĐ trở lên!'));
+                      }
+                    }
+                  ]}
                 >
                   <InputNumber
                     style={{ width: '100%' }}
                     formatter={(value) => ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                    min={1000}
                   />
                 </Form.Item>
               </Col>
             </Row>
 
             <Row gutter={[16, 0]}>
+              <Col xs={24} md={12}>
+                <Form.Item
+                  label="Khuyến mãi"
+                  name="promotion"
+                  tooltip="Giá trị từ 0 đến 1, tương đương 0% đến 100% khuyến mãi"
+                  rules={[
+                    { 
+                      validator: (_, value) => {
+                        if (value >= 0 && value <= 1) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(new Error('Giá trị khuyến mãi phải từ 0 đến 1!'));
+                      }
+                    }
+                  ]}
+                >
+                  <div>
+                    <Select
+                      style={{ width: '100%', marginBottom: '8px' }}
+                      value={promotionType}
+                      onChange={(value) => setPromotionType(value)}
+                    >
+                      <Option value="select">Chọn từ giá trị có sẵn</Option>
+                      <Option value="input">Nhập giá trị tùy chỉnh</Option>
+                    </Select>
+                    
+                    {promotionType === 'select' ? (
+                      <Select style={{ width: '100%' }}>
+                        <Option value={0}>0% (Không khuyến mãi)</Option>
+                        <Option value={0.1}>10%</Option>
+                        <Option value={0.2}>20%</Option>
+                        <Option value={0.3}>30%</Option>
+                        <Option value={0.4}>40%</Option>
+                        <Option value={0.5}>50%</Option>
+                      </Select>
+                    ) : (
+                      <InputNumber
+                        style={{ width: '100%' }}
+                        min={0}
+                        max={1}
+                        step={0.05}
+                        formatter={value => `${(value * 100).toFixed(0)}%`}
+                        parser={value => value.replace('%', '') / 100}
+                      />
+                    )}
+                  </div>
+                </Form.Item>
+              </Col>
+
               <Col xs={24} md={12}>
                 <Form.Item
                   label="Số lượng sản phẩm"
@@ -347,7 +402,9 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                   <InputNumber style={{ width: '100%' }} min={0} />
                 </Form.Item>
               </Col>
+            </Row>
 
+            <Row gutter={[16, 0]}>
               <Col xs={24} md={12}>
                 <Form.Item
                   name="expiredDateTime"
@@ -361,19 +418,21 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                   />
                 </Form.Item>
               </Col>
-            </Row>
 
-            <Form.Item
-              name="status"
-              label="Trạng thái"
-              rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
-            >
-              <Select>
-                <Option value="AVAILABLE">Có sẵn</Option>
-                <Option value="OUT_OF_STOCK">Hết hàng</Option>
-                <Option value="INSUFFICIENT_STOCK">Ngừng kinh doanh</Option>
-              </Select>
-            </Form.Item>
+              <Col xs={24} md={12}>
+                <Form.Item
+                  name="status"
+                  label="Trạng thái"
+                  rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
+                >
+                  <Select>
+                    <Option value="AVAILABLE">Có sẵn</Option>
+                    <Option value="OUT_OF_STOCK">Hết hàng</Option>
+                    <Option value="INSUFFICIENT_STOCK">Ngừng kinh doanh</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
           </Col>
 
           {/* Product Attributes */}

@@ -129,10 +129,10 @@ const ManagePromotion = () => {
 
       if (modalType === 'create') {
         await createPromotion(promotionData);
-        message.success('Tạo voucher thành công!');
+        message.success('Tạo Khuyến mãi thành công!');
       } else {
         await updatePromotion(promotionData.id, promotionData);
-        message.success('Cập nhật voucher thành công!');
+        message.success('Cập nhật Khuyến mãi thành công!');
       }
 
       setIsModalVisible(false);
@@ -147,7 +147,7 @@ const ManagePromotion = () => {
   const handleDelete = async (id) => {
     try {
       await deletePromotion(id);
-      message.success('Voucher đã được xóa!');
+      message.success('Khuyến mãi đã được xóa!');
       fetchPromotions();
     } catch (error) {
       message.error(`Failed to delete promotion: ${error.message}`);
@@ -165,7 +165,7 @@ const ManagePromotion = () => {
       fixed: 'left'
     },
     {
-      title: 'Mã giảm giá',
+      title: 'Mã khuyễn mãi',
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
@@ -201,21 +201,21 @@ const ManagePromotion = () => {
       sorter: (a, b) => moment(a.endDate).unix() - moment(b.endDate).unix(),
     },
     {
-      title: 'Giá trị voucher',
+      title: 'Giá trị',
       dataIndex: 'promoAmount',
       key: 'promoAmount',
       render: (text) => `${formatCurrency(text)}`,
       sorter: (a, b) => a.promoAmount - b.promoAmount,
     },
     {
-      title: 'Giá trị đơn tối thiểu',
+      title: 'Giá tiền tối thiểu',
       dataIndex: 'orderPrice',
       key: 'orderPrice',
       render: (text) => `${formatCurrency(text)}`,
       sorter: (a, b) => a.orderPrice - b.orderPrice,
     },
     {
-      title: 'Số lượng voucher',
+      title: 'Số lượng',
       dataIndex: 'numOfPromo',
       key: 'numOfPromo',
       render: (text) => text === 1073741824 ? 'Không giới hạn' : text,
@@ -242,7 +242,7 @@ const ManagePromotion = () => {
       },
     },
     {
-      title: 'Actions',
+      title: 'Hành động ',
       key: 'actions',
       render: (_, record) => (
         <Space>
@@ -270,13 +270,13 @@ const ManagePromotion = () => {
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <h1 className='text-2xl font-bold mb-4 text-black'>Quản lý Voucher</h1>
+        <h1 className='text-2xl font-bold mb-4 text-black'>Quản lý Khuyến mãi</h1>
         <Button 
           type="primary" 
           icon={<PlusOutlined />} 
           onClick={showCreateModal}
         >
-          Thêm Voucher
+          Thêm Khuyến mãi
         </Button>
       </div>
 
@@ -290,7 +290,7 @@ const ManagePromotion = () => {
       />
 
       <Modal
-        title={modalType === 'create' ? 'Tạo Voucher' : 'Cập nhật Voucher'}
+        title={modalType === 'create' ? 'Tạo Khuyến mãi' : 'Cập nhật Khuyến mãi'}
         visible={isModalVisible}
         onCancel={handleCancel}
         onOk={handleSubmit}
@@ -312,10 +312,10 @@ const ManagePromotion = () => {
             <Col span={16}>
               <Form.Item
                 name="name"
-                label="Tên Voucher"
-                rules={[{ required: true, message: 'Vui lòng nhập tên voucher' }]}
+                label="Tên Khuyến mãi"
+                rules={[{ required: true, message: 'Vui lòng nhập tên Khuyến mãi' }]}
               >
-                <Input placeholder="Nhập tên voucher" />
+                <Input placeholder="Nhập tên Khuyến mãi" />
               </Form.Item>
             </Col>
             <Col span={8}>
@@ -344,7 +344,7 @@ const ManagePromotion = () => {
             label="Mô tả"
             rules={[{ required: true, message: 'Vui lòng nhập mô tả' }]}
           >
-            <TextArea rows={4} placeholder="Nhập mô tả voucher" />
+            <TextArea rows={4} placeholder="Nhập mô tả Khuyến mãi" />
           </Form.Item>
 
           <Row gutter={16}>
@@ -392,13 +392,13 @@ const ManagePromotion = () => {
             <Col span={8}>
               <Form.Item
                 name="promoAmount"
-                label="Giá trị voucher"
-                rules={[{ required: true, message: 'Vui lòng nhập giá trị voucher' }]}
+                label="Giá trị Khuyến mãi"
+                rules={[{ required: true, message: 'Vui lòng nhập giá trị Khuyến mãi' }]}
               >
                 <InputNumber 
                   style={{ width: '100%' }} 
                   min={0}
-                  placeholder="Nhập giá trị voucher" 
+                  placeholder="Nhập giá trị Khuyến mãi" 
                   formatter={value => `${value}`}
                   parser={value => value.replace('đ', '')}
                 />
@@ -422,13 +422,13 @@ const ManagePromotion = () => {
             <Col span={8}>
               <Form.Item
                 name="numOfPromo"
-                label="Số lượng voucher"
-                rules={[{ required: true, message: 'Vui lòng nhập số lượng voucher' }]}
+                label="Số lượng"
+                rules={[{ required: true, message: 'Vui lòng nhập số lượng Khuyến mãi' }]}
               >
                 <InputNumber 
                   style={{ width: '100%' }} 
                   min={1}
-                  placeholder="Nhập số lượng voucher" 
+                  placeholder="Nhập số lượng Khuyến mãi" 
                   formatter={value => value === 1073741824 ? 'Không giới hạn' : value}
                   parser={value => value === 'Không giới hạn' ? 1073741824 : value}
                 />

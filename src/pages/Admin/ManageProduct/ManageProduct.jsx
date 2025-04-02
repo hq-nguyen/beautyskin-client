@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Table, Tag, Space, Modal, Button, Image, Badge } from 'antd';
-import { CiEdit } from "react-icons/ci";
-import { MdOutlineDeleteOutline, MdOutlineRemoveRedEye } from "react-icons/md";
+import {EditOutlined, DeleteOutlined} from '@ant-design/icons';
+import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { fetchProducts, deleteProduct } from '../../../apis/product';
 import { ProductAttributeService } from '../../../apis/productAttribute';
 import ProductModel from './ProductModel';
@@ -63,6 +63,8 @@ const ManageProduct = () => {
 
     const handleEdit = (product) => {
         setCurrentProduct(product);
+        console.log("product", product);
+
         setIsModalVisible(true);
     };
 
@@ -262,10 +264,21 @@ const ManageProduct = () => {
             key: 'action',
             width: 150,
             render: (_, record) => (
-                <Space size="middle">
-                    <Button onClick={() => handleEdit(record)} icon={<CiEdit className="text-blue-500 w-5 h-5" />} />
-                    <Button onClick={() => handleDelete(record)} icon={<MdOutlineDeleteOutline className="text-red-500 w-5 h-5" />} />
-                    <Button onClick={() => handleQuickView(record)} icon={<MdOutlineRemoveRedEye className="text-blue-500 w-5 h-5" />} />
+                <Space>
+                    <Button
+                        icon={<EditOutlined className="text-blue-500 w-5 h-5" />}
+                        type='text'
+                        onClick={() => handleEdit(record)}
+                    >
+                    </Button>
+                    <Button
+                        onClick={() => handleDelete(record)}
+                        type='text'
+                        icon={<DeleteOutlined className="text-red-500 w-5 h-5" />} />
+                    <Button
+                        onClick={() => handleQuickView(record)}
+                        type='text'
+                        icon={<MdOutlineRemoveRedEye className="text-blue-500 w-5 h-5" />} />
                 </Space>
             ),
         },

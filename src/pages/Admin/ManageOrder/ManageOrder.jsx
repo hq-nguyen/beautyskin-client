@@ -540,6 +540,7 @@ const ManageOrder = () => {
             </Button>
           </Dropdown> */}
           <Button
+            type='text'
             size="small"
             icon={<FaEye />}
             onClick={() => handleViewOrder(record.id)}
