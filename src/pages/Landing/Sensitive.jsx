@@ -4,137 +4,54 @@ import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from
 const { Title, Paragraph, Text } = Typography;
 
 const Sensitive = () => {
-  const skincareMorningSteps = [
+  const skincareSteps = [
     {
-      title: 'Sữa rửa mặt dịu nhẹ',
-      description: 'Dùng sữa rửa mặt không chứa xà phòng, chất tạo bọt. Massage bằng đầu ngón tay với nước ấm.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/12"><Tag color="green">Sữa rửa mặt Reihaku Hatomugi Facial Foam</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
+      title: 'Bước 1: Tẩy trang cho da nhạy cảm',
+      description:
+        'Cũng giống như các loại da khác, da nhạy cảm cũng cần được “thở”, được làm sạch và thông thoáng lỗ chân lông. Vệ sinh da cẩn thận là tiền đề quyết định hiệu quả của các dưỡng chất được hấp thụ vào da ở các bước chăm sóc sau đó. Bạn nên chọn sản phẩm tẩy trang dịu nhẹ, không chứa hương liệu, các chất tẩy rửa mạnh và cồn xấu gây mất cân bằng da.',
+      products: [
+        { id: 11, name: 'Dầu tẩy trang DHC Deep Cleansing Oil làm sạch, dưỡng da mềm mịn' },
+      ],
     },
     {
-      title: 'Toner không cồn',
-      description: 'Sử dụng toner làm dịu chứa thành phần như trà xanh hoặc cúc La Mã.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/36"><Tag color="green">Nước hoa hồng không mùi Klairs Supple Preparation Unscented Toner</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
+      title: 'Bước 2: Sữa rửa mặt cho da nhạy cảm',
+      description:
+        'Dùng sữa rửa mặt không chứa xà phòng, chất tạo bọt. Massage nhẹ nhàng bằng đầu ngón tay với nước ấm để làm sạch da mà không gây kích ứng.',
+      products: [
+        { id: 12, name: 'Sữa rửa mặt Reihaku Hatomugi Facial Foam' },
+      ],
     },
     {
-      title: 'Serum dưỡng ẩm',
-      description: 'Thoa serum chứa Hyaluronic Acid hoặc Ceramide để phục hồi hàng rào bảo vệ da.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/14"><Tag color="green">Serum Dưỡng Ẩm Hyaluronic Acid</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
+      title: 'Bước 3: Nước cân bằng cho da nhạy cảm (Toner)',
+      description:
+        'Sử dụng toner làm dịu chứa thành phần như trà xanh hoặc cúc La Mã để cân bằng độ pH và làm dịu da sau bước làm sạch.',
+      products: [
+        { id: 36, name: 'Nước hoa hồng không mùi Klairs Supple Preparation Unscented Toner' },
+      ],
     },
     {
-      title: 'Kem dưỡng ẩm',
-      description: 'Chọn kem không mùi, kết cấu gel hoặc kem nhẹ có chứa Glycerin.',
+      title: 'Bước 4: Tinh chất dưỡng cho da nhạy cảm (Serum)',
+      description:
+        'Thoa serum chứa Hyaluronic Acid hoặc Ceramide để phục hồi hàng rào bảo vệ da và cung cấp độ ẩm cần thiết.',
+      products: [
+        { id: 14, name: 'Serum Dưỡng Ẩm Hyaluronic Acid' },
+      ],
     },
     {
-      title: 'Kem chống nắng vật lý',
-      description: 'Sử dụng SPF 30+ không chứa hóa chất gây kích ứng như Zinc Oxide.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/27"><Tag color="green">Kem Chống Nắng Dưỡng Ẩm SPF50+ PA+++</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-  ];
-
-  const skincareEveningSteps = [
-    {
-      title: 'Tẩy trang dạng dầu',
-      description: 'Dùng dầu tẩy trang gentle để loại bỏ bụi bẩn mà không gây căng da.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/11"><Tag color="green">Dầu tẩy trang DHC Deep Cleansing Oil làm sạch, dưỡng da mềm mịn</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
+      title: 'Bước 5: Kem dưỡng cho da nhạy cảm',
+      description:
+        'Chọn kem không mùi, kết cấu gel hoặc kem nhẹ có chứa Glycerin để khóa ẩm và bảo vệ da suốt cả ngày.',
+      products: [
+        { id: 21, name: 'Kem Dưỡng Ẩm Ban Đêm Collagen' },
+      ],
     },
     {
-      title: 'Sữa rửa mặt',
-      description: 'Lặp lại bước làm sạch buổi sáng.',
-    },
-    {
-      title: 'Mặt nạ giấy dịu da',
-      description: 'Đắp 1-2 lần/tuần mặt nạ chứa thành phần như yến mạch hoặc rau má.',
-      // subTitle: (
-      //   <>
-      //     <ShoppingOutlined style={{ marginRight: 8 }} />
-      //     <Text strong>Sản phẩm gợi ý:</Text>
-      //     <div className="ml-4 mt-2">
-      //       <Space>
-      //         <a href="/product/31"><Tag color="green">Mặt Nạ Dr.Jart+ Cicapair Calming Mask</Tag></a>
-      //       </Space>
-      //     </div>
-      //   </>
-      // )
-    },
-    {
-      title: 'Serum phục hồi',
-      description: 'Dùng serum chứa Panthenol hoặc Centella Asiatica.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/18"><Tag color="green">Tinh Chất Dưỡng Da Vitamin C</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Kem dưỡng ban đêm',
-      description: 'Chọn kem có kết cấu đặc hơn chứa Ceramide và Squalane.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/21"><Tag color="green">Kem Dưỡng Ẩm Ban Đêm Collagen</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
+      title: 'Bước 6: Kem chống nắng cho da nhạy cảm',
+      description:
+        'Sử dụng kem chống nắng vật lý SPF 30+ không chứa hóa chất gây kích ứng như Zinc Oxide để bảo vệ da khỏi tia UV.',
+      products: [
+        { id: 27, name: 'Kem Chống Nắng Dưỡng Ẩm SPF50+ PA+++' },
+      ],
     },
   ];
 
@@ -154,6 +71,40 @@ const Sensitive = () => {
     { name: 'Yến mạch', benefit: 'Cấp ẩm và chống viêm' },
     { name: 'Zinc Oxide', benefit: 'Bảo vệ da khỏi tia UV an toàn' },
   ];
+
+  //render sản phẩm đề xuất
+  const renderProductSuggestion = (products) => {
+    if (!products || products.length === 0) return null;
+    return (
+      <div className="mt-2">
+        <Space align="start">
+          <ShoppingOutlined style={{ marginRight: 8 }} />
+          <div>
+            <Text strong>Sản phẩm gợi ý:</Text>
+            <div className="mt-1">
+              <Space>
+                {products.map((product) => (
+                  <a key={product.id} href={`/product/${product.id}`}>
+                    <Tag color="green">{product.name}</Tag>
+                  </a>
+                ))}
+              </Space>
+            </div>
+          </div>
+        </Space>
+      </div>
+    );
+  };
+
+  const formattedSteps = skincareSteps.map((step) => ({
+    title: step.title,
+    description: (
+      <>
+        <Paragraph>{step.description}</Paragraph>
+        {renderProductSuggestion(step.products)}
+      </>
+    ),
+  }));
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -178,41 +129,17 @@ const Sensitive = () => {
         />
       </Card>
 
-      {/* Morning Routine */}
+      {/* Skincare Steps */}
       <Title level={3} className="mb-4">
         <SkinOutlined className="mr-2" />
-        Quy trình buổi sáng
+        Các bước chăm sóc da nhạy cảm
       </Title>
       <Card className="mb-8">
-        <Steps
-          direction="vertical"
-          current={-1}
-          items={skincareMorningSteps}
-        />
+        <Steps direction="vertical" current={-1} items={formattedSteps} />
         <Divider />
         <Alert
           message="Lưu ý"
-          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
-          type="info"
-          showIcon
-        />
-      </Card>
-
-      {/* Evening Routine */}
-      <Title level={3} className="mb-4">
-        <SkinOutlined className="mr-2" />
-        Quy trình buổi tối
-      </Title>
-      <Card className="mb-8">
-        <Steps
-          direction="vertical"
-          current={-1}
-          items={skincareEveningSteps}
-        />
-        <Divider />
-        <Alert
-          message="Lưu ý"
-          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+          description="Nhấp vào sản phẩm để xem chi tiết. Hãy điều chỉnh thứ tự hoặc bỏ qua các bước tùy theo nhu cầu và tình trạng da của bạn."
           type="info"
           showIcon
         />
