@@ -81,7 +81,6 @@ const Shop = () => {
         setSkinTypes(skinType);
         setSkinConcerns(concerns);
 
-        // Map filter values to IDs from API
         skinType.forEach(type => {
           const lowerName = type.name.toLowerCase();
           if (lowerName.includes("dầu")) filterMap.skinType["da dầu"] = type.id;
@@ -108,7 +107,7 @@ const Shop = () => {
           if (lowerName.includes("serum")) filterMap.texture.serum = form.id;
         });
 
-        // Apply skinType filter from URL query parameter
+        // filter skintype bằng url
         const queryParams = new URLSearchParams(location.search);
         const skinTypeFromUrl = queryParams.get("skinType");
         const skinConcernFromUrl = queryParams.get("skinConcern");
@@ -142,7 +141,7 @@ const Shop = () => {
     fetchAttributes();
   }, [location.search]);
 
-  // Updated to use filtered products for count calculation
+  // dùng filter để đếm
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products.filter(product => {
       const priceInRange = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
@@ -185,18 +184,16 @@ const Shop = () => {
     return filtered;
   }, [filters, products, searchQuery, sortBy]);
 
-  // Calculate pagination values
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredAndSortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredAndSortedProducts.length / productsPerPage);
 
-  // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleSort = (sortType) => {
     setSortBy(sortType);
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1); 
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -211,15 +208,14 @@ const Shop = () => {
 
       return { ...prev, [filterType]: updatedValues };
     });
-    setCurrentPage(1); // Reset to first page when filter changes
+    setCurrentPage(1); 
   };
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when search changes
+    setCurrentPage(1); 
     
-    // Remove localStorage operations for search query
   };
 
   const clearFilters = () => {
@@ -232,26 +228,20 @@ const Shop = () => {
     });
     setSearchQuery("");
     setSortBy("");
-    setCurrentPage(1); // Reset to first page when filters are cleared
+    setCurrentPage(1); 
 
-    // Remove localStorage operations
   };
 
-  // Updated getFilterCounts to only count products that match all other active filters
   const getFilterCounts = (filterType, options) => {
     const counts = {};
     
     options.forEach(option => {
-      // Start with counts at 0
       counts[option.id] = 0;
       
-      // For each product, check if it would match if we add this filter option
       filteredAndSortedProducts.forEach(product => {
-        // Create a temporary filter set that excludes the current filter type
         const tempFilters = {...filters};
         
-        // For the current filter type we're calculating counts for, 
-        // we need to exclude it from the filtering
+        
         if (filterType === 'category') {
           if (product.category && product.category.id === option.id) {
             counts[option.id]++;

@@ -109,7 +109,7 @@ const Login = () => {
         token: idToken 
       });
   
-      console.log("Backend Response:", response.data); // Debug backend response
+      console.log("Backend Response:", response.data); 
   
       if (response?.data) {
         const { token, roleEnum, id } = response.data;
@@ -119,22 +119,18 @@ const Login = () => {
           throw new Error("Phản hồi từ server không chứa token hoặc id");
         }
   
-        // Set items to localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('id', id);
   
-        // Verify storage
-        console.log("Token in localStorage:", localStorage.getItem('token'));
-        console.log("ID in localStorage:", localStorage.getItem('id'));
-  
         dispatch(login(response.data));
   
-        // Navigation based on role
         if (roleEnum === 'MANAGER') {
-          navigate('/admin');
+          navigate('/admin')
+        } else if (roleEnum === 'STAFF') {
+          navigate('/staff/orders')
         } else if (roleEnum === 'USER') {
-          navigate('/');
-        }
+          navigate('/')
+        } 
       } else {
         throw new Error("Không nhận được dữ liệu từ server");
       }
