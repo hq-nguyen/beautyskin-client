@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button, Modal, Space, Table, Tag } from 'antd';
-import { deleteBlog, fetchBlogsIsFalse } from '../../../apis/blog';
+import { deleteBlog, fetchBlogsIsFalse, fetchBlogById } from '../../../apis/blog';
 import dayjs from 'dayjs';
 import { MdOutlineDeleteOutline } from 'react-icons/md';
 import { CiEdit } from 'react-icons/ci';
@@ -10,7 +10,7 @@ const ManageBlog = () => {
     const [blog, setBlog] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
-    const [initialValues, setInitialValues] = useState({});
+    const [initialValues, setInitialValues] = useState(null);
 
     const handleOpenModel = () => {
         setIsOpen(true);
@@ -22,28 +22,53 @@ const ManageBlog = () => {
     };
 
     const handleSubmit = async (values) => {
-        console.log(values);
-        const updatedBlogs = await fetchBlogsIsFalse();
-        setBlog(updatedBlogs);
-        setIsOpen(false);
-        setInitialValues(null);
+        console.log("Values received in parent component:", values);
+        setLoading(true);
+        try {
+            const updatedBlogs = await fetchBlogsIsFalse();
+            console.log("Refreshed blog data:", updatedBlogs);
+            setBlog(updatedBlogs);
+        } catch (error) {
+            console.error("Error refreshing blogs:", error);
+            Modal.error({ content: "Failed to refresh blog list" });
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleEdit = (record) => {
-        setInitialValues(record);
-        handleOpenModel();
-    }
+    const handleEdit = async (record) => {
+        console.log("Editing blog with ID:", record.id, typeof record.id);
+        try {
+            setLoading(true);
+            // Option 1: Use the complete blog data if it has content already
+            if (record.content) {
+                setInitialValues(record);
+                handleOpenModel();
+                return;
+            }
+            
+            // Option 2: Fetch complete blog details if content is missing
+            const blogDetails = await fetchBlogById(record.id);
+            setInitialValues(blogDetails);
+            handleOpenModel();
+        } catch (error) {
+            console.error("Error preparing blog for edit:", error);
+            Modal.error({ content: "Failed to load blog details for editing" });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleDelete = (item) => {
         Modal.confirm({
-            title: 'Bạn có chắc chắn muốn xóa khách hàng này?',
+            title: 'Bạn có chắc chắn muốn xóa bài viết này?',
             content: 'Hành động này không thể hoàn tác!',
             okText: 'Có, xóa',
             okType: 'danger',
             cancelText: 'Không',
             onOk: async () => {
                 try {
-                    await deleteBlog(item.id); 
+                    await deleteBlog(item.id);
                     setBlog(blog.filter(b => b.id !== item.id));
                     Modal.success({ content: 'Xóa blog thành công!' });
                 } catch (e) {
@@ -53,18 +78,21 @@ const ManageBlog = () => {
         });
     };
 
+    const loadBlogs = async () => {
+        setLoading(true);
+        try {
+            const data = await fetchBlogsIsFalse();
+            setBlog(data);
+        } catch (error) {
+            console.error("Error fetching blogs:", error);
+            Modal.error({ content: "Failed to load blogs" });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const getBlog = async () => {
-            try {
-                const data = await fetchBlogsIsFalse();
-                setBlog(data);
-            } catch (error) {
-                console.error("Error fetching blogs:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        getBlog();
+        loadBlogs();
     }, []);
 
     const columns = [
@@ -87,7 +115,8 @@ const ManageBlog = () => {
             dataIndex: 'image',
             key: 'image',
             render: (image) => (
-                <img src={image} alt="blog" className="w-20 h-20 object-cover" />
+                image ? <img src={image} alt="blog" className="w-20 h-20 object-cover" /> : 
+                <div className="w-20 h-20 bg-gray-200 flex items-center justify-center text-gray-500">No image</div>
             ),
         },
         {
@@ -121,8 +150,16 @@ const ManageBlog = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button type='text' onClick={() => handleEdit(record)} icon={<CiEdit className="text-blue-500 w-5 h-5" />} />
-                    <Button type='text' onClick={() => handleDelete(record)} icon={<MdOutlineDeleteOutline className="text-blue-500 w-5 h-5"/>}></Button>
+                    <Button 
+                        type='text' 
+                        onClick={() => handleEdit(record)} 
+                        icon={<CiEdit className="text-blue-500 w-5 h-5" />} 
+                    />
+                    <Button 
+                        type='text' 
+                        onClick={() => handleDelete(record)} 
+                        icon={<MdOutlineDeleteOutline className="text-blue-500 w-5 h-5" />}
+                    />
                 </Space>
             ),
         },
@@ -138,11 +175,15 @@ const ManageBlog = () => {
             <div className='flex justify-between items-center mb-4'>
                 <h1 className="text-2xl font-bold mb-4 text-black">Danh sách bài viết</h1>
                 {/* Button to Add New Blog */}
-                <Button type="primary" onClick={handleOpenModel}>Thêm bài viết</Button>
+                <Button type="primary" onClick={handleOpenModel}>
+                    Thêm bài viết
+                </Button>
             </div>
 
             {loading ? (
-                <div>Loading...</div>
+                <div className="flex justify-center items-center h-64">
+                    Loading...
+                </div>
             ) : (
                 <Table
                     columns={columns}

@@ -89,19 +89,6 @@ const ProductHighlights = () => {
     return Math.round(((originalPrice - discountPrice) / originalPrice) * 100);
   };
 
-  const getCurrentPrice = (product) => {
-    if (product.promotions && product.promotions.length > 0) {
-      const activePromotion = product.promotions
-        .filter(promo => new Date(promo.endDateTime) >= new Date())
-        .sort((a, b) => b.discountPercentage - a.discountPercentage)[0];
-      
-      if (activePromotion) {
-        return product.price * (1 - activePromotion.discountPercentage / 100);
-      }
-    }
-    return product.price;
-  };
-
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8 bg-white rounded-lg shadow-lg mt-24 text-center">
@@ -140,8 +127,6 @@ const ProductHighlights = () => {
       <div className="px-4">
         <Slider {...sliderSettings}>
           {products.map((product) => {
-            const currentPrice = getCurrentPrice(product);
-            const discount = calculateDiscount(product.price, currentPrice);
             const imageUrl = product.images && product.images.length > 0 ? product.images[0].url : "";
             
             return (
@@ -149,10 +134,10 @@ const ProductHighlights = () => {
                 <ProductItem
                   id={product.id}
                   image={imageUrl}
-                  promotion={discount}
+                  promotion={product.promotion}
                   name={product.name}
                   oldPrice={product.price}
-                  newPrice={currentPrice}
+                  newPrice={product.price}
                   averageRating={product.averageRating}
                   productSold={product.productSold}
                   stock={product.stock}

@@ -60,7 +60,7 @@ function AdminHeader({
               <div className="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150">
                 <div className="px-4 py-3 border-b border-gray-200">
                   <p className="font-medium"></p>
-                  <p className="text-sm text-gray-600">Chào bạn {user?.username}</p>
+                  <p className="text-sm text-gray-600">Chào mừng quay trở lại</p>
                 </div>
 
                 <div className="px-2 py-2">

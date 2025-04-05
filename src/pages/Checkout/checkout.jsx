@@ -119,19 +119,9 @@ const CheckoutPage = () => {
   };
 
   const finalTotalPrice = Math.max(
-    originalTotalPrice - (appliedPromotion ? appliedPromotion.promoAmount : 0),
+    totalPrice - (appliedPromotion ? appliedPromotion.promoAmount : 0),
     0
   );
-
-  const calculateTotalDiscount = () => {
-    const productDiscounts = cart.reduce((sum, product) => {
-      return sum + ((product.originalPrice || product.price) - product.price) * product.quantity;
-    }, 0);
-
-    const promotionDiscount = appliedPromotion ? appliedPromotion.promoAmount : 0;
-
-    return productDiscounts + promotionDiscount;
-  };
 
   const handlePlaceOrder = async () => {
     if (!selectedAddressId) {

@@ -35,7 +35,7 @@ const LatestPostsSidebar = () => {
     }
 
     return (
-        <div>
+        <div className='bg-white p-4 rounded shadow-md'>
             <ul>
                 {latestPosts.map((post) => (
                     <li key={post.id} className="mb-2">

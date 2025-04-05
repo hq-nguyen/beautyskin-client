@@ -66,10 +66,13 @@ const Blog = () => {
             {/* Vertical Line Divider */}
             <div className="hidden lg:block w-px bg-gray-200 mx-6"></div>
 
-            <aside className='lg:w-1/5 sticky top-0'>
-                <h2 className='text-2xl font-bold mb-4'>Bài viết mới nhất</h2>
-                <hr className='bg-black w-[20%] h-[3px] mb-4' />
-                <LatestPostsSidebar />
+            <aside className='lg:w-1/5 '>
+                <div className='sticky top-32'>
+                    <h2 className='text-2xl font-bold mb-4'>Bài viết mới nhất</h2>
+                    <hr className='bg-black w-[20%] h-[3px] mb-4' />
+                    <LatestPostsSidebar />
+                </div>
+
             </aside>
         </div>
     );

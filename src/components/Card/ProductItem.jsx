@@ -26,9 +26,10 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
     const [messageType, setMessageType] = useState('success');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+    newPrice = oldPrice && promotion ? oldPrice - (oldPrice * promotion) : newPrice;
     const formattedOldPrice = oldPrice ? oldPrice.toLocaleString() : '0';
     const formattedNewPrice = newPrice ? newPrice.toLocaleString() : '0';
-    const displayPromotion = promotion && promotion > 0;
+    const displayPromotion = promotion !== null && promotion !== undefined && promotion > 0;
     const isOutOfStock = stock === 0;
 
     useEffect(() => {
@@ -65,7 +66,7 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
 
     const handleAddFavorites = async () => {
         if (!isLoggedIn) {
-            showMessage('Vui lòng đăng nhập để thêm sản phẩm vào yêu thích');
+            showMessage('Vui lòng đăng nhập để thêm sản phẩm vào yêu thích', 'error');
             return;
         }
 
@@ -89,7 +90,7 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
             showMessage('Đã thêm vào danh sách yêu thích thành công!');
             console.log('Đã thêm vào danh sách yêu thích:', response.data);
         } catch (error) {
-            showMessage('Sản phẩm đã tồn tại trong danh sách yêu thích');
+            showMessage('Sản phẩm đã tồn tại trong danh sách yêu thích', 'error');
             console.error('Lỗi khi thêm vào sản phẩm yêu thích', error);
         } finally {
             setIsFavoriting(false);
@@ -102,6 +103,11 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
                 className="relative h-60 group block hover:scale-95 transition-transform duration-300"
                 to={`/product/${id}`}
             >
+                {displayPromotion && !isOutOfStock && (
+                    <div className="absolute top-2 left-2 bg-primary font-semibold text-white text-xs px-2 py-1 rounded">
+                        -{Math.round(promotion * 100)}%
+                    </div>
+                )}
                 {isOutOfStock && (
                     <div className="absolute inset-0 bg-gray-500 bg-opacity-30 flex items-center justify-center z-10">
                         <span className="bg-red-500 text-white px-3 py-1 rounded-md font-medium">Hết hàng</span>
@@ -128,11 +134,14 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
                     <span className="ml-2 text-xs text-gray-500">({productSold})</span>
                 </div>
                 <div className="flex items-center">
-                    <span className={`text-base font-semibold ${isOutOfStock ? 'text-gray-500' : 'text-primary'}`}>
+                    {displayPromotion && !isOutOfStock && (
+                        <span className="text-xs text-gray-500 line-through">{formattedOldPrice} đ</span>
+                    )}
+                    <span className={`${displayPromotion && !isOutOfStock ? 'ml-2' : ''} text-base font-semibold ${isOutOfStock ? 'text-gray-500' : 'text-primary'}`}>
                         {formattedNewPrice} đ
                     </span>
-                    {!isOutOfStock && stock < 5 && (
-                        <span className="ml-2 text-xs text-orange-500">Còn {stock} sản phẩm</span>
+                    {!isOutOfStock && stock > 0 && stock < 5 && (
+                        <span className="ml-2 text-xs text-orange-500">Sắp hết hàng</span>
                     )}
                 </div>
                 <div className="flex space-x-2 mt-2">
@@ -158,8 +167,6 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
                     <div className="text-xs text-red-500 mt-1">{error}</div>
                 )}
             </div>
-
-            {/* Popup notification for favorite messages */}
             {favoriteMessage && (
                 <FavoriteMessage message={favoriteMessage} type={messageType} />
             )}
