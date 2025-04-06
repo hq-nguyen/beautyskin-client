@@ -1,125 +1,52 @@
-import { Card, Steps, Collapse, List, Tag, Alert, Typography, Divider, Badge, Space } from 'antd';
+import { Card, Steps, List, Tag, Alert, Typography, Divider, Space } from 'antd';
 import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import api from '../../config/axios'; 
 
 const { Title, Paragraph, Text } = Typography;
-const { Panel } = Collapse;
 
 const Dry = () => {
-  const skincareMorningSteps = [
-    {
-      title: 'Sữa rửa mặt',
-      description: 'Rửa mặt với sữa rửa mặt dạng kem để giữ ẩm cho da.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/16"><Tag color="green">Sữa Rửa Mặt Trà Xanh Ngừa Mụn</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Toner',
-      description: 'Sử dụng toner dưỡng ẩm để làm dịu và cấp ẩm cho da.',
-    },
-    {
-      title: 'Serum',
-      description: 'Thoa serum chứa Hyaluronic Acid để cấp ẩm sâu.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/20"><Tag color="green">Serum Trị Mụn Tea Tree Oil</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Kem dưỡng ẩm',
-      description: 'Dùng kem dưỡng ẩm đậm đặc để khóa ẩm.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/15"><Tag color="green">Kem Chống Nắng Kiềm Dầu SPF50</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Kem chống nắng',
-      description: 'Thoa kem chống nắng dưỡng ẩm với SPF tối thiểu 30.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/10"><Tag color="green">Kem Chống Nắng Dưỡng Trắng Bảo Vệ Chống Ánh Sáng Xanh Ceuticoz Uvicoz Lotion SPF50+ PA++++</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-  ];
+  const [skincareRoutine, setSkincareRoutine] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const skincareEveningSteps = [
-    {
-      title: 'Tẩy trang',
-      description: 'Sử dụng dầu tẩy trang để loại bỏ lớp trang điểm và bụi bẩn.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/33"><Tag color="green">Dầu tẩy trang DHC Deep Cleansing Oil</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Sữa rửa mặt',
-      description: 'Rửa mặt với sữa rửa mặt dịu nhẹ.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/34"><Tag color="green">Sữa rửa Mặt La Roche-Posay Cho Da Khô Nhạy Cảm 200ml</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Toner',
-      description: 'Sử dụng toner dưỡng ẩm để cân bằng da.',
-    },
-    {
-      title: 'Serum',
-      description: 'Sử dụng serum chứa dầu dưỡng hoặc peptide để phục hồi da.',
-    },
-    {
-      title: 'Kem dưỡng ẩm',
-      description: 'Thoa kem dưỡng ẩm đậm đặc để phục hồi độ ẩm qua đêm.',
-    },
-    {
-      title: 'Dầu dưỡng',
-      description: 'Sử dụng dầu dưỡng để tăng cường khả năng giữ ẩm cho da.',
-    },
-  ];
+  useEffect(() => {
+    const getSkincareRoutine = async () => {
+      try {
+        setLoading(true);
+        const skinTypeId = localStorage.getItem('skinTypeId');
+        const token = localStorage.getItem('token');
+
+        if (!skinTypeId) {
+          throw new Error('Skin type ID not found in localStorage.');
+        }
+        if (!token) {
+          throw new Error('No authentication token found. Please log in again.');
+        }
+
+        const response = await api.get(`/routine/getRoutineBySkinType/${skinTypeId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            skinTypeId: skinTypeId,
+          },
+        });
+
+        console.log('API Response:', response.data);
+        const data = response.data;
+        setSkincareRoutine(data.routineSteps || []);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching skincare routine:', error);
+        setError(error.response?.data?.error || 'Không thể tải quy trình chăm sóc da. Vui lòng thử lại sau.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getSkincareRoutine();
+  }, []);
 
   const skincareTips = [
     'Uống đủ nước mỗi ngày',
@@ -132,26 +59,11 @@ const Dry = () => {
   ];
 
   const ingredients = [
-    {
-      name: 'Hyaluronic Acid',
-      benefit: 'Cấp ẩm sâu và giữ nước cho da',
-    },
-    {
-      name: 'Glycerin',
-      benefit: 'Giữ ẩm và làm mềm da',
-    },
-    {
-      name: 'Ceramide',
-      benefit: 'Tăng cường hàng rào bảo vệ da',
-    },
-    {
-      name: 'Shea Butter',
-      benefit: 'Dưỡng ẩm và làm dịu da',
-    },
-    {
-      name: 'Squalane',
-      benefit: 'Dưỡng ẩm và phục hồi da',
-    },
+    { name: 'Hyaluronic Acid', benefit: 'Cấp ẩm sâu và giữ nước cho da' },
+    { name: 'Glycerin', benefit: 'Giữ ẩm và làm mềm da' },
+    { name: 'Ceramide', benefit: 'Tăng cường hàng rào bảo vệ da' },
+    { name: 'Shea Butter', benefit: 'Dưỡng ẩm và làm dịu da' },
+    { name: 'Squalane', benefit: 'Dưỡng ẩm và phục hồi da' },
   ];
 
   return (
@@ -177,44 +89,63 @@ const Dry = () => {
         />
       </Card>
 
-      {/* Morning Routine */}
+      {/* Skincare Routine */}
       <Title level={3} className="mb-4">
         <SkinOutlined className="mr-2" />
-        Quy trình buổi sáng
+        Quy trình chăm sóc da
       </Title>
       <Card className="mb-8">
-        <Steps
-          direction="vertical"
-          current={-1}
-          items={skincareMorningSteps}
-        />
-        <Divider />
-        <Alert
-          message="Lưu ý"
-          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
-          type="info"
-          showIcon
-        />
-      </Card>
-
-      {/* Evening Routine */}
-      <Title level={3} className="mb-4">
-        <SkinOutlined className="mr-2" />
-        Quy trình buổi tối
-      </Title>
-      <Card className="mb-8">
-        <Steps
-          direction="vertical"
-          current={-1}
-          items={skincareEveningSteps}
-        />
-        <Divider />
-        <Alert
-          message="Lưu ý"
-          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
-          type="info"
-          showIcon
-        />
+        {error ? (
+          <Alert message="Lỗi" description={error} type="error" showIcon />
+        ) : loading ? (
+          <Paragraph>Đang tải quy trình chăm sóc da...</Paragraph>
+        ) : skincareRoutine.length > 0 ? (
+          <>
+            <Steps
+              direction="vertical"
+              current={-1}
+              items={skincareRoutine.map((step) => ({
+                title: step.stepName || step.name,
+                description: (
+                  <div>
+                    <Text>{step.description}</Text>
+                    {step.lastUpdated && (
+                      <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
+                        Cập nhật lần cuối: {new Date(step.lastUpdated).toLocaleString()}
+                      </Text>
+                    )}
+                    {step.products?.length > 0 && (
+                      <div className="mt-4">
+                        <ShoppingOutlined style={{ marginRight: 8 }} />
+                        <Text strong>Sản phẩm gợi ý:</Text>
+                        <div className="ml-4 mt-2">
+                          <Space direction="vertical">
+                            {step.products.map((product) => (
+                              <div key={product.id}>
+                                <a href={`/product/${product.id}`}>
+                                  <Tag color="green">{product.name}</Tag>
+                                </a>
+                              </div>
+                            ))}
+                          </Space>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ),
+              }))}
+            />
+            <Divider />
+            <Alert
+              message="Lưu ý"
+              description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+              type="info"
+              showIcon
+            />
+          </>
+        ) : (
+          <Paragraph>Không có quy trình chăm sóc da nào được tìm thấy.</Paragraph>
+        )}
       </Card>
 
       {/* Tips Section */}

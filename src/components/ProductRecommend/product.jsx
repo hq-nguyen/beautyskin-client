@@ -14,6 +14,7 @@ const ProductRecommendations = ({ skinType }) => {
       try {
         setLoading(true);
         const skinTypeId = mapSkinTypeToId(skinType);
+        localStorage.setItem('skinTypeId', skinTypeId)
         
         const data = await getProductBySkinType(skinTypeId);
         
