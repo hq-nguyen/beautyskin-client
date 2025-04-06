@@ -1,131 +1,52 @@
 import { Card, Steps, List, Tag, Alert, Typography, Divider, Space } from 'antd';
 import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import api from '../../config/axios';
 
 const { Title, Paragraph, Text } = Typography;
 
 const Normal = () => {
-  const skincareMorningSteps = [
-    {
-      title: 'Sữa rửa mặt',
-      description: 'Rửa mặt với sữa rửa mặt dịu nhẹ để làm sạch da.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/12"><Tag color="blue">Sữa rửa mặt Reihaku Hatomugi Facial Foam</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Toner',
-      description: 'Sử dụng toner cân bằng độ pH và làm dịu da.',
-    },
-    {
-      title: 'Serum',
-      description: 'Thoa serum chứa vitamin C để bảo vệ da khỏi tác động môi trường và chống oxy hóa.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/14"><Tag color="blue">Serum Dưỡng Ẩm Hyaluronic Acid</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Kem dưỡng ẩm',
-      description: 'Dùng kem dưỡng ẩm phù hợp với da thường để duy trì độ ẩm cân bằng.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/27"><Tag color="blue">Kem Chống Nắng Dưỡng Ẩm SPF50+ PA+++</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Kem chống nắng',
-      description: 'Thoa kem chống nắng với SPF tối thiểu 30 để bảo vệ da khỏi tia UV.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/27"><Tag color="blue">Kem Chống Nắng Dưỡng Trắng Bảo Vệ Chống Ánh Sáng Xanh Ceuticoz Uvicoz Lotion SPF50+ PA++++ </Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-  ];
+  const [skincareRoutine, setSkincareRoutine] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const skincareEveningSteps = [
-    {
-      title: 'Tẩy trang',
-      description: 'Sử dụng dầu tẩy trang hoặc nước tẩy trang nhẹ nhàng.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/19"><Tag color="blue">Nước Tẩy Trang Micellar</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Sữa rửa mặt',
-      description: 'Rửa mặt để loại bỏ bụi bẩn và dầu thừa tích tụ trong ngày.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/6"><Tag color="blue">Tẩy Trang 2 Lớp Emmié by HappySkin 3 In 1 Bi-Phase Micellar Water</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-    {
-      title: 'Toner',
-      description: 'Sử dụng toner để cân bằng da và chuẩn bị cho các bước tiếp theo.',
-    },
-    {
-      title: 'Serum',
-      description: 'Sử dụng serum chứa các thành phần dưỡng ẩm như Hyaluronic Acid hoặc Peptide.',
-    },
-    {
-      title: 'Kem dưỡng ẩm',
-      description: 'Thoa kem dưỡng ẩm để khóa ẩm qua đêm.',
-      subTitle: (
-        <>
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <Text strong>Sản phẩm gợi ý:</Text>
-          <div className="ml-4 mt-2">
-            <Space>
-              <a href="/product/23"><Tag color="blue">Kem Dưỡng Mắt Chống Nhăn Peptide</Tag></a>
-            </Space>
-          </div>
-        </>
-      )
-    },
-  ];
+  useEffect(() => {
+    const getSkincareRoutine = async () => {
+      try {
+        setLoading(true);
+        const skinTypeId = localStorage.getItem('skinTypeId');
+        const token = localStorage.getItem('token')
+
+        if (!skinTypeId) {
+          throw new Error('Skin type ID not found in localStorage.');
+        }
+        if (!token) {
+          throw new Error('No authentication token found. Please log in again.');
+        }
+
+        const response = await api.get(`/routine/getRoutineBySkinType/${skinTypeId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            skinTypeId: skinTypeId,
+          },
+        });
+
+        console.log('API Response:', response.data);
+        const data = response.data;
+        setSkincareRoutine(data.routineSteps || []);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching skincare routine:', error);
+        setError(error.response?.data?.error || 'Không thể tải quy trình chăm sóc da. Vui lòng thử lại sau.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getSkincareRoutine();
+  }, []);
 
   const skincareTips = [
     'Duy trì chế độ chăm sóc da đều đặn',
@@ -138,27 +59,16 @@ const Normal = () => {
   ];
 
   const ingredients = [
-    {
-      name: 'Hyaluronic Acid',
-      benefit: 'Dưỡng ẩm sâu và giữ nước cho da',
-    },
-    {
-      name: 'Vitamin C',
-      benefit: 'Chống oxy hóa và làm sáng da',
-    },
-    {
-      name: 'Vitamin E',
-      benefit: 'Bảo vệ da và dưỡng ẩm',
-    },
-    {
-      name: 'Peptide',
-      benefit: 'Hỗ trợ tái tạo da và chống lão hóa',
-    },
-    {
-      name: 'Ceramide',
-      benefit: 'Tăng cường hàng rào bảo vệ da',
-    },
+    { name: 'Hyaluronic Acid', benefit: 'Dưỡng ẩm sâu và giữ nước cho da' },
+    { name: 'Vitamin C', benefit: 'Chống oxy hóa và làm sáng da' },
+    { name: 'Vitamin E', benefit: 'Bảo vệ da và dưỡng ẩm' },
+    { name: 'Peptide', benefit: 'Hỗ trợ tái tạo da và chống lão hóa' },
+    { name: 'Ceramide', benefit: 'Tăng cường hàng rào bảo vệ da' },
   ];
+
+  const renderHTML = (htmlString) => {
+    return <div dangerouslySetInnerHTML={{ __html: htmlString }} />;
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -184,44 +94,63 @@ const Normal = () => {
         />
       </Card>
 
-      {/* Morning Routine */}
+      {/* Skincare Routine */}
       <Title level={3} className="mb-4">
         <SkinOutlined className="mr-2" />
-        Quy trình buổi sáng
+        Quy trình chăm sóc da
       </Title>
       <Card className="mb-8">
-        <Steps
-          direction="vertical"
-          current={-1}
-          items={skincareMorningSteps}
-        />
-        <Divider />
-        <Alert
-          message="Lưu ý"
-          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
-          type="info"
-          showIcon
-        />
-      </Card>
-
-      {/* Evening Routine */}
-      <Title level={3} className="mb-4">
-        <SkinOutlined className="mr-2" />
-        Quy trình buổi tối
-      </Title>
-      <Card className="mb-8">
-        <Steps
-          direction="vertical"
-          current={-1}
-          items={skincareEveningSteps}
-        />
-        <Divider />
-        <Alert
-          message="Lưu ý"
-          description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
-          type="info"
-          showIcon
-        />
+        {error ? (
+          <Alert message="Lỗi" description={error} type="error" showIcon />
+        ) : loading ? (
+          <Paragraph>Đang tải quy trình chăm sóc da...</Paragraph>
+        ) : skincareRoutine.length > 0 ? (
+          <>
+            <Steps
+              direction="vertical"
+              current={-1}
+              items={skincareRoutine.map((step) => ({
+                title: step.stepName || step.name,
+                description: (
+                  <div>
+                    <Text>{step.description}</Text>
+                    {step.lastUpdated && (
+                      <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
+                        Cập nhật lần cuối: {new Date(step.lastUpdated).toLocaleString()}
+                      </Text>
+                    )}
+                    {step.products?.length > 0 && (
+                      <div className="mt-4">
+                        <ShoppingOutlined style={{ marginRight: 8 }} />
+                        <Text strong>Sản phẩm gợi ý:</Text>
+                        <div className="ml-4 mt-2">
+                          <Space direction="vertical">
+                            {step.products.map((product) => (
+                              <div key={product.id}>
+                                <a href={`/product/${product.id}`}>
+                                  <Tag color="green">{product.name}</Tag>
+                                </a>
+                              </div>
+                            ))}
+                          </Space>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ),
+              }))}
+            />
+            <Divider />
+            <Alert
+              message="Lưu ý"
+              description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
+              type="info"
+              showIcon
+            />
+          </>
+        ) : (
+          <Paragraph>Không có quy trình chăm sóc da nào được tìm thấy.</Paragraph>
+        )}
       </Card>
 
       {/* Tips Section */}

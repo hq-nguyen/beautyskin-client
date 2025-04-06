@@ -1,66 +1,52 @@
 import { Card, Steps, List, Tag, Alert, Typography, Divider, Space } from 'antd';
 import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import api from '../../config/axios'; 
 
 const { Title, Paragraph, Text } = Typography;
 
 const Sensitive = () => {
-  // Dữ liệu tĩnh thay vì fetch từ API
-  const skincareSteps = [
-    {
-      steporder: 1,
-      stepname: 'Tẩy trang cho da nhạy cảm',
-      description:
-        'Cũng giống như các loại da khác, da nhạy cảm cũng cần được “thở”, được làm sạch và thông thoáng lỗ chân lông. Vệ sinh da cẩn thận là tiền đề quyết định hiệu quả của các dưỡng chất được hấp thụ vào da ở các bước chăm sóc sau đó. Bạn nên chọn sản phẩm tẩy trang dịu nhẹ, không chứa hương liệu, các chất tẩy rửa mạnh và cồn xấu gây mất cân bằng da.',
-      products: [
-        { id: 11, name: 'Dầu tẩy trang DHC Deep Cleansing Oil làm sạch, dưỡng da mềm mịn' },
-      ],
-    },
-    {
-      steporder: 2,
-      stepname: 'Sữa rửa mặt cho da nhạy cảm',
-      description:
-        'Dùng sữa rửa mặt không chứa xà phòng, chất tạo bọt. Massage nhẹ nhàng bằng đầu ngón tay với nước ấm để làm sạch da mà không gây kích ứng.',
-      products: [
-        { id: 12, name: 'Sữa rửa mặt Reihaku Hatomugi Facial Foam' },
-      ],
-    },
-    {
-      steporder: 3,
-      stepname: 'Nước cân bằng cho da nhạy cảm (Toner)',
-      description:
-        'Sử dụng toner làm dịu chứa thành phần như trà xanh hoặc cúc La Mã để cân bằng độ pH và làm dịu da sau bước làm sạch.',
-      products: [
-        { id: 36, name: 'Nước hoa hồng không mùi Klairs Supple Preparation Unscented Toner' },
-      ],
-    },
-    {
-      steporder: 4,
-      stepname: 'Tinh chất dưỡng cho da nhạy cảm (Serum)',
-      description:
-        'Thoa serum chứa Hyaluronic Acid hoặc Ceramide để phục hồi hàng rào bảo vệ da và cung cấp độ ẩm cần thiết.',
-      products: [
-        { id: 14, name: 'Serum Dưỡng Ẩm Hyaluronic Acid' },
-      ],
-    },
-    {
-      steporder: 5,
-      stepname: 'Kem dưỡng cho da nhạy cảm',
-      description:
-        'Chọn kem không mùi, kết cấu gel hoặc kem nhẹ có chứa Glycerin để khóa ẩm và bảo vệ da suốt cả ngày.',
-      products: [
-        { id: 21, name: 'Kem Dưỡng Ẩm Ban Đêm Collagen' },
-      ],
-    },
-    {
-      steporder: 6,
-      stepname: 'Kem chống nắng cho da nhạy cảm',
-      description:
-        'Sử dụng kem chống nắng vật lý SPF 30+ không chứa hóa chất gây kích ứng như Zinc Oxide để bảo vệ da khỏi tia UV.',
-      products: [
-        { id: 27, name: 'Kem Chống Nắng Dưỡng Ẩm SPF50+ PA+++' },
-      ],
-    },
-  ];
+  const [skincareRoutine, setSkincareRoutine] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const getSkincareRoutine = async () => {
+      try {
+        setLoading(true);
+        const skinTypeId = localStorage.getItem('skinTypeId');
+        const token = localStorage.getItem('token');
+
+        if (!skinTypeId) {
+          throw new Error('Skin type ID not found in localStorage.');
+        }
+        if (!token) {
+          throw new Error('No authentication token found. Please log in again.');
+        }
+
+        const response = await api.get(`/routine/getRoutineBySkinType/${skinTypeId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            skinTypeId: skinTypeId,
+          },
+        });
+
+        console.log('API Response:', response.data);
+        const data = response.data;
+        setSkincareRoutine(data.routineSteps || []);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching skincare routine:', error);
+        setError(error.response?.data?.error || 'Không thể tải quy trình chăm sóc da. Vui lòng thử lại sau.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getSkincareRoutine();
+  }, []);
 
   const skincareTips = [
     'Luôn test sản phẩm mới trên vùng da nhỏ trước 24h',
@@ -78,41 +64,6 @@ const Sensitive = () => {
     { name: 'Yến mạch', benefit: 'Cấp ẩm và chống viêm' },
     { name: 'Zinc Oxide', benefit: 'Bảo vệ da khỏi tia UV an toàn' },
   ];
-
-  // Render product suggestions
-  const renderProductSuggestion = (products) => {
-    if (!products || products.length === 0) return null;
-    return (
-      <div className="mt-2">
-        <Space align="start">
-          <ShoppingOutlined style={{ marginRight: 8 }} />
-          <div>
-            <Text strong>Sản phẩm gợi ý:</Text>
-            <div className="mt-1">
-              <Space>
-                {products.map((product) => (
-                  <a key={product.id} href={`/product/${product.id}`}>
-                    <Tag color="green">{product.name}</Tag>
-                  </a>
-                ))}
-              </Space>
-            </div>
-          </div>
-        </Space>
-      </div>
-    );
-  };
-
-  // Format steps for Ant Design Steps component
-  const formattedSteps = skincareSteps.map((step) => ({
-    title: `Bước ${step.steporder}: ${step.stepname}`,
-    description: (
-      <>
-        <Paragraph>{step.description}</Paragraph>
-        {renderProductSuggestion(step.products)}
-      </>
-    ),
-  }));
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -137,25 +88,62 @@ const Sensitive = () => {
         />
       </Card>
 
-      {/* Skincare Steps */}
+      {/* Skincare Routine */}
       <Title level={3} className="mb-4">
         <SkinOutlined className="mr-2" />
-        Các bước chăm sóc da nhạy cảm
+        Quy trình chăm sóc da
       </Title>
       <Card className="mb-8">
-        {skincareSteps.length > 0 ? (
+        {error ? (
+          <Alert message="Lỗi" description={error} type="error" showIcon />
+        ) : loading ? (
+          <Paragraph>Đang tải quy trình chăm sóc da...</Paragraph>
+        ) : skincareRoutine.length > 0 ? (
           <>
-            <Steps direction="vertical" current={-1} items={formattedSteps} />
+            <Steps
+              direction="vertical"
+              current={-1}
+              items={skincareRoutine.map((step) => ({
+                title: step.stepName || step.name,
+                description: (
+                  <div>
+                    <Text>{step.description}</Text>
+                    {step.lastUpdated && (
+                      <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
+                        Cập nhật lần cuối: {new Date(step.lastUpdated).toLocaleString()}
+                      </Text>
+                    )}
+                    {step.products?.length > 0 && (
+                      <div className="mt-4">
+                        <ShoppingOutlined style={{ marginRight: 8 }} />
+                        <Text strong>Sản phẩm gợi ý:</Text>
+                        <div className="ml-4 mt-2">
+                          <Space direction="vertical">
+                            {step.products.map((product) => (
+                              <div key={product.id}>
+                                <a href={`/product/${product.id}`}>
+                                  <Tag color="green">{product.name}</Tag>
+                                </a>
+                              </div>
+                            ))}
+                          </Space>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ),
+              }))}
+            />
             <Divider />
             <Alert
               message="Lưu ý"
-              description="Nhấp vào sản phẩm để xem chi tiết. Hãy điều chỉnh thứ tự hoặc bỏ qua các bước tùy theo nhu cầu và tình trạng da của bạn."
+              description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
               type="info"
               showIcon
             />
           </>
         ) : (
-          <Alert message="No steps available" type="info" showIcon />
+          <Paragraph>Không có quy trình chăm sóc da nào được tìm thấy.</Paragraph>
         )}
       </Card>
 
