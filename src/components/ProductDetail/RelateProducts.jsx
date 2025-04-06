@@ -127,17 +127,6 @@ const RelatedProducts = ({ categoryId, currentProductId }) => {
                 <div className="relative px-6">
                     <Slider {...settings}>
                         {relatedProducts.map(product => {
-                            // Extract promotion value
-                            const promotionValue = product.promotions && product.promotions.length > 0
-                                ? product.promotions[0].value
-                                : 10;
-
-                            // Calculate new price if there's a promotion
-                            const newPrice = promotionValue > 0
-                                ? Math.round(product.price * (1 - promotionValue / 100))
-                                : product.price;
-
-                            // Get image URL
                             const imageUrl = product.images && product.images.length > 0
                                 ? product.images[0].url
                                 : 'https://via.placeholder.com/300x300';
@@ -147,10 +136,10 @@ const RelatedProducts = ({ categoryId, currentProductId }) => {
                                     <ProductItem
                                         id={product.id}
                                         image={imageUrl}
-                                        promotion={promotionValue}
+                                        promotion={product.promotion}
                                         name={product.name}
                                         oldPrice={product.price}
-                                        newPrice={newPrice}
+                                        newPrice={product.price}
                                         averageRating={product.averageRating}
                                         productSold={product.productSold}
                                         stock={product.stock}

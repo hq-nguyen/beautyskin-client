@@ -1,6 +1,5 @@
 import api from '../config/axios';
 export default api;
-// Fetch all products
 export const fetchProducts = async () => {
     try {
         const response = await api.get('/product/get');
@@ -11,7 +10,6 @@ export const fetchProducts = async () => {
     }
 };
 
-// Fetch a product by ID
 export const fetchProductById = async (productId) => {
     try {
         const response = await api.get(`/product/getById/${productId}`);
@@ -22,7 +20,6 @@ export const fetchProductById = async (productId) => {
     }
 };
 
-// Update a product
 export const updateProduct = async (productId, productData) => {
     try {
         const response = await api.put(`/product/update/${productId}`, productData);
@@ -33,7 +30,6 @@ export const updateProduct = async (productId, productData) => {
     }
 };
 
-// Add a new product
 export const addProduct = async (productData) => {
     try {
         const response = await api.post('/product/create', productData);
@@ -44,13 +40,9 @@ export const addProduct = async (productData) => {
     }
 };
 
-
-// Delete a product
 export const deleteProduct = async (productId) => {
     try {
         const response = await api.delete(`/product/delete/${productId}`);
-        // debug
-        console.log(response);
         return response;
     } catch (error) {
         console.error(`Error deleting product with ID ${productId}:`, error);
@@ -77,7 +69,6 @@ export const getProductByCategory = async (id) => {
         throw new Error("Failed to fetch product. Please try again later.");
     }
 }
-
 
 export const mapSkinTypeToId = (skinType) => {
     const skinTypeMap = {

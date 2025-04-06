@@ -85,7 +85,7 @@ const ProductActions = ({ product, navigateToCompare }) => {
                 image: product.images?.[0]?.url || assets.news_3,
                 description: product.description,
                 originalPrice: product.price,
-                promo: product.promotions?.[0]?.value || 0,
+                promotion: product.promotion || 0,
                 maxStock: product.stock
             }));
             showNotification('Đã thêm sản phẩm vào giỏ hàng', 'success');

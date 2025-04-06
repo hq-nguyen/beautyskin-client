@@ -102,7 +102,7 @@ const OrderHistory = () => {
         return "Đơn hàng mới";
       case "IN_PROGRESS":
         return "Đang xử lý";
-      case "SHIPPED":
+      case "SHIPPING":
         return "Đang giao hàng";
       case "DELIVERED":
         return "Đã giao hàng";
@@ -126,7 +126,7 @@ const OrderHistory = () => {
       case 'processed':
         return orders.filter(order => order.status === 'IN_PROGRESS');
       case 'shipping':
-        return orders.filter(order => order.status === 'SHIPPED');
+        return orders.filter(order => order.status === 'SHIPPING');
       case 'delivered':
         return orders.filter(order => order.status === 'DELIVERED');
       case 'confirm':
@@ -178,7 +178,7 @@ const OrderHistory = () => {
         return "bg-yellow-100 text-yellow-800";
       case "IN_PROGRESS":
         return "bg-blue-100 text-blue-800";
-      case "SHIPPED":
+      case "SHIPPING":
         return "bg-indigo-100 text-indigo-800";
       case "DELIVERED":
         return "bg-green-100 text-green-800";
@@ -211,7 +211,7 @@ const OrderHistory = () => {
 
   // Reported handlers
   const canReportOrder = (order) => {
-    return order.status === 'SHIPPED' || order.status === 'DELIVERED';
+    return order.status === 'DELIVERED';
   };
 
   const handleClosePopup = () => {

@@ -46,10 +46,9 @@ function FeedbackModel({ mode, visible, close, submit }) {
     if (mode === "feedback") {
       submit({ rating, comment, images });
     } else if (mode === "report") {
-      // Find the correct value for the selected reason
-      const selectedReasonObj = reportReasons.find(r => r.label === reason);
+      const selectedReasonObj = reportReasons.find(r => r.value === reason);
       submit({ 
-        reason: selectedReasonObj ? selectedReasonObj.value : "OTHER", 
+        reason: selectedReasonObj ? selectedReasonObj.label : "OTHER", 
         description, 
         images 
       });

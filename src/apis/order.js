@@ -85,7 +85,7 @@ export const fetchOrderHistory = async () => {
 
 export const fetchOrders = async () => {
     try {
-        const payload = await api.get("order/getAll");
+        const payload = await api.get("order/getAll2");
         return payload.data;
     } catch (error) {
         message.error(error.response.data);

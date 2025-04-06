@@ -18,12 +18,12 @@ const StaffSidebar = () => {
     {
       key: '/staff',
       icon: <DashboardOutlined />,
-      label: 'Thống kê công việc',
+      label: 'Thống kê',
     },
     {
       key: '/staff/orders',
       icon: <ShoppingCartOutlined />,
-      label: 'Xử lí đơn hàng',
+      label: 'Xử lí đơn',
     },
     // {
     //   key: '/customers',
@@ -38,7 +38,7 @@ const StaffSidebar = () => {
   };
   
   return (
-    <div className="relative h-screen w-64 bg-white shadow-lg flex flex-col">
+    <div className="relative h-screen w-48 bg-white shadow-lg flex flex-col">
       <Link to={'/'} className="p-4 flex items-center justify-center mb-5">
         <h2 className="m-0 text-gray-800 text-xl font-semibold tracking-wider">BeautySkin</h2>
       </Link>

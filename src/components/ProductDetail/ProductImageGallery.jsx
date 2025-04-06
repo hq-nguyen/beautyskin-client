@@ -57,8 +57,8 @@ const ProductImageGallery = ({ images, promotionValue }) => {
                 )}
 
                 {promotionValue > 0 && (
-                    <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full">
-                        -{promotionValue}%
+                    <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-md">
+                        -{promotionValue * 100}%
                     </div>
                 )}
             </div>
