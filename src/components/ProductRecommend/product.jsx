@@ -34,7 +34,6 @@ const ProductRecommendations = ({ skinType }) => {
     getRecommendedProducts();
   }, [skinType]);
   
-  // Thêm log trước render
   console.log('Products before render:', products);
 
   if (loading) return (

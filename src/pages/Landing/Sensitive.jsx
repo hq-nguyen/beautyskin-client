@@ -4,9 +4,11 @@ import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from
 const { Title, Paragraph, Text } = Typography;
 
 const Sensitive = () => {
+  // Dữ liệu tĩnh thay vì fetch từ API
   const skincareSteps = [
     {
-      title: 'Bước 1: Tẩy trang cho da nhạy cảm',
+      steporder: 1,
+      stepname: 'Tẩy trang cho da nhạy cảm',
       description:
         'Cũng giống như các loại da khác, da nhạy cảm cũng cần được “thở”, được làm sạch và thông thoáng lỗ chân lông. Vệ sinh da cẩn thận là tiền đề quyết định hiệu quả của các dưỡng chất được hấp thụ vào da ở các bước chăm sóc sau đó. Bạn nên chọn sản phẩm tẩy trang dịu nhẹ, không chứa hương liệu, các chất tẩy rửa mạnh và cồn xấu gây mất cân bằng da.',
       products: [
@@ -14,7 +16,8 @@ const Sensitive = () => {
       ],
     },
     {
-      title: 'Bước 2: Sữa rửa mặt cho da nhạy cảm',
+      steporder: 2,
+      stepname: 'Sữa rửa mặt cho da nhạy cảm',
       description:
         'Dùng sữa rửa mặt không chứa xà phòng, chất tạo bọt. Massage nhẹ nhàng bằng đầu ngón tay với nước ấm để làm sạch da mà không gây kích ứng.',
       products: [
@@ -22,7 +25,8 @@ const Sensitive = () => {
       ],
     },
     {
-      title: 'Bước 3: Nước cân bằng cho da nhạy cảm (Toner)',
+      steporder: 3,
+      stepname: 'Nước cân bằng cho da nhạy cảm (Toner)',
       description:
         'Sử dụng toner làm dịu chứa thành phần như trà xanh hoặc cúc La Mã để cân bằng độ pH và làm dịu da sau bước làm sạch.',
       products: [
@@ -30,7 +34,8 @@ const Sensitive = () => {
       ],
     },
     {
-      title: 'Bước 4: Tinh chất dưỡng cho da nhạy cảm (Serum)',
+      steporder: 4,
+      stepname: 'Tinh chất dưỡng cho da nhạy cảm (Serum)',
       description:
         'Thoa serum chứa Hyaluronic Acid hoặc Ceramide để phục hồi hàng rào bảo vệ da và cung cấp độ ẩm cần thiết.',
       products: [
@@ -38,7 +43,8 @@ const Sensitive = () => {
       ],
     },
     {
-      title: 'Bước 5: Kem dưỡng cho da nhạy cảm',
+      steporder: 5,
+      stepname: 'Kem dưỡng cho da nhạy cảm',
       description:
         'Chọn kem không mùi, kết cấu gel hoặc kem nhẹ có chứa Glycerin để khóa ẩm và bảo vệ da suốt cả ngày.',
       products: [
@@ -46,7 +52,8 @@ const Sensitive = () => {
       ],
     },
     {
-      title: 'Bước 6: Kem chống nắng cho da nhạy cảm',
+      steporder: 6,
+      stepname: 'Kem chống nắng cho da nhạy cảm',
       description:
         'Sử dụng kem chống nắng vật lý SPF 30+ không chứa hóa chất gây kích ứng như Zinc Oxide để bảo vệ da khỏi tia UV.',
       products: [
@@ -72,7 +79,7 @@ const Sensitive = () => {
     { name: 'Zinc Oxide', benefit: 'Bảo vệ da khỏi tia UV an toàn' },
   ];
 
-  //render sản phẩm đề xuất
+  // Render product suggestions
   const renderProductSuggestion = (products) => {
     if (!products || products.length === 0) return null;
     return (
@@ -96,8 +103,9 @@ const Sensitive = () => {
     );
   };
 
+  // Format steps for Ant Design Steps component
   const formattedSteps = skincareSteps.map((step) => ({
-    title: step.title,
+    title: `Bước ${step.steporder}: ${step.stepname}`,
     description: (
       <>
         <Paragraph>{step.description}</Paragraph>
@@ -135,14 +143,20 @@ const Sensitive = () => {
         Các bước chăm sóc da nhạy cảm
       </Title>
       <Card className="mb-8">
-        <Steps direction="vertical" current={-1} items={formattedSteps} />
-        <Divider />
-        <Alert
-          message="Lưu ý"
-          description="Nhấp vào sản phẩm để xem chi tiết. Hãy điều chỉnh thứ tự hoặc bỏ qua các bước tùy theo nhu cầu và tình trạng da của bạn."
-          type="info"
-          showIcon
-        />
+        {skincareSteps.length > 0 ? (
+          <>
+            <Steps direction="vertical" current={-1} items={formattedSteps} />
+            <Divider />
+            <Alert
+              message="Lưu ý"
+              description="Nhấp vào sản phẩm để xem chi tiết. Hãy điều chỉnh thứ tự hoặc bỏ qua các bước tùy theo nhu cầu và tình trạng da của bạn."
+              type="info"
+              showIcon
+            />
+          </>
+        ) : (
+          <Alert message="No steps available" type="info" showIcon />
+        )}
       </Card>
 
       {/* Tips Section */}

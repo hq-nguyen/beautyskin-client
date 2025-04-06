@@ -82,7 +82,6 @@ const Shop = () => {
         setSkinTypes(skinType);
         setSkinConcerns(concerns);
 
-        // Map filter values to IDs from API
         skinType.forEach(type => {
           const lowerName = type.name.toLowerCase();
           if (lowerName.includes("dầu")) filterMap.skinType["da dầu"] = type.id;
@@ -109,7 +108,7 @@ const Shop = () => {
           if (lowerName.includes("serum")) filterMap.texture.serum = form.id;
         });
 
-        // Apply skinType filter from URL query parameter
+        // filter skintype bằng url
         const queryParams = new URLSearchParams(location.search);
         const skinTypeFromUrl = queryParams.get("skinType");
         const skinConcernFromUrl = queryParams.get("skinConcern");
@@ -143,7 +142,7 @@ const Shop = () => {
     fetchAttributes();
   }, [location.search]);
 
-  // Updated to use filtered products for count calculation
+  // dùng filter để đếm
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products.filter(product => {
       const priceInRange = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
@@ -186,13 +185,10 @@ const Shop = () => {
     return filtered;
   }, [filters, products, searchQuery, sortBy]);
 
-  // Calculate pagination values
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredAndSortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredAndSortedProducts.length / productsPerPage);
-
-
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleSort = (sortType) => {
@@ -239,9 +235,9 @@ const Shop = () => {
 
     options.forEach(option => {
       counts[option.id] = 0;
-
       filteredAndSortedProducts.forEach(product => {
-        const tempFilters = { ...filters };
+        const tempFilters = {...filters};
+        
         if (filterType === 'category') {
           if (product.category && product.category.id === option.id) {
             counts[option.id]++;
