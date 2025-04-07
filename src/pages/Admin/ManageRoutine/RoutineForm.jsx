@@ -7,11 +7,12 @@ import {
     Divider,
     Card,
     Modal,
+    message,
 } from 'antd';
 import { SaveOutlined, PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { ProductAttributeService } from '../../../apis/productAttribute';
 import { getProductBySkinType } from '../../../apis/product';
-import { deleteRoutineStep } from '../../../apis/routine';
+import { fetchRoutines } from '../../../apis/routine'; 
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -29,21 +30,41 @@ const RoutineForm = ({
     const [loading, setLoading] = useState(false);
     const [selectedSkinType, setSelectedSkinType] = useState(null);
     const [deletedStepIds, setDeletedStepIds] = useState([]);
+    const [allRoutines, setAllRoutines] = useState([]);
 
-    // Fetch skin types on component mount
     useEffect(() => {
         if (visible) {
             fetchSkinTypes();
+            fetchAllRoutines(); 
             setDeletedStepIds([]);
-            if (initialValues?.skinTypeId) {
-                setSelectedSkinType(initialValues.skinTypeId);
-                fetchProducts(initialValues.skinTypeId);
-            }
-            form.setFieldsValue(initialValues);
-        } else {
             form.resetFields();
+
+            if (initialValues) {
+                if (initialValues.skinTypeId) {
+                    setSelectedSkinType(initialValues.skinTypeId);
+                    fetchProducts(initialValues.skinTypeId);
+                }
+                setTimeout(() => {
+                    form.setFieldsValue(initialValues);
+                }, 100);
+            }
         }
     }, [visible, form, initialValues]);
+
+    const fetchAllRoutines = async () => {
+        try {
+            setLoading(true);
+            const routinesData = await fetchRoutines();
+            console.log('routinesData', routinesData);
+            
+            setAllRoutines(routinesData || []);
+
+        } catch (error) {
+            console.error('Error fetching all routines:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchSkinTypes = async () => {
         try {
@@ -62,10 +83,12 @@ const RoutineForm = ({
     };
 
     const fetchProducts = async (skinTypeId) => {
+        if (!skinTypeId) return;
+
         try {
             setLoading(true);
             const productsData = await getProductBySkinType(skinTypeId);
-            setProducts(productsData);
+            setProducts(productsData || []);
         } catch (error) {
             Modal.error({
                 title: 'Lỗi',
@@ -77,7 +100,20 @@ const RoutineForm = ({
         }
     };
 
+    const checkRoutineExistsForSkinType = (skinTypeId) => {
+        if (!skinTypeId || !allRoutines.length) return null;
+        const skinTypeIdStr = skinTypeId.toString();
+        const existingRoutine = allRoutines.find(routine => 
+            routine.skinTypeResponse.typeId.toString() === skinTypeIdStr && 
+            (!isEditing || (isEditing && initialValues && routine.id !== initialValues.id))
+        );
+        
+        return existingRoutine;
+    };
+
     const handleSkinTypeChange = async (skinTypeId) => {
+        if (!skinTypeId) return;
+        
         setSelectedSkinType(skinTypeId);
         await fetchProducts(skinTypeId);
     };
@@ -85,24 +121,64 @@ const RoutineForm = ({
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-
-            // Format the data according to API requirements
+            const existingRoutine = checkRoutineExistsForSkinType(values.skinTypeId);
+            
+            if (existingRoutine) {
+                message.error(`Không thể tạo quy trình mới. Đã tồn tại quy trình "${existingRoutine.name}" cho loại da này. Mỗi loại da chỉ có thể có một quy trình.`);
+                return; 
+            }
+            
+            if (values.routineStepResponse && values.routineStepResponse.length > 0) {
+                values.routineStepResponse = values.routineStepResponse.map((step, index) => ({
+                    ...step,
+                    stepOrder: index + 1
+                }));
+            }
             const formattedData = {
                 ...values,
-                skinTypeId: parseInt(values.skinTypeId, 10),
-                routineStepRequests: values.routineStepRequests.map((step, index) => ({
-                    ...(step.id ? { id: step.id } : {}), // Include ID if it exists (for editing)
-                    stepName: step.stepName,
-                    description: step.description,
-                    stepOrder: index + 1,
-                    products: step.products.map(productId => ({ id: parseInt(productId, 10) }))
-                })),
                 deletedStepIds: deletedStepIds
             };
 
             onSubmit(formattedData);
         } catch (error) {
             console.error('Validation failed:', error);
+        }
+    };
+
+    const handleRemoveStep = (field, remove) => {
+        const stepId = form.getFieldValue(['routineStepResponse', field.name, 'id']);
+
+        if (stepId) {
+            Modal.confirm({
+                title: 'Xác nhận xóa',
+                content: 'Bạn có chắc chắn muốn xóa bước này không?',
+                okText: 'Xóa',
+                okType: 'danger',
+                cancelText: 'Hủy',
+                onOk: () => {
+                    setDeletedStepIds(prev => [...prev, stepId]);
+                    remove(field.name);
+                    message.success('Bước đã được xóa thành công!');
+                    const currentValues = form.getFieldValue('routineStepResponse');
+                    if (currentValues && currentValues.length > 0) {
+                        const updatedValues = currentValues.map((step, index) => ({
+                            ...step,
+                            stepOrder: index + 1
+                        }));
+                        form.setFieldsValue({ routineStepResponse: updatedValues });
+                    }
+                }
+            });
+        } else {
+            remove(field.name);
+            const currentValues = form.getFieldValue('routineStepResponse');
+            if (currentValues && currentValues.length > 0) {
+                const updatedValues = currentValues.map((step, index) => ({
+                    ...step,
+                    stepOrder: index + 1
+                }));
+                form.setFieldsValue({ routineStepResponse: updatedValues });
+            }
         }
     };
 
@@ -130,7 +206,19 @@ const RoutineForm = ({
             <Form
                 form={form}
                 layout="vertical"
-                initialValues={initialValues}
+                initialValues={{
+                    name: '',
+                    description: '',
+                    skinTypeId: undefined,
+                    routineStepResponse: [
+                        {
+                            stepName: '',
+                            description: '',
+                            stepOrder: 1,
+                            productResponse: []
+                        }
+                    ]
+                }}
             >
                 <Form.Item
                     name="name"
@@ -151,7 +239,20 @@ const RoutineForm = ({
                 <Form.Item
                     name="skinTypeId"
                     label="Loại da"
-                    rules={[{ required: true, message: 'Vui lòng chọn loại da' }]}
+                    rules={[
+                        { required: true, message: 'Vui lòng chọn loại da' },
+                        {
+                            validator: (_, value) => {
+                                if (!value) return Promise.resolve();
+                                
+                                const existingRoutine = checkRoutineExistsForSkinType(value);
+                                if (existingRoutine) {
+                                    return Promise.reject(new Error(`Đã tồn tại quy trình cho loại da này (${existingRoutine.name})`));
+                                }
+                                return Promise.resolve();
+                            }
+                        }
+                    ]}
                 >
                     <Select
                         placeholder="Chọn loại da"
@@ -169,7 +270,7 @@ const RoutineForm = ({
                 <Divider>Các bước chăm sóc da</Divider>
 
                 <Form.List
-                    name="routineStepRequests"
+                    name="routineStepResponse"
                     rules={[
                         {
                             validator: async (_, steps) => {
@@ -195,43 +296,11 @@ const RoutineForm = ({
                                                 type="text"
                                                 danger
                                                 icon={<MinusCircleOutlined />}
-                                                onClick={() => {
-                                                    const stepId = form.getFieldValue(['routineStepRequests', field.name, 'id']);
-                                                    if (stepId) {
-                                                        Modal.confirm({
-                                                            title: 'Xác nhận xóa',
-                                                            content: 'Bạn có chắc chắn muốn xóa bước này không?',
-                                                            okText: 'Xóa',
-                                                            okType: 'danger',
-                                                            cancelText: 'Hủy',
-                                                            onOk: async () => {
-                                                                try {
-                                                                    // Add the step ID to deletedStepIds array
-                                                                    setDeletedStepIds(prev => [...prev, stepId]);
-
-                                                                    // Call API to delete step
-                                                                    await deleteRoutineStep(stepId);
-
-                                                                    // Remove from form
-                                                                    remove(field.name);
-                                                                } catch (error) {
-                                                                    Modal.error({
-                                                                        title: 'Lỗi',
-                                                                        content: 'Không thể xóa bước. Vui lòng thử lại sau.'
-                                                                    });
-                                                                }
-                                                            }
-                                                        });
-                                                    } else {
-                                                        // For new steps (not saved yet), just remove without confirmation
-                                                        remove(field.name);
-                                                    }
-                                                }}
+                                                onClick={() => handleRemoveStep(field, remove)}
                                             />
                                         )
                                     }
                                 >
-                                    {/* Hidden field for step ID */}
                                     <Form.Item
                                         noStyle
                                         name={[field.name, 'id']}
@@ -256,7 +325,15 @@ const RoutineForm = ({
                                     </Form.Item>
 
                                     <Form.Item
-                                        name={[field.name, 'products']}
+                                        noStyle
+                                        name={[field.name, 'stepOrder']}
+                                        initialValue={index + 1}
+                                    >
+                                        <Input type="hidden" />
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        name={[field.name, 'productResponse']}
                                         label="Sản phẩm khuyến nghị"
                                         rules={[{ required: true, message: 'Vui lòng chọn ít nhất một sản phẩm' }]}
                                     >
@@ -265,13 +342,13 @@ const RoutineForm = ({
                                             placeholder="Chọn sản phẩm"
                                             disabled={!selectedSkinType}
                                             loading={loading}
+                                            optionFilterProp="children"
                                         >
                                             {products.map(product => (
                                                 <Option key={product.id} value={product.id.toString()}>
-                                                    <div className='flex align-items-center'>
-                                                        {product.images && (
+                                                    <div className="flex align-items-center">
+                                                        {product.images && product.images.length > 0 && (
                                                             <img
-
                                                                 src={product.images[0].url}
                                                                 alt={product.name}
                                                                 style={{ width: 32, height: 32, marginRight: 8 }}
@@ -292,7 +369,8 @@ const RoutineForm = ({
                                     onClick={() => add({
                                         stepName: '',
                                         description: '',
-                                        products: []
+                                        stepOrder: fields.length + 1,
+                                        productResponse: []
                                     })}
                                     icon={<PlusOutlined />}
                                     style={{ width: '100%' }}

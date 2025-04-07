@@ -36,12 +36,12 @@ const ManageRoutine = () => {
         name: '',
         description: '',
         skinTypeId: undefined,
-        routineStepRequests: [
+        routineStepResponse: [
             {
                 stepName: '',
                 description: '',
                 stepOrder: 1,
-                products: []
+                productResponse: []
             }
         ]
     });
@@ -69,18 +69,18 @@ const ManageRoutine = () => {
         try {
             setLoading(true);
             const data = await fetchRoutines();
-            const transformedData = data.map(routine => ({
+            const transformedData = data.map((routine) => ({
                 id: routine.id,
                 name: routine.name,
                 description: routine.description,
-                skinTypeId: routine.skinType.id,
-                skinTypeName: routine.skinType.name,
-                routineStepRequests: routine.routineSteps ? routine.routineSteps.map(step => ({
-                    id: step.id,
+                skinTypeId: routine.skinTypeResponse.typeId,
+                skinTypeName: routine.skinTypeResponse.type,
+                routineStepResponse: routine.routineStepResponse ? routine.routineStepResponse.map((step, stepIndex) => ({
+                    id: stepIndex + 1,
                     stepName: step.stepName,
                     description: step.description,
                     stepOrder: step.stepOrder,
-                    products: step.products || []
+                    productResponse: step.productResponse || []
                 })) : []
             }));
             setRoutines(transformedData);
@@ -98,12 +98,12 @@ const ManageRoutine = () => {
             name: '',
             description: '',
             skinTypeId: undefined,
-            routineStepRequests: [
+            routineStepResponse: [
                 {
                     stepName: '',
                     description: '',
                     stepOrder: 1,
-                    products: []
+                    productResponse: []
                 }
             ]
         });
@@ -116,10 +116,9 @@ const ManageRoutine = () => {
         const formattedValues = {
             ...routine,
             skinTypeId: routine.skinTypeId.toString(),
-            routineStepRequests: routine.routineStepRequests.map(step => ({
+            routineStepResponse: routine.routineStepResponse.map(step => ({
                 ...step,
-                // Ensure products is an array of IDs as strings
-                products: step.products.map(product => product.id.toString())
+                productResponse: step.productResponse.map(product => product.id.toString())
             }))
         };
 
@@ -136,19 +135,33 @@ const ManageRoutine = () => {
         try {
             setLoading(true);
 
+            const formattedValues = {
+                ...values,
+                skinTypeResponse: {
+                    typeId: parseInt(values.skinTypeId),
+                    type: skinTypes.find(type => type.id === parseInt(values.skinTypeId))?.name || ''
+                },
+                routineStepResponse: values.routineStepResponse.map(step => ({
+                    stepName: step.stepName,
+                    description: step.description,
+                    stepOrder: step.stepOrder,
+                    productResponse: step.productResponse.map(productId => ({
+                        id: parseInt(productId),
+                        name: "Product Name" 
+                    }))
+                }))
+            };
+
             if (editingRoutine) {
-                // Update existing routine
-                await updateRoutine(editingRoutine, values);
+                await updateRoutine(editingRoutine, formattedValues);
                 message.success('Cập nhật quy trình thành công!');
             } else {
-                // Add new routine
-                await createRoutine(values);
+                await createRoutine(formattedValues);
                 message.success('Thêm quy trình mới thành công!');
             }
 
             setFormVisible(false);
             setEditingRoutine(null);
-            // Refresh data after update
             getAllRoutines();
         } catch (error) {
             message.error('Lưu quy trình thất bại. Vui lòng thử lại.');
@@ -174,7 +187,7 @@ const ManageRoutine = () => {
                 } catch (error) {
                     message.error('Xóa quy trình thất bại. Vui lòng thử lại.');
                     console.error('Error deleting routine:', error);
-                } finally {
+                } finally {         
                     setLoading(false);
                 }
             }
@@ -205,8 +218,8 @@ const ManageRoutine = () => {
         {
             title: 'Số bước',
             key: 'steps',
-            render: (_, record) => record.routineStepRequests.length,
-            sorter: (a, b) => a.routineStepRequests.length - b.routineStepRequests.length,
+            render: (_, record) => record.routineStepResponse.length,
+            sorter: (a, b) => a.routineStepResponse.length - b.routineStepResponse.length,
         },
         {
             title: 'Hành động',
@@ -252,17 +265,18 @@ const ManageRoutine = () => {
                             title: 'Mô tả',
                             dataIndex: 'description',
                             key: 'description',
-                            // ellipsis: true,
                             width: 280,
                         },
                         {
                             title: 'Sản phẩm khuyến nghị',
-                            key: 'products',
+                            key: 'productResponse',
                             render: (_, record) => (
                                 <>
-                                    {record.products.map((product) => (
+                                    {record.productResponse.map((product) => (
                                         <Tag color="green" key={product.id} style={{ marginRight: '8px' }}>
-                                            {product.name.split(" ").slice(0, 6).join(" ")} ... - {product.category.name}
+                                            {product.name.length > 40 
+                                              ? `${product.name.substring(0, 40)}...` 
+                                              : product.name}
                                         </Tag>
                                     ))}
                                 </>
@@ -270,7 +284,7 @@ const ManageRoutine = () => {
                             width: 500,
                         },
                     ]}
-                    dataSource={record.routineStepRequests}
+                    dataSource={record.routineStepResponse.sort((a, b) => a.stepOrder - b.stepOrder)}
                     pagination={false}
                     rowKey={record => record.id || record.stepOrder}
                     scroll={{ x: 1080 }}
@@ -300,7 +314,7 @@ const ManageRoutine = () => {
                     loading={loading}
                     expandable={{
                         expandedRowRender,
-                        rowExpandable: record => record.routineStepRequests && record.routineStepRequests.length > 0,
+                        rowExpandable: record => record.routineStepResponse && record.routineStepResponse.length > 0,
                     }}
                 />
             </Card>

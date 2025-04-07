@@ -1,6 +1,5 @@
 import api from '../config/axios';
 
-// Get all skincare routines
 export const fetchRoutines = async () => {
     try {
         const response = await api.get('/routine/getAll');
@@ -11,10 +10,25 @@ export const fetchRoutines = async () => {
     }
 };
 
-// Create a new skincare routine with all steps in one request
 export const createRoutine = async (routineData) => {
     try {
-        const response = await api.post('/routine/createRoutine', routineData);
+        const formattedData = {
+            name: routineData.name,
+            description: routineData.description,
+            skinTypeId: routineData.skinTypeId,
+            routineStepRequests: routineData.routineStepResponse.map(step => ({
+                stepName: step.stepName,
+                description: step.description,
+                stepOrder: step.stepOrder,
+                products: Array.isArray(step.productResponse)
+                    ? step.productResponse.map(product => ({
+                        id: typeof product === 'object' ? product.id : parseInt(product, 10)
+                    }))
+                    : []
+            }))
+        };
+
+        const response = await api.post('/routine/createRoutine', formattedData);
         return response.data;
     } catch (error) {
         console.error("Error creating routine:", error);
@@ -24,72 +38,49 @@ export const createRoutine = async (routineData) => {
 
 export const updateRoutine = async (routineId, routineData) => {
     try {
-        const { name, description, skinTypeId, routineStepRequests, deletedStepIds } = routineData;
+        const basicRoutineData = {
+            name: routineData.name,
+            description: routineData.description,
+            skinTypeId: routineData.skinTypeId
+        };
 
-        // First update the basic routine information
         await api.put(
-            `/routine/update/${routineId}/${skinTypeId}?name=${encodeURIComponent(name)}&description=${encodeURIComponent(description)}`
+            `/routine/update/${routineId}/${basicRoutineData.skinTypeId}?name=${encodeURIComponent(basicRoutineData.name)}&description=${encodeURIComponent(basicRoutineData.description)}`
         );
 
-        // Handle any steps that were already deleted through the UI
-        // but we want to make sure they're properly deleted in the database
-        if (deletedStepIds && deletedStepIds.length > 0) {
-            // These steps were already deleted via deleteRoutineStep API in the UI,
-            // but we're double-checking to ensure deletion was successful
-            const deletePromises = deletedStepIds.map(async (stepId) => {
-                try {
-                    // Attempt to delete again - this will likely return an error if already deleted,
-                    // but we can safely ignore that
-                    await deleteRoutineStep(stepId);
-                } catch (error) {
-                    // Likely already deleted, so we can ignore this error
-                    console.log(`Step ID ${stepId} may have already been deleted or doesn't exist`, error);
-                }
-            });
+        const currentRoutine = await getRoutineById(routineId);
+        const currentStepIds = currentRoutine.routineStepResponse
+            ? currentRoutine.routineStepResponse.map(step => step.id)
+            : [];
 
-            await Promise.all(deletePromises);
+        for (const stepId of currentStepIds) {
+            try {
+                await deleteRoutineStep(stepId);
+            } catch (err) {
+                console.error(`Failed to delete step ${stepId}:`, err);
+            }
         }
 
-        // Process remaining steps (update existing ones, create new ones)
-        if (routineStepRequests && routineStepRequests.length > 0) {
-            const stepPromises = routineStepRequests.map(step => {
-                if (step.id) {
-                    // Only update steps that weren't deleted
-                    if (!deletedStepIds?.includes(step.id)) {
-                        return updateRoutineStep(step.id, {
-                            stepName: step.stepName,
-                            description: step.description,
-                            stepOrder: step.stepOrder,
-                            products: step.products.map(product => {
-                                if (typeof product === 'object' && product.id) {
-                                    return { id: product.id };
-                                }
-                                return { id: typeof product === 'string' ? parseInt(product, 10) : product };
-                            })
-                        });
-                    }
-                    return Promise.resolve(); // Skip deleted steps
-                } else {
-                    // Create new steps
-                    return createRoutineStep(routineId, {
-                        stepName: step.stepName,
-                        description: step.description,
-                        stepOrder: step.stepOrder,
-                        products: step.products.map(product => {
-                            if (typeof product === 'object' && product.id) {
-                                return { id: product.id };
-                            }
-                            return { id: typeof product === 'string' ? parseInt(product, 10) : product };
-                        })
-                    });
-                }
-            });
+        if (routineData.routineStepResponse && routineData.routineStepResponse.length > 0) {
+            const stepsToCreate = routineData.routineStepResponse.map((step, index) => ({
+                stepName: step.stepName,
+                description: step.description,
+                stepOrder: index + 1, 
+                products: Array.isArray(step.productResponse)
+                    ? step.productResponse.map(product => {
+                        const productId = typeof product === 'object' ? product.id : parseInt(product, 10);
+                        return { id: productId };
+                    })
+                    : []
+            }));
 
-            // Wait for all step operations to complete
-            await Promise.all(stepPromises);
+            for (const stepData of stepsToCreate) {
+                await createRoutineStep(routineId, stepData);
+            }
         }
 
-        return true; // Return success
+        const updatedRoutine = await getRoutineById(routineId);
+        return updatedRoutine;
     } catch (error) {
         console.error(`Error updating routine with ID ${routineId}:`, error);
         throw error;
@@ -98,7 +89,7 @@ export const updateRoutine = async (routineId, routineData) => {
 
 export const getRoutineById = async (routineId) => {
     try {
-        const response = await api.get(`/routine/getById/${routineId}`);
+        const response = await api.get(`/routine/getRoutineById/${routineId}`);
         return response.data;
     } catch (error) {
         console.error(`Error fetching routine with ID ${routineId}:`, error);
@@ -106,7 +97,6 @@ export const getRoutineById = async (routineId) => {
     }
 };
 
-// Create a single routine step
 export const createRoutineStep = async (routineId, stepData) => {
     try {
         const response = await api.post(`/routine/createRoutineStep/${routineId}`, stepData);
@@ -117,7 +107,6 @@ export const createRoutineStep = async (routineId, stepData) => {
     }
 };
 
-// Update a single routine step
 export const updateRoutineStep = async (stepId, stepData) => {
     try {
         const response = await api.put(`/routine/updateRoutineStep/${stepId}`, stepData);
@@ -128,7 +117,6 @@ export const updateRoutineStep = async (stepId, stepData) => {
     }
 };
 
-// Delete a routine step
 export const deleteRoutineStep = async (stepId) => {
     try {
         const response = await api.delete(`/routine/deleteRoutineStep/${stepId}`);
@@ -139,7 +127,6 @@ export const deleteRoutineStep = async (stepId) => {
     }
 };
 
-// Delete an entire routine
 export const deleteRoutine = async (routineId) => {
     try {
         const response = await api.delete(`/routine/delete/${routineId}`);
