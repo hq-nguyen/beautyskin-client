@@ -45,7 +45,7 @@ const OrderList = () => {
 
       const filteredOrders = sortedOrders.filter(order => {
         const status = order.orderStatus.toUpperCase();
-        return ['PENDING', 'IN_PROGRESS', 'SHIPPING', 'DELIVERED'].includes(status);
+        return ['PENDING', 'IN_PROGRESS', 'SHIPPING', 'DELIVERED', 'CONFIRMED'].includes(status);
       });
 
       setOrders(filteredOrders);
@@ -344,6 +344,7 @@ const OrderList = () => {
     {
       title: 'Tổng tiền',
       dataIndex: 'totalPrice',
+      width: 120,
       key: 'totalPrice',
       sorter: (a, b) => a.totalPrice - b.totalPrice,
       sortDirections: ['descend', 'ascend'],
@@ -387,7 +388,7 @@ const OrderList = () => {
       title: 'Hành động',
       key: 'actions',
       render: (_, record) => (
-        record.orderStatus !== 'DELIVERED' ? (
+        (record.orderStatus !== 'DELIVERED' && record.orderStatus !== 'CONFIRMED') ? (
           <Space>
             <Button
               size="small"
@@ -481,6 +482,7 @@ const OrderList = () => {
             pagination={false}
             rowClassName={(record, index) => (index % 2 === 0 ? "bg-gray-50" : "bg-white")}
             className="w-full"
+            scroll={{ x: 1200 }}
           />
 
           {total > 0 && (

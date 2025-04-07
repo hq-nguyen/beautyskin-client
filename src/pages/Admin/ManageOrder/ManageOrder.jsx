@@ -632,6 +632,7 @@ const ManageOrder = () => {
             pagination={false}
             rowClassName={(record, index) => (index % 2 === 0 ? "bg-gray-50" : "bg-white")}
             className="w-full"
+            scroll={{ x: 1200 }}
           />
 
           {total > 0 && (

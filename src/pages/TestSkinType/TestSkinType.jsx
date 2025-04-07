@@ -53,7 +53,7 @@ const SkinTypeQuiz = () => {
           };
         });
         
-        console.log('Validated questions:', validatedData);
+        // console.log('Validated questions:', validatedData);
         setQuestions(validatedData);
         setLoading(false);
       } catch (err) {
@@ -114,6 +114,8 @@ const SkinTypeQuiz = () => {
       setTotalPoints(sum);
       
       const skinTypeResult = determineSkinType(sum);
+      // console.log('skinTypeResult:', skinTypeResult);
+      
       setSkinType(skinTypeResult.type);
       setRecommendations(skinTypeResult.recommendations);
       setShowResult(true);

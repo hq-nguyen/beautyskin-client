@@ -21,10 +21,8 @@ const DashboardSummary = () => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      // Use the real API call
       const orders = await getOrdersFromStaff();
       
-      // Calculate statistics from orders
       const statusCounts = {
         completed: 0,
         inProgress: 0,
@@ -34,7 +32,7 @@ const DashboardSummary = () => {
       
       orders.forEach(orderAssignment => {
         const status = orderAssignment.order.orderStatus;
-        if (status === 'SHIPPED' || status === 'DELIVERED') {
+        if (status === 'SHIPPING' || status === 'DELIVERED' || status === 'CONFIRMED') {
           statusCounts.completed++;
         } else if (status === 'IN_PROGRESS') {
           statusCounts.inProgress++;
