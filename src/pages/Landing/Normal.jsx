@@ -1,51 +1,40 @@
 import { Card, Steps, List, Tag, Alert, Typography, Divider, Space } from 'antd';
 import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-import api from '../../config/axios';
+import { getRoutineBySkinType } from '../../apis/routine';
 
 const { Title, Paragraph, Text } = Typography;
 
 const Normal = () => {
   const [skincareRoutine, setSkincareRoutine] = useState([]);
+  const [skinTypeInfo, setSkinTypeInfo] = useState(null);
+  const [routineInfo, setRoutineInfo] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const getSkincareRoutine = async () => {
+    const fetchSkincareRoutine = async () => {
       try {
         setLoading(true);
-        const skinTypeId = localStorage.getItem('skinTypeId');
-        const token = localStorage.getItem('token')
-
-        if (!skinTypeId) {
-          throw new Error('Skin type ID not found in localStorage.');
-        }
-        if (!token) {
-          throw new Error('No authentication token found. Please log in again.');
-        }
-
-        const response = await api.get(`/routine/getRoutineBySkinType/${skinTypeId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            skinTypeId: skinTypeId,
-          },
+        const data = await getRoutineBySkinType(2); 
+        setRoutineInfo({
+          id: data.id,
+          name: data.name,
+          description: data.description
         });
 
-        console.log('API Response:', response.data);
-        const data = response.data;
-        setSkincareRoutine(data.routineSteps || []);
+        setSkinTypeInfo(data.skinTypeResponse);
+        setSkincareRoutine(data.routineStepResponse || []);
         setError(null);
       } catch (error) {
         console.error('Error fetching skincare routine:', error);
-        setError(error.response?.data?.error || 'Không thể tải quy trình chăm sóc da. Vui lòng thử lại sau.');
+        setError(error?.response?.data?.error || 'Không thể tải quy trình chăm sóc da. Vui lòng thử lại sau.');
       } finally {
         setLoading(false);
       }
     };
 
-    getSkincareRoutine();
+    fetchSkincareRoutine();
   }, []);
 
   const skincareTips = [
@@ -66,20 +55,16 @@ const Normal = () => {
     { name: 'Ceramide', benefit: 'Tăng cường hàng rào bảo vệ da' },
   ];
 
-  const renderHTML = (htmlString) => {
-    return <div dangerouslySetInnerHTML={{ __html: htmlString }} />;
-  };
-
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <Title level={2} className="text-center mb-8">
-        Phương pháp chăm sóc cho da thường
+        {routineInfo?.name || "Phương pháp chăm sóc cho da thường"}
       </Title>
 
       {/* Overview Section */}
       <Card className="mb-8">
         <Alert
-          message="Đặc điểm của da thường"
+          message={`Đặc điểm ${skinTypeInfo?.type || "da thường"}`}
           description={
             <ul className="list-disc pl-5 mt-2">
               <li>Da không quá khô hoặc quá dầu</li>
@@ -110,22 +95,17 @@ const Normal = () => {
               direction="vertical"
               current={-1}
               items={skincareRoutine.map((step) => ({
-                title: step.stepName || step.name,
+                title: step.stepName,
                 description: (
                   <div>
                     <Text>{step.description}</Text>
-                    {step.lastUpdated && (
-                      <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
-                        Cập nhật lần cuối: {new Date(step.lastUpdated).toLocaleString()}
-                      </Text>
-                    )}
-                    {step.products?.length > 0 && (
+                    {step.productResponse?.length > 0 && (
                       <div className="mt-4">
                         <ShoppingOutlined style={{ marginRight: 8 }} />
                         <Text strong>Sản phẩm gợi ý:</Text>
                         <div className="ml-4 mt-2">
                           <Space direction="vertical">
-                            {step.products.map((product) => (
+                            {step.productResponse.map((product) => (
                               <div key={product.id}>
                                 <a href={`/product/${product.id}`}>
                                   <Tag color="green">{product.name}</Tag>
@@ -141,12 +121,6 @@ const Normal = () => {
               }))}
             />
             <Divider />
-            <Alert
-              message="Lưu ý"
-              description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
-              type="info"
-              showIcon
-            />
           </>
         ) : (
           <Paragraph>Không có quy trình chăm sóc da nào được tìm thấy.</Paragraph>
@@ -156,7 +130,7 @@ const Normal = () => {
       {/* Tips Section */}
       <Title level={3} className="mb-4">
         <BulbOutlined className="mr-2" />
-        Lời khuyên cho da thường
+        Nguyên tắc vàng cho da thường
       </Title>
       <Card className="mb-8">
         <List
@@ -180,7 +154,7 @@ const Normal = () => {
           renderItem={(item) => (
             <List.Item>
               <List.Item.Meta
-                title={<Tag color="blue">{item.name}</Tag>}
+                title={<Tag color="green">{item.name}</Tag>}
                 description={item.benefit}
               />
             </List.Item>
@@ -190,7 +164,7 @@ const Normal = () => {
 
       {/* What to Avoid */}
       <Title level={3} className="mb-4">
-        Những điều nên tránh
+        Tác nhân cần tránh
       </Title>
       <Card className="mb-8">
         <List

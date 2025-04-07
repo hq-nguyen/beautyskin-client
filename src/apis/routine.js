@@ -97,6 +97,20 @@ export const getRoutineById = async (routineId) => {
     }
 };
 
+export const getRoutineBySkinType = async (skinTypeId) => {
+    try {
+        const response = await api.get(`/routine/getRoutineBySkinType/${skinTypeId}`, {
+            params: {
+                skinTypeId: skinTypeId
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching routine for skin type ${skinTypeId}:`, error);
+        throw error;
+    }
+}
+
 export const createRoutineStep = async (routineId, stepData) => {
     try {
         const response = await api.post(`/routine/createRoutineStep/${routineId}`, stepData);

@@ -1,50 +1,40 @@
 import { Card, Steps, List, Tag, Alert, Typography, Divider, Space } from 'antd';
 import { SkinOutlined, ExperimentOutlined, BulbOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-import api from '../../config/axios';
+import { getRoutineBySkinType } from '../../apis/routine';
+
 const { Title, Paragraph, Text } = Typography;
 
 const Combination = () => {
   const [skincareRoutine, setSkincareRoutine] = useState([]);
+  const [skinTypeInfo, setSkinTypeInfo] = useState(null);
+  const [routineInfo, setRoutineInfo] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const getSkincareRoutine = async () => {
+    const fetchSkincareRoutine = async () => {
       try {
         setLoading(true);
-        const skinTypeId = localStorage.getItem('skinTypeId');
-        const token = localStorage.getItem('token');
-        
-        if (!skinTypeId) {
-          throw new Error('Skin type ID not found in localStorage.');
-        }
-        if (!token) {
-          throw new Error('No authentication token found. Please log in again.');
-        }
-
-        const response = await api.get(`/routine/getRoutineBySkinType/${skinTypeId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            skinTypeId: skinTypeId,
-          },
+        const data = await getRoutineBySkinType(6); 
+        setRoutineInfo({
+          id: data.id,
+          name: data.name,
+          description: data.description
         });
 
-        console.log('API Response:', response.data);
-        const data = response.data;
-        setSkincareRoutine(data.routineSteps || []);
+        setSkinTypeInfo(data.skinTypeResponse);
+        setSkincareRoutine(data.routineStepResponse || []);
         setError(null);
       } catch (error) {
         console.error('Error fetching skincare routine:', error);
-        setError(error.response?.data?.error || 'Không thể tải quy trình chăm sóc da. Vui lòng thử lại sau.');
+        setError(error?.response?.data?.error || 'Không thể tải quy trình chăm sóc da. Vui lòng thử lại sau.');
       } finally {
         setLoading(false);
       }
     };
 
-    getSkincareRoutine();
+    fetchSkincareRoutine();
   }, []);
 
   const skincareTips = [
@@ -67,13 +57,12 @@ const Combination = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <Title level={2} className="text-center mb-8">
-        Phương pháp chăm sóc cho da hỗn hợp
+        {routineInfo?.name || "Phương pháp chăm sóc cho da hỗn hợp"}
       </Title>
 
-      {/* Overview Section */}
       <Card className="mb-8">
         <Alert
-          message="Đặc điểm của da hỗn hợp"
+          message={`Đặc điểm ${skinTypeInfo?.type || "da hỗn hợp"}`}
           description={
             <ul className="list-disc pl-5 mt-2">
               <li>Da dầu ở vùng chữ T (trán, mũi, cằm)</li>
@@ -87,7 +76,6 @@ const Combination = () => {
         />
       </Card>
 
-      {/* Skincare Routine */}
       <Title level={3} className="mb-4">
         <SkinOutlined className="mr-2" />
         Quy trình chăm sóc da
@@ -103,25 +91,20 @@ const Combination = () => {
               direction="vertical"
               current={-1}
               items={skincareRoutine.map((step) => ({
-                title: step.stepName || step.name,
+                title: step.stepName,
                 description: (
                   <div>
                     <Text>{step.description}</Text>
-                    {step.lastUpdated && (
-                      <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
-                        Cập nhật lần cuối: {new Date(step.lastUpdated).toLocaleString()}
-                      </Text>
-                    )}
-                    {step.products?.length > 0 && (
+                    {step.productResponse?.length > 0 && (
                       <div className="mt-4">
                         <ShoppingOutlined style={{ marginRight: 8 }} />
                         <Text strong>Sản phẩm gợi ý:</Text>
                         <div className="ml-4 mt-2">
                           <Space direction="vertical">
-                            {step.products.map((product) => (
+                            {step.productResponse.map((product) => (
                               <div key={product.id}>
                                 <a href={`/product/${product.id}`}>
-                                  <Tag color="green">{product.name}</Tag>
+                                  <Tag color="orange">{product.name}</Tag>
                                 </a>
                               </div>
                             ))}
@@ -146,10 +129,9 @@ const Combination = () => {
         )}
       </Card>
 
-      {/* Tips Section */}
       <Title level={3} className="mb-4">
         <BulbOutlined className="mr-2" />
-        Lời khuyên cho da hỗn hợp
+        Nguyên tắc vàng cho da hỗn hợp
       </Title>
       <Card className="mb-8">
         <List
@@ -162,7 +144,6 @@ const Combination = () => {
         />
       </Card>
 
-      {/* Ingredients Section */}
       <Title level={3} className="mb-4">
         <ExperimentOutlined className="mr-2" />
         Thành phần nên có trong sản phẩm
@@ -181,9 +162,8 @@ const Combination = () => {
         />
       </Card>
 
-      {/* What to Avoid */}
       <Title level={3} className="mb-4">
-        Những điều nên tránh
+        Tác nhân cần tránh
       </Title>
       <Card className="mb-8">
         <List
@@ -202,7 +182,6 @@ const Combination = () => {
         />
       </Card>
 
-      {/* Maintenance Tips */}
       <Title level={3} className="mb-4">
         Duy trì làn da khỏe mạnh
       </Title>
@@ -211,7 +190,7 @@ const Combination = () => {
           Da hỗn hợp cần được chăm sóc cẩn thận để cân bằng độ ẩm và kiểm soát dầu. Hãy chú ý đến việc sử dụng sản phẩm phù hợp với từng vùng da và duy trì thói quen chăm sóc da đều đặn.
         </Paragraph>
         <Paragraph>
-          <strong>Lưu ý quan trọng:</strong> Trong mùa hè, da hỗn hợp có thể trở nên bóng dầu hơn, vì vậy hãy tăng cường sử dụng sản phẩm kiểm soát dầu và giữ da sạch sẽ.
+          <strong>Lưu ý quan trọng:</strong> Trong mùa hè, da hỗn hợp có thể trở nên bóng dầu hơn, vì vậy hãy tăng cường sử dụng sản phẩm kiểm soát dầu và giữ da sạch sẽ. Ngược lại, vào mùa đông, cần chú ý cấp ẩm cho vùng da khô nhiều hơn.
         </Paragraph>
       </Card>
     </div>
