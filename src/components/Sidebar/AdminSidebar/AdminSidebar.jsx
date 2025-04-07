@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
+import { LuArrowLeftToLine, LuArrowRightToLine, LuHandHelping } from "react-icons/lu";
 import { IoDiscOutline } from "react-icons/io5";
 import { MdOutlineDashboard, MdOutlineCategory, MdOutlineQuiz } from "react-icons/md";
 import { BiUser, BiPackage, BiCart } from "react-icons/bi"; 
@@ -27,10 +27,10 @@ function AdminSidebar({
     JSON.parse(localStorage.getItem('sidebar-expanded')) || false
   );
 
-  // close sidebar when click outside, only on small screens
+  // close sidebar when click outside for small screens
   useEffect(() => {
     const clickHandler = ({ target }) => {
-      if (window.innerWidth >= 1024) return; // Do not close on large screens
+      if (window.innerWidth >= 1024) return; 
 
       if (!sidebar.current || !trigger.current) return;
       if (!sidebarOpen || sidebar.current.contains(target) || trigger.current.contains(target) || (iconRef.current && iconRef.current.contains(target))) return;
@@ -40,7 +40,7 @@ function AdminSidebar({
     return () => document.removeEventListener("click", clickHandler);
   }, [sidebarOpen, setSidebarOpen]);
 
-  // close if the esc key is pressed
+  // esc key is pressed
   useEffect(() => {
     const keyHandler = ({ keyCode }) => {
       if (!sidebarOpen || keyCode !== 27) return;
@@ -123,6 +123,13 @@ function AdminSidebar({
       icon: <MdOutlineQuiz size={20} />,
       path: '/admin/quiz',
       mark: 'quiz',
+    },
+    {
+      id: 'routine',
+      label: 'Lộ trình chăm sóc',
+      icon: <LuHandHelping size={20} />,
+      path: '/admin/routine',
+      mark: 'routine',
     },
   ];
 

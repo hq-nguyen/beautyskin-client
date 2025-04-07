@@ -57,6 +57,7 @@ import Dashboard from "../pages/Staff/Dashboard";
 import OrderManagement from "../pages/Staff/OrderManagement";
 import ComparePage from "../pages/Shop/Compare";
 import DashboardMain from "../pages/Admin/Dashboard/Dashboard";
+import ManageRoutine from "../pages/Admin/ManageRoutine/ManageRoutine";
 
 const Routers = () => {
   const routing = useRoutes([
@@ -265,6 +266,10 @@ const Routers = () => {
         {
           path: "quiz",
           element: <ManageQuiz />,
+        },
+        {
+          path: "routine",
+          element: <ManageRoutine />,
         }
       ],
     },
