@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FaEye, FaHeart } from 'react-icons/fa';
+import { IoCartOutline } from "react-icons/io5";
 import StarRating from '../utils/StarRating';
 import { assets } from '../../assets/frontend_assets/assets';
 import api from '../../config/axios';
@@ -131,7 +132,10 @@ const ProductItem = ({ id, image, promotion, name, oldPrice, newPrice, averageRa
                 </Link>
                 <div className="flex my-1">
                     <StarRating rating={averageRating.toFixed(1)} />
-                    <span className="ml-2 text-xs text-gray-500">({productSold})</span>
+                    <span className="border border-r-black "></span>
+                    <span className="ml-2 text-xs text-gray-500 flex items-center">
+                    <IoCartOutline className='mr-2'/> {productSold}   
+                    </span>
                 </div>
                 <div className="flex items-center">
                     {displayPromotion && !isOutOfStock && (

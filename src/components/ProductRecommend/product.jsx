@@ -10,11 +10,14 @@ const ProductRecommendations = ({ skinType }) => {
   useEffect(() => {
     const getRecommendedProducts = async () => {
       if (!skinType) return;
+      console.log('Fetching products for skin type:', skinType);
+      
       
       try {
         setLoading(true);
         const skinTypeId = mapSkinTypeToId(skinType);
         localStorage.setItem('skinTypeId', skinTypeId)
+        console.log('Skin type ID:', skinTypeId);
         
         const data = await getProductBySkinType(skinTypeId);
         

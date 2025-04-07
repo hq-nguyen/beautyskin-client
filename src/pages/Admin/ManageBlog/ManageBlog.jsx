@@ -193,6 +193,7 @@ const ManageBlog = () => {
                     pagination={{ position: ['bottomRight'] }}
                     rowClassName={(_, index) => (index % 2 === 0 ? "bg-gray-100" : "bg-white")}
                     className="w-full border rounded-lg shadow-md"
+                    scroll={{ x: 1200 }}
                 />
             )}
 

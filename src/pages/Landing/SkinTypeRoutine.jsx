@@ -29,14 +29,13 @@ const SkinTypeRoutine = ({ skinTypeKey: propSkinTypeKey }) => {
         types.forEach(type => {
           const key = type.name
             .toLowerCase()
-            .replace('da ', '')  // Remove "Da " prefix
+            .replace('da ', '')  
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "") 
             .replace(/\s+/g, ''); 
           
           typeMap[key] = type.id;
           
-          // Also add English equivalents
           if (key.includes('thuong') || key.includes('normal')) typeMap['normal'] = type.id;
           if (key.includes('dau') || key.includes('oily')) typeMap['oily'] = type.id;
           if (key.includes('kho') || key.includes('dry')) typeMap['dry'] = type.id;
@@ -116,7 +115,7 @@ const SkinTypeRoutine = ({ skinTypeKey: propSkinTypeKey }) => {
         'Sử dụng sản phẩm tẩy tế bào chết mạnh',
       ],
       color: 'orange',
-      alertType: 'warning',
+      alertType: 'success',
       characteristics: [
         'Da thường xuyên cảm thấy căng và khô',
         'Lỗ chân lông nhỏ',
@@ -158,7 +157,7 @@ const SkinTypeRoutine = ({ skinTypeKey: propSkinTypeKey }) => {
         'Sử dụng quá nhiều sản phẩm cùng lúc',
         'Chạm tay lên mặt quá nhiều',
       ],
-      color: 'green',
+      color: 'blue',
       alertType: 'success',
       characteristics: [
         'Da không quá khô hoặc quá dầu',
@@ -203,7 +202,7 @@ const SkinTypeRoutine = ({ skinTypeKey: propSkinTypeKey }) => {
         'Sử dụng sản phẩm chứa cồn nồng độ cao',
       ],
       color: 'blue',
-      alertType: 'info',
+      alertType: 'success',
       characteristics: [
         'Da bóng dầu, đặc biệt ở vùng chữ T',
         'Lỗ chân lông to và dễ nhìn thấy',
@@ -247,7 +246,7 @@ const SkinTypeRoutine = ({ skinTypeKey: propSkinTypeKey }) => {
         'Bỏ qua bước cân bằng da sau khi rửa mặt',
       ],
       color: 'purple',
-      alertType: 'info',
+      alertType: 'success',
       characteristics: [
         'Vùng chữ T (trán, mũi, cằm) tiết dầu nhiều',
         'Vùng má khô hoặc bình thường',
@@ -291,7 +290,7 @@ const SkinTypeRoutine = ({ skinTypeKey: propSkinTypeKey }) => {
         'Tiếp xúc với nhiệt độ cực đoan',
       ],
       color: 'red',
-      alertType: 'error',
+      alertType: 'success',
       characteristics: [
         'Da dễ bị đỏ và kích ứng',
         'Cảm giác ngứa, rát, bỏng khi sử dụng sản phẩm',
@@ -395,12 +394,6 @@ const SkinTypeRoutine = ({ skinTypeKey: propSkinTypeKey }) => {
               }))}
             />
             <Divider />
-            <Alert
-              message="Lưu ý"
-              description="Các bước được đánh dấu 'Tùy chọn' có thể được thêm vào hoặc bỏ qua tùy thuộc vào tình trạng da hiện tại và nhu cầu của bạn. Nhấp vào sản phẩm để xem chi tiết."
-              type="info"
-              showIcon
-            />
           </>
         ) : (
           <Paragraph>Không có quy trình chăm sóc da nào được tìm thấy.</Paragraph>

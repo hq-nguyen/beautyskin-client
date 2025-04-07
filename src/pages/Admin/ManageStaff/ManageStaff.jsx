@@ -22,7 +22,6 @@ const ManageStaff = () => {
     const getStaffs = async () => {
       try {
         const data = await fetchStaff();
-        // Filter to only include users with the roleEnums "STAFF"
         const staffData = data.filter(user => user.role === "STAFF");
         setStaffs(staffData);
         setFilteredStaffs(staffData);
@@ -36,7 +35,6 @@ const ManageStaff = () => {
   }, []);
 
   useEffect(() => {
-    // Apply filters when statusFilter changes
     if (statusFilter === 'all') {
       setFilteredStaffs(staffs);
     } else if (statusFilter === 'active') {
@@ -56,7 +54,6 @@ const ManageStaff = () => {
       onOk: async () => {
         try {
           await lockAccount(staff.id);
-          // Update the local state after successful API call
           const updatedStaffs = staffs.map(s => 
             s.id === staff.id ? { ...s, active: false } : s
           );
@@ -82,7 +79,6 @@ const ManageStaff = () => {
       onOk: async () => {
         try {
           await unLockAccount(staff.id);
-          // Update the local state after successful API call
           const updatedStaffs = staffs.map(s => 
             s.id === staff.id ? { ...s, active: true } : s
           );
@@ -109,7 +105,7 @@ const ManageStaff = () => {
       const newStaffWithId = { 
         ...newStaff, 
         id: response.id, 
-        active: true // Assuming new staff is active by default
+        active: true 
       };
       const updatedStaffs = [...staffs, newStaffWithId];
       setStaffs(updatedStaffs);
@@ -122,7 +118,7 @@ const ManageStaff = () => {
         content: error.message 
       });
     }
-    getStaffs(); // Refresh the staff list after adding a new staff
+    getStaffs(); 
   };
 
   const columns = [
@@ -222,6 +218,7 @@ const ManageStaff = () => {
           pagination={{ position: ['bottomRight'] }}
           rowClassName={(_, index) => (index % 2 === 0 ? "bg-gray-100" : "bg-white")}
           className="w-full border rounded-lg shadow-md"
+          scroll={{ x: 1200 }}
         />
       )}
 

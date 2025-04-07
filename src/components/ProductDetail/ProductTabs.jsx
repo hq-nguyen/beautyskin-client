@@ -262,12 +262,12 @@ const ProductTabs = ({ product, feedbackData }) => {
                                             <div className="flex items-center">
                                                 <div className={`w-10 h-10 rounded-full ${isCurrentUserFeedback(feedback) ? 'bg-primary/20' : 'bg-primary/10'} flex items-center justify-center`}>
                                                     <span className="text-primary font-semibold">
-                                                        {feedback.user?.fullName?.charAt(0) || "U"}
+                                                        {feedback?.userName.charAt(0) || "U"}
                                                     </span>
                                                 </div>
                                                 <div className="ml-3">
                                                     <div className="flex items-center">
-                                                        <p className="font-medium">{feedback.user?.fullName || "Người dùng"}</p>
+                                                        <p className="font-medium">{feedback?.userName || "Người dùng"}</p>
                                                     </div>
                                                     <div className="flex items-center mt-1">
                                                         <div className="flex">
