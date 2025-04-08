@@ -155,10 +155,10 @@ const ShoppingCart = () => {
 
                   return (
                     <tr key={product.id} className={`border-b border-gray-200 ${isInvalid ? 'bg-yellow-50' : ''}`}>
-                      <td className="py-4 pl-2">
+                      <td className="py-4 pl-2">  
                         <div className="flex pr-6">
                           <Link to={`/product/${product.id}`}>
-                            <img src={product.image} alt={product.name} className="w-24 h-20 object-contain mr-2" />
+                            <img src={product.image} alt={product.name} className="w-20 h-20 min-w-20 min-h-20 object-cover aspect-square overflow-hidden mr-2" />
                           </Link>
                           <div>
                             <Link to={`/product/${product.id}`} className="font-medium text-sm w-80 hover:text-rose-600">{product.name}</Link>
@@ -175,10 +175,10 @@ const ShoppingCart = () => {
                               </div>
                             )}
                             <div className="flex space-x-2 text-sm mb-2 mt-1">
-                              <button className="flex items-center text-gray-600 hover:text-rose-600">
+                              {/* <button className="flex items-center text-gray-600 hover:text-rose-600">
                                 <CiHeart className="h-4 w-4 mr-1" />
                                 Yêu thích
-                              </button>
+                              </button> */}
                               <button
                                 className="flex items-center text-gray-600 hover:text-rose-600"
                                 onClick={() => showDeleteConfirm(product.id)}

@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Tag, Clock } from "lucide-react";
-import { getAllPromotions } from '../../apis/promotion';
+import { fetchRanking, getAllPromotions } from '../../apis/promotion';
+import { getUserRank } from '../../apis/customer';
 import { applyPromotion } from '../../redux/features/cartSlice';
 import { useDispatch } from 'react-redux';
 import { assets } from '../../assets/frontend_assets/assets';
+import { formatCurrency } from '../../utils/format';
 
 const PromotionSection = ({
     promotionCode,
@@ -17,21 +19,53 @@ const PromotionSection = ({
     const [showPromotionModal, setShowPromotionModal] = useState(false);
     const [availablePromotions, setAvailablePromotions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [userRankAmount, setUserRankAmount] = useState(0);
+    const [userRankInfo, setUserRankInfo] = useState(null);
     const dispatch = useDispatch();
+    const [ranks, setRanks] = useState(null);
+
+    useEffect(() => {
+        const fetchUserRank = async () => {
+            try {
+                const rank = await fetchRanking();
+                setRanks(rank);
+            } catch (error) {
+                console.error("Error fetching user rank:", error);
+            }
+        };
+
+        fetchUserRank();
+    }, []);
+
+    useEffect(() => {
+        if (userRankAmount > 0) {
+            const currentRank = ranks.reduce((highest, rank) => {
+                if (userRankAmount >= rank.amountLevel && rank.id > highest.id) {
+                    return rank;
+                }
+                return highest;
+            }, ranks[0]);
+            
+            setUserRankInfo(currentRank);
+        }
+    }, [userRankAmount]);
 
     const openPromotionModal = async () => {
         setLoading(true);
         try {
+            const userAmount = await getUserRank();
+            setUserRankAmount(userAmount);
             const promotions = await getAllPromotions();
             const now = new Date();
             const validPromotions = promotions.filter(promotion => {
                 const endDate = new Date(promotion.endDate);
                 return endDate > now && promotion.numOfPromo > 0;
             });
+            
             setAvailablePromotions(validPromotions);
             setShowPromotionModal(true);
         } catch (error) {
-            console.error("Error fetching promotions:", error);
+            console.error("Error fetching promotions or user rank:", error);
         } finally {
             setLoading(false);
         }
@@ -47,6 +81,11 @@ const PromotionSection = ({
             details: promotion
         }));
         setAppliedPromotion(promotion);
+    };
+
+    const isUserEligibleForPromotion = (promotionRank) => {
+        if (!userRankInfo) return false;
+        return userRankInfo.id >= promotionRank.id;
     };
 
     const getRemainingTime = (endDate) => {
@@ -125,7 +164,6 @@ const PromotionSection = ({
                 </div>
             )}
 
-            {/* Promotion Modal */}
             {showPromotionModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-lg shadow-lg w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
@@ -150,13 +188,13 @@ const PromotionSection = ({
                                 </div>
                             ) : (
                                 availablePromotions.map((promotion) => {
-                                    // Check if this promotion can be applied to the current order
                                     const isEligible = originalTotalPrice >= promotion.orderPrice;
+                                    const hasEligibleRank = isUserEligibleForPromotion(promotion.userRank);
 
                                     return (
                                         <div
                                             key={promotion.id}
-                                            className="border border-gray-200 rounded-lg mb-3 flex overflow-hidden"
+                                            className={`border ${hasEligibleRank ? 'border-gray-200' : 'border-gray-300 bg-gray-50'} rounded-lg mb-3 flex overflow-hidden`}
                                         >
                                             <div className="w-16 border-rose-500 border-r-4 flex items-center justify-center">
                                                 <img
@@ -168,16 +206,19 @@ const PromotionSection = ({
                                             <div className="flex-1 p-3">
                                                 <div className="flex justify-between items-start">
                                                     <div>
-                                                        <div className="text-red-600 font-medium">
+                                                        <div className={`${hasEligibleRank ? 'text-red-600' : 'text-gray-500'} font-medium`}>
                                                             Giảm ₫{(promotion.promoAmount / 1000).toFixed(0)}k
                                                         </div>
                                                         <div className="text-sm text-gray-600">
-                                                            Đơn Tối Thiểu ₫{(promotion.orderPrice / 1000).toFixed(0)}k
+                                                            Đơn Tối Thiểu {formatCurrency(promotion.orderPrice)}
+                                                        </div>
+                                                        <div className="text-xs text-blue-600">
+                                                            Hạng {promotion.userRank.rankName}
                                                         </div>
                                                     </div>
                                                     <button
-                                                        onClick={() => isEligible && selectPromotion(promotion)}
-                                                        className={`${isEligible ? 'bg-[#EE1F5B] text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} px-3 py-1 rounded text-sm`}
+                                                        onClick={() => (isEligible && hasEligibleRank) && selectPromotion(promotion)}
+                                                        className={`${(isEligible && hasEligibleRank) ? 'bg-[#EE1F5B] text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} px-3 py-1 rounded text-sm`}
                                                     >
                                                         Dùng ngay
                                                     </button>
@@ -196,6 +237,11 @@ const PromotionSection = ({
                                                 {!isEligible && (
                                                     <div className="text-xs text-red-500 mt-1">
                                                         Đơn hàng chưa đạt giá trị tối thiểu
+                                                    </div>
+                                                )}
+                                                {!hasEligibleRank && (
+                                                    <div className="text-xs text-red-500 mt-1">
+                                                        Không đủ hạng để dùng mã này
                                                     </div>
                                                 )}
                                                 {promotion.description && (

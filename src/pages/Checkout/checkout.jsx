@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
-import { applyPromotion, clearCart } from "../../redux/features/cartSlice";
+import { applyPromotion, clearCart, clearBuyNow } from "../../redux/features/cartSlice";
 import api from '../../config/axios';
 import { createOrder, createOrderCOD } from '../../apis/order';
 import { message } from 'antd';
@@ -25,7 +25,13 @@ const CheckoutPage = () => {
   const [appliedPromotion, setAppliedPromotion] = useState(null);
 
   // Redux state
-  const cart = useSelector((state) => state.cart?.listItem || []);
+  const cart = useSelector((state) => state.cart);
+  const isBuyNow = useSelector((state) => state.cart?.isBuyNow || false);
+  const buyNowItem = useSelector((state) => state.cart?.buyNowItem);
+  const cartItems = useSelector((state) => state.cart?.listItem || []);
+  
+  const displayItems = isBuyNow && buyNowItem ? [buyNowItem] : cartItems;
+  
   const totalQuantity = useSelector((state) => state.cart?.totalQuantity || 0);
   const totalPrice = useSelector((state) => state.cart?.totalPrice || 0);
   const dispatch = useDispatch();
@@ -42,7 +48,13 @@ const CheckoutPage = () => {
     }
 
     setLoading(false);
-  }, [navigate]);
+    
+    return () => {
+      if (isBuyNow) {
+        dispatch(clearBuyNow());
+      }
+    };
+  }, [navigate, dispatch, isBuyNow]);
 
   const fetchUserAddresses = async () => {
     try {
@@ -96,7 +108,6 @@ const CheckoutPage = () => {
         return;
       }
 
-      // Apply promotion to cart
       dispatch(applyPromotion({
         code: promotionCode,
         amount: promotionDetails.promoAmount,
@@ -134,11 +145,15 @@ const CheckoutPage = () => {
       return;
     }
 
+    const orderItems = isBuyNow && buyNowItem 
+      ? [{ productId: buyNowItem.id, quantity: buyNowItem.quantity }]
+      : cartItems.map((product) => ({
+          productId: product.id,
+          quantity: product.quantity,
+        }));
+
     const orderData = {
-      details: cart.map((product) => ({
-        productId: product.id,
-        quantity: product.quantity,
-      })),
+      details: orderItems,
       promold: appliedPromotion ? appliedPromotion.id : null
     };
 
@@ -146,13 +161,25 @@ const CheckoutPage = () => {
       if (paymentMethod === 'cod') {
         const payload = await createOrderCOD(orderData);
         console.log("COD order created:", payload);
-        dispatch(clearCart());
+        
+        if (isBuyNow) {
+          dispatch(clearBuyNow());
+        } else {
+          dispatch(clearCart());
+        }
+        
         navigate('/checkout/confirmCOD');
       } else {
         const payload = await createOrder(orderData);
         console.log("Payment redirect URL:", payload);
+        
+        if (isBuyNow) {
+          dispatch(clearBuyNow());
+        } else {
+          dispatch(clearCart());
+        }
+        
         window.location.href = payload;
-        dispatch(clearCart());
       }
     } catch (error) {
       console.error("Error creating order:", error);
@@ -162,7 +189,7 @@ const CheckoutPage = () => {
 
   if (loading) return <div className="max-w-6xl mx-auto p-4">Loading...</div>;
   if (!isLoggedIn) return <div>Please log in</div>;
-  if (cart.length === 0) return <div>Your cart is empty</div>;
+  if (displayItems.length === 0) return <div>Your cart is empty</div>;
 
   return (
     <div className="max-w-6xl mx-auto p-4 font-sans">
@@ -177,10 +204,10 @@ const CheckoutPage = () => {
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1">
           <h1 className="text-2xl font-medium text-[#d90429] mb-4">
-            Giỏ hàng của bạn ({totalQuantity} sản phẩm)
+            {isBuyNow ? 'Mua ngay' : `Giỏ hàng của bạn (${totalQuantity} sản phẩm)`}
           </h1>
 
-          <ProductList cart={cart} />
+          <ProductList cart={displayItems} />
 
           <PromotionSection
             promotionCode={promotionCode}
@@ -194,7 +221,7 @@ const CheckoutPage = () => {
 
           <OrderSummary
             totalPrice={finalTotalPrice}
-            originalTotalPrice={originalTotalPrice}  // Pass original total price
+            originalTotalPrice={originalTotalPrice}
             totalQuantity={totalQuantity}
             totalDiscount={appliedPromotion ? appliedPromotion.promoAmount : 0}
           />

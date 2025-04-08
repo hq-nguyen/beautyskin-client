@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Table, Button, Space, Modal, Form, Input, DatePicker, 
   Select, InputNumber, Switch, message, Popconfirm, Row, Col
@@ -20,7 +20,6 @@ import { formatCurrency } from '../../../utils/format';
 const { Option } = Select;
 const { TextArea } = Input;
 
-// Define a consistent date format to use throughout the application
 const DATE_FORMAT = 'YYYY-MM-DD';
 const DISPLAY_DATE_FORMAT = 'DD/MM/YYYY';
 
@@ -43,7 +42,7 @@ const ManagePromotion = () => {
       const ranksData = await fetchRanking();
       setRanks(ranksData);
     } catch (error) {
-      message.error('Failed to fetch ranks');
+      message.error('Failed to fetch ranks: ' + error.message);
     }
   };
 
@@ -69,10 +68,10 @@ const ManagePromotion = () => {
   const showUpdateModal = (record) => {
     setModalType('update');
     setCurrentPromotion(record);
-    
-    // Parse dates correctly and set form values
     const startDate = moment(record.startDate);
     const endDate = moment(record.endDate);
+    
+    const rankId = record.userRank ? record.userRank.id : 1;
     
     form.setFieldsValue({
       id: record.id,
@@ -80,7 +79,7 @@ const ManagePromotion = () => {
       description: record.description,
       startDate: startDate,
       endDate: endDate,
-      rank: record.rank,
+      rank: rankId,
       promoAmount: record.promoAmount,
       orderPrice: record.orderPrice,
       numOfPromo: record.numOfPromo,
@@ -107,10 +106,9 @@ const ManagePromotion = () => {
             startDate: values.startDate.toISOString(),
             endDate: values.endDate.toISOString(),
             promoAmount: values.promoAmount,
-            numOfPromo: values.numOfPromo || 1073741824,
+            numOfPromo: values.numOfPromo || 1073741824, 
             orderPrice: values.orderPrice,
-            rank: values.rank || 1, // Default to rank 1 (everybody)
-            rate: 9007199254740991
+            rank: values.rank || 1, 
           }
         : {
             id: values.id,
@@ -138,7 +136,7 @@ const ManagePromotion = () => {
       setIsModalVisible(false);
       fetchPromotions();
     } catch (error) {
-      message.error(`Failed to ${modalType} promotion: ${error.message}`);
+      message.error(`Lỗi khi ${modalType === 'create' ? 'tạo' : 'cập nhật'} khuyến mãi: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -165,20 +163,23 @@ const ManagePromotion = () => {
       fixed: 'left'
     },
     {
-      title: 'Mã khuyễn mãi',
+      title: 'Mã khuyến mãi',
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: 'Hạng áp dụng',
-      dataIndex: 'rank',
+      dataIndex: 'userRank',
       key: 'rank',
-      render: (rank) => {
-        const rankObj = ranks.find(r => r.id === rank);
-        return rankObj ? rankObj.rankName : 'Tất cả';
+      render: (userRank) => {
+        return userRank ? userRank.rankName : 'Tất cả';
       },
-      sorter: (a, b) => a.rank - b.rank,
+      sorter: (a, b) => {
+        const aRank = a.userRank ? a.userRank.id : 0;
+        const bRank = b.userRank ? b.userRank.id : 0;
+        return aRank - bRank;
+      },
     },
     {
       title: 'Ngày bắt đầu',
@@ -442,15 +443,6 @@ const ManagePromotion = () => {
                 <Form.Item
                   name="deleted"
                   label="Đã xóa"
-                  valuePropName="checked"
-                >
-                  <Switch />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item
-                  name="outDate"
-                  label="Hết hạn"
                   valuePropName="checked"
                 >
                   <Switch />
