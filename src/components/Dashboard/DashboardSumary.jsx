@@ -32,13 +32,11 @@ const DashboardSummary = () => {
       
       orders.forEach(orderAssignment => {
         const status = orderAssignment.order.orderStatus;
-        if (status === 'SHIPPING' || status === 'DELIVERED' || status === 'CONFIRMED') {
+        if (status === 'SHIPPING' || status === 'DELIVERED' || status === 'CONFIRMED' || status === 'REFUND_REQ' || status === 'REFUNDED') {
           statusCounts.completed++;
         } else if (status === 'IN_PROGRESS') {
           statusCounts.inProgress++;
-        } else if (status === 'CANCELLED') {
-          statusCounts.cancelled++;
-        }
+        } 
       });
       
       const totalOrders = orders.length;
@@ -65,11 +63,7 @@ const DashboardSummary = () => {
     {
       type: 'Đang xử lí',
       value: stats.inProgress,
-    },
-    {
-      type: 'Đã hủy',
-      value: stats.cancelled,
-    },  
+    }, 
     
   ];
 
@@ -108,14 +102,6 @@ const DashboardSummary = () => {
             value={stats.inProgress}
             loading={loading}
             icon="inProgress"
-          />
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <StatisticCard
-            title="Số đơn đã hủy"
-            value={stats.cancelled}
-            loading={loading}
-            icon="cancelled"
           />
         </Col>
       </Row>
