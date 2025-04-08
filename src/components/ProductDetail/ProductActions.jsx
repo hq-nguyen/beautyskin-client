@@ -4,7 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { AiOutlineHeart } from 'react-icons/ai';
 import { MdCompare } from 'react-icons/md';
 import api from '../../apis/product';
-import { addToCartWithQuantity, clearCart } from '../../redux/features/cartSlice';
+import { 
+  addToCartWithQuantity, 
+  setBuyNowItem 
+} from '../../redux/features/cartSlice';
 import { addToCompare } from '../../redux/features/compareSlice';
 import { assets } from '../../assets/frontend_assets/assets';
 
@@ -28,7 +31,7 @@ const ProductActions = ({ product, navigateToCompare }) => {
 
     const handleQuantityChange = (e) => {
         const value = parseInt(e.target.value);
-        if (value > 0) { // Now allowing any positive value
+        if (value > 0) { 
             setQuantity(value);
         }
     };
@@ -104,8 +107,7 @@ const ProductActions = ({ product, navigateToCompare }) => {
             showNotification('Sản phẩm chỉ có thể thêm tối đa là 3', 'error');
             return;
         } else if (product) {
-            dispatch(clearCart());
-            dispatch(addToCartWithQuantity({
+            dispatch(setBuyNowItem({
                 id: product.id,
                 name: product.name,
                 price: product.price,

@@ -6,7 +6,9 @@ const initialState = {
   totalPrice: 0,
   originalTotalPrice: 0,
   appliedPromotion: null,
-  totalDiscount: 0
+  totalDiscount: 0,
+  buyNowItem: null, 
+  isBuyNow: false   
 };
 
 export const cartSlice = createSlice({
@@ -41,6 +43,29 @@ export const cartSlice = createSlice({
       state.totalQuantity += quantityToAdd;
       state.totalPrice += product.price * quantityToAdd;
       state.originalTotalPrice += product.price * quantityToAdd;
+    },
+
+    setBuyNowItem: (state, action) => {
+      const product = action.payload;
+      state.buyNowItem = product;
+      state.isBuyNow = true;
+      
+      state.totalPrice = product.price * product.quantity;
+      state.originalTotalPrice = product.price * product.quantity;
+      // state.totalQuantity = product.quantity;
+    },
+
+    clearBuyNow: (state) => {
+      state.buyNowItem = null;
+      state.isBuyNow = false;
+      
+      state.totalQuantity = state.listItem.reduce((sum, item) => sum + item.quantity, 0);
+      state.originalTotalPrice = state.listItem.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      state.totalPrice = state.originalTotalPrice;
+      
+      if (state.appliedPromotion) {
+        state.totalPrice = state.originalTotalPrice - state.totalDiscount;
+      }
     },
 
     reducerCart: (state, action) => {
@@ -89,6 +114,8 @@ export const cartSlice = createSlice({
       state.originalTotalPrice = 0;
       state.appliedPromotion = null;
       state.totalDiscount = 0;
+      state.buyNowItem = null;
+      state.isBuyNow = false;
     },
 
     applyPromotion: (state, action) => {
@@ -111,7 +138,9 @@ export const {
   removeFromCart, 
   reducerCart, 
   clearCart, 
-  applyPromotion 
+  applyPromotion,
+  setBuyNowItem,
+  clearBuyNow
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

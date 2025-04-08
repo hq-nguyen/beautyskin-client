@@ -32,7 +32,7 @@ export const updatePromotion = async (id, promotionData) => {
 
 export const deletePromotion = async (id) => {
   try {
-    const response = await api.delete(`promotion/${id}`);
+    const response = await api.delete(`promotion/delete/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error deleting promotion with id ${id}:`, error);
@@ -68,7 +68,7 @@ export const getActivePromotions = async () => {
 
 export const fetchRanking = async () => {
   try {
-    const response = await api.get('loyalty-point/gets');
+    const response = await api.get('user-rank/gets');
     return response.data;
   } catch (error) {
     console.error('Error fetching ranking:', error);

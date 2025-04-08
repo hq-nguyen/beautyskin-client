@@ -370,7 +370,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                 </Form.Item>
               </Col>
 
-              <Col xs={24} md={12}>
+              {/* <Col xs={24} md={12}>
                 <Form.Item
                   name="status"
                   label="Trạng thái"
@@ -382,7 +382,7 @@ const ProductModel = ({ product, onSave, onCancel, visible }) => {
                     <Option value="INSUFFICIENT_STOCK">Ngừng kinh doanh</Option>
                   </Select>
                 </Form.Item>
-              </Col>
+              </Col> */}
             </Row>
           </Col>
 
