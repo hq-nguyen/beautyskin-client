@@ -1,11 +1,10 @@
 import axios from 'axios';
+
 const api = axios.create({
-    baseURL: 'http://14.225.210.92:8080/api/',
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
         'Content-Type': 'application/json'
-    } //s
-    // baseURL: 'http://14.225.207.163:8080/api/', 
-
+    }
 });
 
 api.interceptors.request.use(
@@ -19,5 +18,6 @@ api.interceptors.request.use(
     function (error) {
         return Promise.reject(error);
     }
-)
+);
+
 export default api;
