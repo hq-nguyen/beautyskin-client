@@ -8,13 +8,11 @@ This repository contains the frontend for the **Skincare Shop Management System*
 - **Skin Testing**: Quiz-based tool to determine skin type.
 - **Product Recommendations**: Personalized suggestions based on skin type.
 - **Feedback Submission**: Customers leave feedback for admin review.
-<!-- - **Order Tracking**: Customers track their orders. -->
 
 ## Tech Stack
 - **Framework**: ReactJS
 - **Styling**: TailwindCSS
 - **API Integration**: RESTful APIs
-<!-- - **State Management**: Context API or Redux -->
 
 ## Setup Instructions
 
@@ -61,38 +59,7 @@ Ensure the .env file is NOT committed to version control by adding it to .gitign
 echo ".env" >> .gitignore
 ```
 
-#### 4️⃣ Add TailwindCSS Configuration Files
-If tailwind.config.js and postcss.config.js are missing, generate them with:
-```sh
-npx tailwindcss init -p
-```
-
-**tailwind.config.js**
-```js
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-};
-```
-
-**postcss.config.js**
-```js
-module.exports = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-};
-```
-
-#### 5️⃣ Start the Development Server
+#### 4️⃣ Start the Development Server
 Run the development server with:
 ```sh
 npm run dev
